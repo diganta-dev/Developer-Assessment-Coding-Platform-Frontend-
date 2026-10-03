@@ -20,13 +20,14 @@ import { Spinner } from "../ui/spinner";
 import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
 import { loginSchema } from "@/validation";
+import { useLogin } from "@/hook";
 
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-//   const { mutate: login, isPending: loginPending } = useLogin();
+  const { mutate: login, isPending: loginPending } = useLogin();
 
   const form = useForm({
     defaultValues: {
@@ -45,7 +46,23 @@ export default function LoginForm() {
         email: value.email,
         password: value.password,
       };
-      console.log(loginData)
+      login(loginData, {
+        onSuccess: () => {
+          toast.add({
+            title: "Login successful",
+            description: "You have been logged in successfully",
+            type: "success",
+          });
+          router.push("/");
+        },
+        onError: (error) => {
+          toast.add({
+            title: "Login failed",
+            description: error.message,
+            type: "error",
+          });
+        },
+      });
 
     } 
   });
@@ -129,9 +146,9 @@ export default function LoginForm() {
               );
             }}
           </form.Field>
-          <Button type="submit">Submit</Button>
+          
 
-          {/* <Button disabled={loginPending} type="submit">
+          <Button disabled={loginPending} type="submit">
             {loginPending ? (
               <>
                 <Spinner /> submitting
@@ -139,7 +156,7 @@ export default function LoginForm() {
             ) : (
               "Submit"
             )}
-          </Button> */}
+          </Button>
         </FieldGroup>
       </form>
 

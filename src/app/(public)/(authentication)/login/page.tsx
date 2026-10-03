@@ -1,5 +1,7 @@
-import LoginForm from "@/components/form/login-from";
+import Image from "next/image";
 import Link from "next/link";
+import loginImage from "@/assets/login-bg.jpg";
+import LoginForm from "@/components/form/login-from";
 
 export default function LoginPage() {
   return (
@@ -8,8 +10,7 @@ export default function LoginPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-medium">
             <div className="flex items-center gap-2">
-              
-              <span>Developer Assessment Platform</span> 
+              <span>Developer Assessment Platform</span>
             </div>
           </Link>
         </div>
@@ -20,10 +21,13 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/login.jpg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        <Image
+          src={loginImage}
+          alt="Developer Assessment Platform"
+          fill
+          priority
+          sizes="50vw"
+          className="object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>
     </div>
