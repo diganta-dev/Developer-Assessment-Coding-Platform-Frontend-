@@ -8,29 +8,30 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
+  FieldSeparator, 
 } from "../ui/field";
-import { loginSchema } from "@/validation";
+
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
-import { useGoogleOAuth, useLogin } from "@/hooks";
+
 import { useRouter } from "next/navigation";
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
 import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
-import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
+import { loginSchema } from "@/validation";
+
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const { mutate: login, isPending: loginPending } = useLogin();
+//   const { mutate: login, isPending: loginPending } = useLogin();
 
   const form = useForm({
     defaultValues: {
-      email: "mirhussain@gmail.com",
-      password: "@Doctor123456",
+      email: "",
+      password: "",
     },
     // defaultValues: {
     //   email: "superadmin@gmail.com",
@@ -44,40 +45,25 @@ export default function LoginForm() {
         email: value.email,
         password: value.password,
       };
+      console.log(loginData)
 
-      login(loginData, {
-        onSuccess: (res) => {
-          toast.add({
-            title: "Login Success",
-            description: "Welcome back",
-            type: "success",
-          });
-          router.push("/");
-        },
-        onError: (err) => {
-          toast.add({
-            title: "Authorization failure",
-            description:
-              err.message || "Something went wrong. Please try again",
-            type: "error",
-          });
-        },
-      });
-    },
+    } 
   });
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col items-center gap-2 text-center">
+    <div className="flex flex-col gap-5  border rounded-xl ">
+      <div className="pt-6 px-2">
+        <div className="flex flex-col items-center gap-2 text-center ">
         <h1 className="text-2xl font-bold tracking-tight">
           Login to your account
         </h1>
         <p className="text-balance text-sm text-muted-foreground">
-          Enter your email below to login to your account
+          Enter your email below to login to your account    
         </p>
       </div>
+      </div>
 
-      <form
+      <form className="px-6 mb-2"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -143,8 +129,9 @@ export default function LoginForm() {
               );
             }}
           </form.Field>
+          <Button type="submit">Submit</Button>
 
-          <Button disabled={loginPending} type="submit">
+          {/* <Button disabled={loginPending} type="submit">
             {loginPending ? (
               <>
                 <Spinner /> submitting
@@ -152,15 +139,15 @@ export default function LoginForm() {
             ) : (
               "Submit"
             )}
-          </Button>
+          </Button> */}
         </FieldGroup>
       </form>
 
       <FieldSeparator>Or continue with</FieldSeparator>
 
-      <GoogleLoginComponent />
+      
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-sm text-muted-foreground mb-4">
         Don&apos;t have an account?{" "}
         <Link
           href="/register"

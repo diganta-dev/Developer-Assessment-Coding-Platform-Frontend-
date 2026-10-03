@@ -1,3 +1,4 @@
+import LoginForm from "@/components/form/login-from";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -14,7 +15,7 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            
+            <LoginForm />
           </div>
         </div>
       </div>
