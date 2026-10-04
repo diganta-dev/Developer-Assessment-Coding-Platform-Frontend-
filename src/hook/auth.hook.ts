@@ -1,4 +1,4 @@
-import { companyRegistration, companyVerification, userGetMe, userLogin, userRegistration, userVerifyAccount } from "@/api";
+import { companyRegistration, companyVerification, userGetMe, userLogin, userLogout, userRegistration, userVerifyAccount } from "@/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useLogin() {
@@ -24,6 +24,12 @@ export function useGetMe() {
     queryFn: userGetMe,
     retry: false,
   });
+}
+export function useLogout(){
+  return useMutation({
+    mutationFn: userLogout
+    
+  })
 }
 
 export function useCompanyRegistration() {

@@ -1,16 +1,62 @@
 "use client";
 
-import { ArrowRight, Building2, Code2, Menu, X, LayoutDashboard } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Code2,
+  Menu,
+  X,
+  LayoutDashboard,
+  LogOut,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { buttonVariants } from "@/components/ui/button";
-import { useGetMe } from "@/hook";
-import { getRoleDashboardRoute } from "@/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useGetMe, useLogout } from "@/hook";
+import { getCompanyRole, getRoleDashboardRoute } from "@/utils";
+import { UserMenu } from "../user-menu";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/toast";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const { data } = useGetMe();
   const user = data?.data;
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
+
+  const handleMobileLogout = () => {
+    setMobileMenuOpen(false);
+    logout(undefined, {
+      onSuccess: async () => {
+        toast.add({
+          title: "Logged out successfully",
+          description: "You have been logged out of your account",
+          type: "success",
+        });
+        queryClient.setQueryData(["user"], null);
+        await queryClient.invalidateQueries({ queryKey: ["user"] });
+        await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+        queryClient.clear();
+        router.push("/login");
+        router.refresh();
+      },
+      onError: (error: any) => {
+        toast.add({
+          title: "Logged out",
+          description: error?.message || "Session ended",
+          type: "info",
+        });
+        queryClient.setQueryData(["user"], null);
+        queryClient.clear();
+        router.push("/login");
+        router.refresh();
+      },
+    });
+  };
 
   const navLinks = [
     { label: "Assessments", href: "/#assessments" },
@@ -19,7 +65,7 @@ export function Header() {
     { label: "Enterprise", href: "/#enterprise" },
   ];
 
-  const dashboardUrl = getRoleDashboardRoute(user?.role);
+  const dashboardUrl = getRoleDashboardRoute(user);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -64,15 +110,7 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
-              <div className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs">
-                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-medium text-foreground max-w-[120px] truncate">
-                  {user.name || user.email}
-                </span>
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                  {user.role}
-                </span>
-              </div>
+              <UserMenu user={user} />
               <Link
                 href={dashboardUrl}
                 className={buttonVariants({
@@ -157,7 +195,7 @@ export function Header() {
               <div className="flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground">
                 <span className="truncate">Signed in as <strong className="text-foreground">{user.name || user.email}</strong></span>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary uppercase shrink-0">
-                  {user.role}
+                  {getCompanyRole(user) || user.role}
                 </span>
               </div>
               <Link
@@ -171,6 +209,19 @@ export function Header() {
                 <LayoutDashboard className="size-4" />
                 Go to Dashboard
               </Link>
+              <Button
+                variant="destructive"
+                disabled={isLoggingOut}
+                onClick={handleMobileLogout}
+                className="w-full justify-center gap-1.5 cursor-pointer"
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <LogOut className="size-4" />
+                )}
+                <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
+              </Button>
             </div>
           ) : (
             <div className="flex flex-col gap-2 border-t border-border pt-4">

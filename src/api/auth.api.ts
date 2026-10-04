@@ -30,6 +30,11 @@ export function userVerifyAccount(payload: VerifyAccountPayload) {
 export function userGetMe(){
   return apiClient("auth/me");
 }
+export function userLogout() {
+  return apiClient("auth/logout", {
+    method: "POST",
+  });
+}
 
 export function companyRegistration(payload: CompanyRegistrationPayload) {
   return apiClient("company/create-company", { 

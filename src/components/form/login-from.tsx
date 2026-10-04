@@ -54,6 +54,7 @@ export default function LoginForm() {
             description: "You have been logged in successfully",
             type: "success",
           });
+          await queryClient.invalidateQueries({ queryKey: ["user"] });
           await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
           router.push("/dashboard");
         },

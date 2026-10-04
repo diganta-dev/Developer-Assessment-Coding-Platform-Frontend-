@@ -13,7 +13,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Code2 } from "lucide-react";
-import { DashboardRole, SidebarItems } from "@/types";
+import { DashboardRole, SidebarItems, UserRole } from "@/types";
 import {
   adminRoutes,
   candidateRoutes,
@@ -23,6 +23,8 @@ import {
 } from "@/routes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useGetMe } from "@/hook";
+import { getUserEffectiveRole } from "@/utils";
 
 const sidebarRoutes: Partial<Record<DashboardRole, SidebarItems>> = {
   SUPER_ADMIN: adminRoutes,
@@ -34,9 +36,14 @@ const sidebarRoutes: Partial<Record<DashboardRole, SidebarItems>> = {
   EVALUATOR: evaluatorRoutes,
 };
 
-export function DashboardSidebar({ role }: { role: DashboardRole }) {
+export function DashboardSidebar({ role }: { role?: DashboardRole }) {
   const pathname = usePathname();
-  const routes: SidebarItems = sidebarRoutes[role] || [];
+  const { data } = useGetMe();
+  const user = data?.data;
+
+  const effectiveRole: DashboardRole =
+    role || (user ? getUserEffectiveRole(user) : UserRole.CANDIDATE);
+  const routes: SidebarItems = sidebarRoutes[effectiveRole] || [];
 
   return (
     <Sidebar>

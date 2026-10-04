@@ -8,6 +8,10 @@ export const adminRoutes: SidebarItems = [
         title: "Dashboard",
         url: "/admin",
       },
+      {
+        title: "My Company",
+        url: "/admin/my-company",
+      },
     ],
   },
   {

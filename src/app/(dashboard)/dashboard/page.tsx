@@ -19,7 +19,7 @@ export default function DashboardIndexPage() {
       return;
     }
 
-    const destination = getRoleDashboardRoute(user.role);
+    const destination = getRoleDashboardRoute(user);
     router.replace(destination);
   }, [isPending, isError, user, router]);
 

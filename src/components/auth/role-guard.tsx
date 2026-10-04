@@ -1,13 +1,12 @@
 "use client";
 
-
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import AuthLoading from "./auth-loading";
 import { DashboardRole } from "@/types";
 import AccessDenied from "./access-denied";
 import { useGetMe } from "@/hook";
-
+import { isUserAuthorized, getRoleDashboardRoute } from "@/utils";
 
 interface IProps {
   children: ReactNode;
@@ -21,7 +20,7 @@ export default function RoleGuard({ children, roles }: IProps) {
 
   const user = data?.data;
 
-  const isAuthorized = !!user && roles.includes(user.role as DashboardRole);
+  const isAuthorized = isUserAuthorized(user, roles);
 
   useEffect(() => {
     if (isPending) {
@@ -29,8 +28,15 @@ export default function RoleGuard({ children, roles }: IProps) {
     }
     if (isError || !user) {
       router.replace("/login");
+      return;
     }
-  }, [isPending, isError, user, router]);
+    if (!isAuthorized) {
+      // User is authenticated, but their active role belongs to another dashboard.
+      // Automatically redirect them to their rightful dashboard!
+      const rightfulDashboard = getRoleDashboardRoute(user);
+      router.replace(rightfulDashboard);
+    }
+  }, [isPending, isError, user, isAuthorized, router]);
 
   if (isPending) {
     return <AuthLoading />;
@@ -44,5 +50,5 @@ export default function RoleGuard({ children, roles }: IProps) {
     return <>{children}</>;
   }
 
-  return <AccessDenied />;
+  return <AuthLoading label="Redirecting to your dashboard..." />;
 }

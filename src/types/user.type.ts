@@ -13,13 +13,30 @@ export enum CompanyMemberRole {
 
 export type DashboardRole = UserRole | CompanyMemberRole;
 
+export interface ICompanyMember {
+  id?: string;
+  userId?: string;
+  companyId?: string;
+  role: CompanyMemberRole | string;
+  company?: any;
+  joinedAt?: string;
+  updatedAt?: string;
+}
+
 export interface IUser {
   id?: string;
   _id?: string;
+  userId?: string;
   name: string;
   email: string;
-  role: DashboardRole;
+  role: DashboardRole | string;
+  companyId?: string | null;
+  companyRole?: CompanyMemberRole | string | null;
+  companyMembers?: ICompanyMember[];
+  candidateProfile?: any;
   avatar?: string;
+  profilePictureUrl?: string | null;
   status?: string;
+  tokenVersion?: number;
   [key: string]: any;
 }
