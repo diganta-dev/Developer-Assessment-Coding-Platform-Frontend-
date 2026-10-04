@@ -1,4 +1,4 @@
-import { userLogin } from "@/api";
+import { userLogin, userRegistration } from "@/api";
 import { useMutation } from "@tanstack/react-query";
 
 export function useLogin(){
@@ -6,6 +6,13 @@ export function useLogin(){
         mutationFn:userLogin,
     })
 }
+
+export function useRegistration(){
+    return useMutation({
+        mutationFn:userRegistration,
+    })
+}
+    
 
 
 

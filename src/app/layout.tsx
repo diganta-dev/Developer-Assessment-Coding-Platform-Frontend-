@@ -40,10 +40,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
         robotoHeading.variable,
       )}
-    >  <Providers>
-          <body className="min-h-full flex flex-col">{children} <Toaster /></body>
-    </Providers>
-     
+    >
+      <body className="min-h-full flex flex-col">
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
+      </body>
     </html>
   );
 }
