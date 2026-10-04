@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import { LoginPayload, UserRegistrationPayload } from "@/types";
+import { LoginPayload, UserRegistrationPayload, VerifyAccountPayload } from "@/types";
 
 export function userLogin(payload: LoginPayload) {
   return apiClient("auth/login", {
@@ -14,3 +14,10 @@ export function userRegistration(payload: UserRegistrationPayload) {
     body: payload,
   });
 } 
+
+export function userVerifyAccount(payload:VerifyAccountPayload){
+  return apiClient("auth/verify-email", {
+    method: "POST",
+    body: payload,
+  });
+}

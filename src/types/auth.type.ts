@@ -12,3 +12,8 @@ export interface UserRegistrationPayload{
         
     }
 } 
+
+export interface VerifyAccountPayload{
+    email:string;
+    otp:string;
+} 
