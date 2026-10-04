@@ -8,7 +8,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator, 
+  FieldSeparator,
 } from "../ui/field";
 
 import { useState } from "react";
@@ -21,7 +21,6 @@ import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
 import { loginSchema } from "@/validation";
 import { useLogin } from "@/hook";
-
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -63,24 +62,24 @@ export default function LoginForm() {
           });
         },
       });
-
-    } 
+    },
   });
 
   return (
     <div className="flex flex-col gap-5  border rounded-xl ">
       <div className="pt-6 px-2">
         <div className="flex flex-col items-center gap-2 text-center ">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Login to your account
-        </h1>
-        <p className="text-balance text-sm text-muted-foreground">
-          Enter your email below to login to your account    
-        </p>
-      </div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Login to your account
+          </h1>
+          <p className="text-balance text-sm text-muted-foreground">
+            Enter your email below to login to your account
+          </p>
+        </div>
       </div>
 
-      <form className="px-6 mb-2"
+      <form
+        className="px-6 mb-2"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -146,7 +145,6 @@ export default function LoginForm() {
               );
             }}
           </form.Field>
-          
 
           <Button disabled={loginPending} type="submit">
             {loginPending ? (
@@ -161,8 +159,6 @@ export default function LoginForm() {
       </form>
 
       <FieldSeparator>Or continue with</FieldSeparator>
-
-      
 
       <div className="text-center text-sm text-muted-foreground mb-4">
         Don&apos;t have an account?{" "}

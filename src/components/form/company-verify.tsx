@@ -17,11 +17,11 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
-import { useVerifyAccount } from "@/hook";
+import { useCompanyVerfication, useVerifyAccount } from "@/hook";
 
 const RESEND_COOLDOWN = 120;
 
-export default function VerifyAccountForm() {
+export default function VerifyCompanyForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -29,7 +29,7 @@ export default function VerifyAccountForm() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
 
-  const { mutate: verifyAccount, isPending: isVerifying } = useVerifyAccount();
+  const { mutate: verifyAccount, isPending: isVerifying } = useCompanyVerfication();
 
   const email = searchParams.get("email") || "";
 
@@ -104,7 +104,7 @@ export default function VerifyAccountForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Verify Account</CardTitle>
+        <CardTitle>Verify Company</CardTitle>
         <CardDescription>
           Please provide the OTP we sent you in your email
         </CardDescription>

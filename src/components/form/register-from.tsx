@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { patientRegistrationSchema } from "@/validation";
+import { candidateRegistrationSchema } from "@/validation";
 import z from "zod";
 
 import { toast } from "../ui/toast";
@@ -27,23 +27,24 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  type CandidateDefaultValues = z.infer<typeof patientRegistrationSchema>;
+  type CandidateDefaultValues = z.infer<typeof candidateRegistrationSchema>;
 
   const defaultValues: CandidateDefaultValues = {
     name: "",
     email: "",
     phone: "",
-    location:"",
+    location: "",
     password: "",
     confirmPassword: "",
   };
 
-  const { mutate: registration, isPending: registrationPending } =useRegistration();
+  const { mutate: registration, isPending: registrationPending } =
+    useRegistration();
 
   const form = useForm({
     defaultValues,
     validators: {
-      onSubmit: patientRegistrationSchema,
+      onSubmit: candidateRegistrationSchema,
     },
     onSubmit: async ({ value }) => {
       const registrationData = {
@@ -192,7 +193,7 @@ export function RegisterForm() {
                       id={field.name}
                       name={field.name}
                       type="text"
-                      placeholder="Dhaka, Bangladesh" 
+                      placeholder="Dhaka, Bangladesh"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -300,12 +301,10 @@ export function RegisterForm() {
               "Submit"
             )}
           </Button>
-        </FieldGroup> 
+        </FieldGroup>
       </form>
 
       <FieldSeparator>Or continue with</FieldSeparator>
-
-      
 
       <div className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
