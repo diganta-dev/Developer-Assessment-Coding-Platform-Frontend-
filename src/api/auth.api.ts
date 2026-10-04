@@ -27,6 +27,10 @@ export function userVerifyAccount(payload: VerifyAccountPayload) {
   });
 }
 
+export function userGetMe(){
+  return apiClient("auth/me");
+}
+
 export function companyRegistration(payload: CompanyRegistrationPayload) {
   return apiClient("company/create-company", { 
     method: "POST",

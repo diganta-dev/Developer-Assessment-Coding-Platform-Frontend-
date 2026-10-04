@@ -1,5 +1,5 @@
-import { companyRegistration, companyVerification, userLogin, userRegistration, userVerifyAccount } from "@/api";
-import { useMutation } from "@tanstack/react-query";
+import { companyRegistration, companyVerification, userGetMe, userLogin, userRegistration, userVerifyAccount } from "@/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useLogin() {
   return useMutation({
@@ -16,6 +16,13 @@ export function useRegistration() {
 export function useVerifyAccount() {
   return useMutation({
     mutationFn: userVerifyAccount,
+  });
+}
+export function useGetMe() {
+  return useQuery({
+    queryKey: ["user"],  
+    queryFn: userGetMe,
+    retry: false,
   });
 }
 

@@ -12,3 +12,14 @@ export enum CompanyMemberRole {
 }
 
 export type DashboardRole = UserRole | CompanyMemberRole;
+
+export interface IUser {
+  id?: string;
+  _id?: string;
+  name: string;
+  email: string;
+  role: DashboardRole;
+  avatar?: string;
+  status?: string;
+  [key: string]: any;
+}

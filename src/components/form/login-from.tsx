@@ -21,10 +21,12 @@ import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
 import { loginSchema } from "@/validation";
 import { useLogin } from "@/hook";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { mutate: login, isPending: loginPending } = useLogin();
 
@@ -46,13 +48,14 @@ export default function LoginForm() {
         password: value.password,
       };
       login(loginData, {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.add({
             title: "Login successful",
             description: "You have been logged in successfully",
             type: "success",
           });
-          router.push("/");
+          await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+          router.push("/dashboard");
         },
         onError: (error) => {
           toast.add({
