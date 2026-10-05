@@ -329,7 +329,7 @@ export default function CompanyProfile() {
                             })}
                         >
                             <Users className="size-3.5" />
-                            Manage Team 
+                            Manage Team
                         </Link>
                         <Link
                             href="/company-admin/assessments"

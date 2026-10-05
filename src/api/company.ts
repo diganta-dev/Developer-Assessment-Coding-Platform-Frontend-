@@ -25,3 +25,9 @@ export function addCompanyMember(companyId: string, payload: AddCompanyMemberPay
     body: payload,
   });
 }
+export function removeMember(companyId: string, memberUserId: string) {
+  return apiClient(`company/${companyId}/members/${memberUserId}`, {
+    method: "DELETE",
+  });
+}
+  
