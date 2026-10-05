@@ -1,5 +1,5 @@
-import { getCompanyMembers, getUserCompany, updateCompanyMemberRole } from "@/api";
-import { UpdateCompanyMemberRolePayload } from "@/types";
+import { addCompanyMember, getCompanyMembers, getUserCompany, updateCompanyMemberRole } from "@/api";
+import { AddCompanyMemberPayload, UpdateCompanyMemberRolePayload } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useUserCompany() {
@@ -28,5 +28,17 @@ export function useUpdateCompanyMemberRole() {
       memberUserId: string;
       payload: UpdateCompanyMemberRolePayload;
     }) => updateCompanyMemberRole(companyId, memberUserId, payload),
+  });
+}
+
+export function useAddCompanyMember() {
+  return useMutation({
+    mutationFn: ({
+      companyId,
+      payload,
+    }: {
+      companyId: string;
+      payload: AddCompanyMemberPayload;
+    }) => addCompanyMember(companyId, payload),
   });
 }

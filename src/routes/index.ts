@@ -86,6 +86,10 @@ export const companyAdminRoutes: SidebarItems = [
         url: "/company-admin/company-members",
       },
       {
+        title: "Invite Members",
+        url: "/company-admin/invitation", 
+      },
+      {
         title: "Assessments",
         url: "/company-admin/assessments",
       },

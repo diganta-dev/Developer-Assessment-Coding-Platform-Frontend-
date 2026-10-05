@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import { UpdateCompanyMemberRolePayload } from "@/types";
+import { AddCompanyMemberPayload, UpdateCompanyMemberRolePayload } from "@/types";
 
 export function getUserCompany() {
   return apiClient("company/my-company");
@@ -16,6 +16,12 @@ export function updateCompanyMemberRole(
 ) {
   return apiClient(`company/${companyId}/members/${memberUserId}`, {
     method: "PATCH",
+    body: payload,
+  });
+}
+export function addCompanyMember(companyId: string, payload: AddCompanyMemberPayload) {
+  return apiClient(`company/add-member/${companyId}`, {
+    method: "POST",
     body: payload,
   });
 }

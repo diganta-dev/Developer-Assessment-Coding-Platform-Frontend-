@@ -37,3 +37,8 @@ export interface ICompany {
 export interface UpdateCompanyMemberRolePayload {
   role: string;
 }
+
+export interface AddCompanyMemberPayload {
+  email: string;
+  role: string;
+}
