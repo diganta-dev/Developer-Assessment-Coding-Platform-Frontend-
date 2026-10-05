@@ -87,7 +87,10 @@ export const companyAdminRoutes: SidebarItems = [
       },
       {
         title: "Invite Members",
-        url: "/company-admin/invitation", 
+        url: "/company-admin/invitation",  
+      },{
+        title: "Problems Bank Management",
+        url: "/company-admin/create-problems-bank",   
       },
       {
         title: "Assessments",
