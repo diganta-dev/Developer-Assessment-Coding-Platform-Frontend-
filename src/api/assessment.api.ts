@@ -6,6 +6,7 @@ import type {
   IAssessmentInvitationsResponse,
   IAssessmentListResponse,
   IAttemptDetailsResponse,
+  IAttemptResultResponse,
   ICandidateMyAttemptsFilters,
   ICandidateMyAttemptsResponse,
   ICreateAssessmentPayload,
@@ -141,5 +142,31 @@ export function getCandidateMyAttempts(
   return apiClient("assessment/candidate/my-attempts", {
     method: "GET",
     query: filters,
+  });
+}
+
+export function GetAttemptDetails(
+  attemptId: string,
+): Promise<IAttemptDetailsResponse> {
+  return apiClient(`assessment/attempts/${attemptId}`, {
+    method: "GET",
+  });
+}
+
+export function finalizeAndSubmitAttempt(
+  attemptId: string,
+  payload?: ISubmitAttemptPayload,
+): Promise<ISubmitAttemptResponse> {
+  return apiClient(`assessment/attempts/${attemptId}/submit`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function getAttemptResult(
+  attemptId: string,
+): Promise<IAttemptResultResponse> {
+  return apiClient(`assessment/attempts/${attemptId}/result`, {
+    method: "GET",
   });
 }

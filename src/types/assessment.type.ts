@@ -1,4 +1,4 @@
-import type { IPaginationMeta } from "./question.type";
+import type { Difficulty, IPaginationMeta, ProblemType } from "./question.type";
 
 export interface IProctoringSettings {
   trackTabSwitches: boolean;
@@ -260,18 +260,80 @@ export interface ISubmitAnswerItem {
 }
 
 export interface ISubmitAttemptPayload {
-  answers: ISubmitAnswerItem[];
+  answers?: ISubmitAnswerItem[];
 }
 
 export interface ISubmitAttemptResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data?: {
-    attempt: IAssessmentAttempt;
-    evaluatedAnswersCount?: number;
-    totalMarksObtained?: number;
+  data?:
+    | (IAssessmentAttempt & {
+        submissions?: IAttemptSubmissionItem[];
+        result?: {
+          id: string;
+          totalMarks: number;
+          obtainedMarks: number;
+          percentage: number;
+          passingScore?: number | null;
+          rank?: number | null;
+          status: string;
+          publishedAt?: string | null;
+        } | null;
+      })
+    | {
+        attempt: IAssessmentAttempt;
+        evaluatedAnswersCount?: number;
+        totalMarksObtained?: number;
+      };
+}
+
+export interface IAttemptSubmissionItem {
+  id: string;
+  attemptId?: string;
+  problemId: string;
+  selectedOptionId?: string | null;
+  answerText?: string | null;
+  sourceCode?: string | null;
+  language?: string | null;
+  status?: string;
+  obtainedMarks?: number | null;
+  isCorrect?: boolean | null;
+  feedback?: string | null;
+  submittedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IAttemptCandidateInfo {
+  id: string;
+  name?: string | null;
+  email: string;
+}
+
+export interface IAttemptDetailedItem extends IAssessmentAttempt {
+  assessment?: IAssessment & {
+    problems?: ISanitizedAssessmentProblem[];
+    settings?: Record<string, unknown> | null;
+    company?: {
+      id: string;
+      name: string;
+      slug?: string;
+      logoUrl?: string | null;
+    };
   };
+  candidate?: IAttemptCandidateInfo | null;
+  submissions?: IAttemptSubmissionItem[];
+  result?: {
+    id: string;
+    totalMarks: number;
+    obtainedMarks: number;
+    percentage: number;
+    passingScore?: number | null;
+    rank?: number | null;
+    status: string;
+    publishedAt?: string | null;
+  } | null;
 }
 
 export interface IAttemptDetailsResponse {
@@ -279,10 +341,17 @@ export interface IAttemptDetailsResponse {
   statusCode: number;
   message: string;
   data: {
-    attempt: IAssessmentAttempt;
+    attempt: IAttemptDetailedItem;
     remainingSeconds: number | null;
     assessment?: IAssessment & {
       problems?: ISanitizedAssessmentProblem[];
+      settings?: Record<string, unknown> | null;
+      company?: {
+        id: string;
+        name: string;
+        slug?: string;
+        logoUrl?: string | null;
+      };
     };
   };
 }
@@ -335,4 +404,104 @@ export interface ICandidateMyAttemptsResponse {
     totalPages: number;
   };
   data: ICandidateAttemptItem[];
+}
+
+export interface IAttemptResultCandidateSubmission {
+  id: string;
+  selectedOptionId?: string | null;
+  answerText?: string | null;
+  sourceCode?: string | null;
+  language?: string | null;
+  status?: string | null;
+  marksObtained?: number | null;
+  isCorrect?: boolean | null;
+  submittedAt?: string | null;
+  evaluations?: Array<{
+    id: string;
+    marksAwarded: number;
+    feedback?: string | null;
+    evaluatorId?: string;
+  }>;
+}
+
+export interface IAttemptResultProblemBreakdown {
+  problemId: string;
+  title: string;
+  type: ProblemType | string;
+  difficulty: Difficulty | string;
+  marksAllocated: number;
+  questionOrder: number;
+  mcqDetails?: {
+    options: Array<{
+      id: string;
+      optionText: string;
+      optionOrder: number;
+      isCorrect?: boolean;
+    }>;
+    explanation?: string;
+  } | null;
+  codingDetails?: {
+    supportedLanguages: string[];
+    timeLimitMs?: number;
+    memoryLimitMb?: number;
+    publicTestCases?: Array<{
+      input: string;
+      expectedOutput: string;
+    }>;
+  } | null;
+  writtenDetails?: {
+    wordLimit?: number;
+    expectedAnswer?: string;
+  } | null;
+  candidateSubmission?: IAttemptResultCandidateSubmission | null;
+}
+
+export interface IAttemptResultData {
+  isPublished: boolean;
+  message?: string;
+  candidate?: {
+    id: string;
+    name?: string | null;
+    email: string;
+    profilePictureUrl?: string | null;
+  } | null;
+  assessment?: {
+    id: string;
+    title: string;
+    totalMarks: number;
+    passingScore?: number | null;
+    company?: {
+      id: string;
+      name: string;
+      slug?: string;
+      logoUrl?: string | null;
+    } | null;
+  } | null;
+  attempt?: {
+    id: string;
+    attemptNumber?: number;
+    status: string;
+    startedAt?: string | null;
+    submittedAt?: string | null;
+    durationMinutes?: number | null;
+    assessmentTitle?: string;
+  } | null;
+  result?: {
+    id: string;
+    totalMarks: number;
+    obtainedMarks: number;
+    percentage: number;
+    passingScore?: number | null;
+    rank?: number | null;
+    status: string;
+    publishedAt?: string | null;
+  } | null;
+  problemBreakdown?: IAttemptResultProblemBreakdown[];
+}
+
+export interface IAttemptResultResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: IAttemptResultData;
 }

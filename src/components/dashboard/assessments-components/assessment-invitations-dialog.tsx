@@ -40,6 +40,7 @@ import type {
   IAssessment,
   IAssessmentInvitation,
 } from "@/types/assessment.type";
+import { AttemptDetailsDialog } from "./attempt-details-dialog";
 
 interface AssessmentInvitationsDialogProps {
   assessment: IAssessment | null;
@@ -97,6 +98,10 @@ export function AssessmentInvitationsDialog({
   const [statusFilter, setStatusFilter] =
     useState<InvitationStatusFilter>("ALL");
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(
+    null,
+  );
+  const [attemptDetailsOpen, setAttemptDetailsOpen] = useState(false);
 
   const assessmentId = assessment?.id || "";
 
@@ -481,8 +486,18 @@ export function AssessmentInvitationsDialog({
                               </p>
                               {invitation.candidate
                                 ?.assessmentAttempts?.[0] && (
-                                <span
-                                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-sm border ${
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const attId =
+                                      invitation.candidate
+                                        ?.assessmentAttempts?.[0]?.id;
+                                    if (attId) {
+                                      setSelectedAttemptId(attId);
+                                      setAttemptDetailsOpen(true);
+                                    }
+                                  }}
+                                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-sm border hover:opacity-80 transition-opacity cursor-pointer ${
                                     invitation.candidate.assessmentAttempts[0]
                                       .status === "COMPLETED"
                                       ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
@@ -492,6 +507,7 @@ export function AssessmentInvitationsDialog({
                                         ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
                                         : "bg-muted text-muted-foreground border-border"
                                   }`}
+                                  title="Click to view candidate attempt details & answers"
                                 >
                                   {invitation.candidate.assessmentAttempts[0]
                                     .status === "COMPLETED"
@@ -505,7 +521,7 @@ export function AssessmentInvitationsDialog({
                                       }%`
                                     : invitation.candidate.assessmentAttempts[0]
                                         .status}
-                                </span>
+                                </button>
                               )}
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-tight">
@@ -611,6 +627,14 @@ export function AssessmentInvitationsDialog({
           </Button>
         </div>
       </DialogContent>
+
+      {/* ── Attempt Details Dialog for Company Staff ── */}
+      <AttemptDetailsDialog
+        attemptId={selectedAttemptId}
+        open={attemptDetailsOpen}
+        onOpenChange={setAttemptDetailsOpen}
+        isCandidateView={false}
+      />
     </Dialog>
   );
 }

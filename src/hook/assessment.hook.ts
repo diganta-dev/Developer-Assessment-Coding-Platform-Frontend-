@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addProblemInAssessment,
   createAssessment,
+  finalizeAndSubmitAttempt,
   getAssessmentInvitation,
   getAttemptDetails,
+  getAttemptResult,
   getCandidateMyAttempts,
   getCompanyAllAssessments,
   getMyAttempts,
@@ -111,15 +113,6 @@ export function useStartAttempt() {
   });
 }
 
-export function useGetAttemptDetails(attemptId: string) {
-  return useQuery({
-    queryKey: ["assessment-attempt", attemptId],
-    queryFn: () => getAttemptDetails(attemptId),
-    enabled: Boolean(attemptId),
-    refetchInterval: false,
-  });
-}
-
 export function useSubmitAssessmentAttempt() {
   const queryClient = useQueryClient();
 
@@ -159,5 +152,55 @@ export function useGetCandidateMyAttempts(
   return useQuery({
     queryKey: ["candidate-my-attempts", filters],
     queryFn: () => getCandidateMyAttempts(filters),
+  });
+}
+
+export function useGetAttemptDetails(attemptId: string) {
+  return useQuery({
+    queryKey: ["assessment-attempt", attemptId],
+    queryFn: () => getAttemptDetails(attemptId),
+    enabled: Boolean(attemptId),
+    refetchInterval: false,
+  });
+}
+
+export function useFinalizeAndSubmitResult() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (
+      variables:
+        | string
+        | {
+            attemptId: string;
+            payload?: ISubmitAttemptPayload;
+          },
+    ) => {
+      const attemptId =
+        typeof variables === "string" ? variables : variables.attemptId;
+      const payload =
+        typeof variables === "string" ? undefined : variables.payload;
+      return finalizeAndSubmitAttempt(attemptId, payload);
+    },
+    onSuccess: (_, variables) => {
+      const attemptId =
+        typeof variables === "string" ? variables : variables.attemptId;
+      queryClient.invalidateQueries({ queryKey: ["candidate-my-attempts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["assessment-attempt", attemptId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["assessment-attempt-result", attemptId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["assessment-invitations"] });
+    },
+  });
+}
+
+export function useGetAttemptResults(attemptId: string, enabled = true) {
+  return useQuery({
+    queryKey: ["assessment-attempt-result", attemptId],
+    queryFn: () => getAttemptResult(attemptId),
+    enabled: Boolean(attemptId) && enabled,
+    refetchInterval: false,
   });
 }

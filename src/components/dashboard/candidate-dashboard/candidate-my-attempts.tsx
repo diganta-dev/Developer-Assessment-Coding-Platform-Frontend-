@@ -15,11 +15,15 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import {
+  AttemptDetailsDialog,
+  AttemptResultDialog,
+  FinalizeSubmitAttemptDialog,
+} from "@/components/dashboard/assessments-components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -78,6 +82,20 @@ export function CandidateMyAttempts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<AttemptStatusFilter>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(
+    null,
+  );
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Finalize & Submit dialog state
+  const [submitAttemptId, setSubmitAttemptId] = useState<string | null>(null);
+  const [submitAssessmentTitle, setSubmitAssessmentTitle] = useState("");
+  const [submitOpen, setSubmitOpen] = useState(false);
+
+  // Result dialog state
+  const [resultAttemptId, setResultAttemptId] = useState<string | null>(null);
+  const [resultOpen, setResultOpen] = useState(false);
+
   const pageSize = 10;
 
   // Query candidate attempts
@@ -574,30 +592,69 @@ export function CandidateMyAttempts() {
 
                       {/* Action */}
                       <TableCell className="text-right">
-                        {status === "IN_PROGRESS" ? (
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => handleResumeAttempt(item)}
-                            disabled={startAttemptMutation.isPending}
-                            className="h-7 text-xs px-2.5 gap-1.5 font-medium bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
-                          >
-                            <Play className="size-3 fill-white" />
-                            <span>Resume</span>
-                          </Button>
-                        ) : (
-                          <Link
-                            href={`/candidate/assessments?assessmentId=${item.assessmentId}&attemptId=${item.id}`}
-                            className={buttonVariants({
-                              variant: "outline",
-                              size: "sm",
-                              className: "h-7 text-xs px-2.5 gap-1 font-medium",
-                            })}
-                          >
-                            <Eye className="size-3 text-muted-foreground" />
-                            <span>Details</span>
-                          </Link>
-                        )}
+                        <div className="flex items-center justify-end gap-1.5">
+                          {status === "IN_PROGRESS" ? (
+                            <>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleResumeAttempt(item)}
+                                disabled={startAttemptMutation.isPending}
+                                className="h-7 text-xs px-2.5 gap-1.5 font-medium bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
+                              >
+                                <Play className="size-3 fill-white" />
+                                <span>Resume</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSubmitAttemptId(item.id);
+                                  setSubmitAssessmentTitle(
+                                    item.assessment?.title || "",
+                                  );
+                                  setSubmitOpen(true);
+                                }}
+                                className="h-7 text-xs px-2 gap-1 font-medium border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 cursor-pointer"
+                              >
+                                <span>Submit</span>
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              {(status === "SUBMITTED" ||
+                                status === "EVALUATED") && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setResultAttemptId(item.id);
+                                    setResultOpen(true);
+                                  }}
+                                  className="h-7 text-xs px-2.5 gap-1 font-medium border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
+                                >
+                                  <Trophy className="size-3" />
+                                  <span>Result</span>
+                                </Button>
+                              )}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedAttemptId(item.id);
+                                  setDetailsOpen(true);
+                                }}
+                                className="h-7 text-xs px-2.5 gap-1 font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                              >
+                                <Eye className="size-3 text-muted-foreground" />
+                                <span>Details</span>
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -638,6 +695,34 @@ export function CandidateMyAttempts() {
           </div>
         )}
       </Card>
+
+      {/* ── Attempt Details Modal Dialog ── */}
+      <AttemptDetailsDialog
+        attemptId={selectedAttemptId}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        isCandidateView={true}
+      />
+
+      {/* ── Finalize & Submit Dialog ── */}
+      <FinalizeSubmitAttemptDialog
+        attemptId={submitAttemptId}
+        assessmentTitle={submitAssessmentTitle}
+        open={submitOpen}
+        onOpenChange={setSubmitOpen}
+        onSuccess={(id) => {
+          setResultAttemptId(id);
+          setResultOpen(true);
+        }}
+      />
+
+      {/* ── Official Attempt Result Modal Dialog ── */}
+      <AttemptResultDialog
+        attemptId={resultAttemptId}
+        open={resultOpen}
+        onOpenChange={setResultOpen}
+        isCandidateView={true}
+      />
     </div>
   );
 }
