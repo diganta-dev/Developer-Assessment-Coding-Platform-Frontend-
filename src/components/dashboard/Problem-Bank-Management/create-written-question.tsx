@@ -155,12 +155,11 @@ export function CreateWrittenQuestion() {
       description: description.trim(),
       type: "WRITTEN",
       difficulty,
-      defaultMarks: Number(defaultMarks),
+      marks: Number(defaultMarks),
       companyId: companyId || undefined,
-      writtenQuestion: {
-        guidelines: guidelines.trim(),
-        ...(minWords !== "" ? { minWords: Number(minWords) } : {}),
-        ...(maxWords !== "" ? { maxWords: Number(maxWords) } : {}),
+      written: {
+        ...(maxWords !== "" ? { wordLimit: Number(maxWords) } : {}),
+        ...(guidelines.trim() ? { expectedAnswer: guidelines.trim() } : {}),
       },
     };
 

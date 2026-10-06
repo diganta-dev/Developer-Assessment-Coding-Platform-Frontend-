@@ -4,7 +4,8 @@ import { ProblemBankCreate } from "@/components/dashboard/Problem-Bank-Managemen
 
 export default function CreateProblemsBankPage() {
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 w-full">
+      {/* Back nav */}
       <div className="flex items-center gap-2">
         <Link
           href="/company-admin"
@@ -13,6 +14,14 @@ export default function CreateProblemsBankPage() {
           <ArrowLeft className="size-3.5" />
           Back to Dashboard
         </Link>
+      </div>
+
+      {/* Page heading */}
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Problem Bank</h1>
+        <p className="text-xs text-muted-foreground mt-1">
+          Create and manage your company&apos;s question library
+        </p>
       </div>
 
       <ProblemBankCreate />

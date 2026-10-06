@@ -60,8 +60,11 @@ const DIFFICULTIES: {
   },
 ];
 
-interface FormOption extends IMCQOption {
+interface FormOption {
   id: string;
+  text: string;
+  isCorrect: boolean;
+  explanation?: string;
 }
 
 const generateDefaultOptions = (): FormOption[] => [
@@ -284,22 +287,30 @@ export function CreateMCQQuestion() {
       return;
     }
 
+    const correctOpt = options.find(
+      (opt) => opt.isCorrect && opt.explanation?.trim(),
+    );
+    const overallExplanation = correctOpt?.explanation?.trim();
+
+    const finalDescription = description.trim()
+      ? question.trim() && question.trim() !== description.trim()
+        ? `${description.trim()}\n\n${question.trim()}`
+        : description.trim()
+      : question.trim();
+
     const payload: ICreateMCQQuestion = {
       title: title.trim(),
-      description: description.trim(),
+      description: finalDescription,
       type: "MCQ",
       difficulty,
-      defaultMarks: Number(defaultMarks),
+      marks: Number(defaultMarks),
       companyId: companyId || undefined,
-      mcqQuestion: {
-        question: question.trim(),
-        multipleCorrect,
-        options: options.map((opt) => ({
-          text: opt.text.trim(),
+      mcq: {
+        ...(overallExplanation ? { explanation: overallExplanation } : {}),
+        options: options.map((opt, index) => ({
+          optionText: opt.text.trim(),
           isCorrect: opt.isCorrect,
-          ...(opt.explanation?.trim()
-            ? { explanation: opt.explanation.trim() }
-            : {}),
+          optionOrder: index + 1,
         })),
       },
     };
