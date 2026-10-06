@@ -73,3 +73,17 @@ export interface IAssessmentProblem {
 export interface IAddProblemInAssessment {
   problems: IAssessmentProblem[];
 }
+
+export interface IInviteCandidatePayload {
+  emails: string[];
+}
+
+export interface IInviteCandidateResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    invitedCount?: number;
+    failedCount?: number;
+    invitations?: unknown[];
+  };
+}

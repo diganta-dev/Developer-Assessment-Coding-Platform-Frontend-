@@ -1,9 +1,11 @@
 import apiClient from "@/lib/apiClient";
 import type {
-    IAddProblemInAssessment,
+  IAddProblemInAssessment,
   IAssessmentFilters,
   IAssessmentListResponse,
   ICreateAssessmentPayload,
+  IInviteCandidatePayload,
+  IInviteCandidateResponse,
 } from "@/types/assessment.type";
 
 export function createAssessment(payload: ICreateAssessmentPayload) {
@@ -22,8 +24,26 @@ export function getCompanyAllAssessments(
   });
 }
 
-export function addProblemInAssessment(assessmentId: string ,payload:IAddProblemInAssessment) {
+export function addProblemInAssessment(
+  assessmentId: string,
+  payload: IAddProblemInAssessment,
+) {
   return apiClient(`assessment/add-problems/${assessmentId}`, {
+    method: "POST",
+    body: payload,
+  });
+}
+export function publishAssessment(assessmentId: string) {
+  return apiClient(`assessment/publish-assessment/${assessmentId}`, {
+    method: "PATCH",
+  });
+}
+
+export function inviteCandidate(
+  assessmentId: string,
+  payload: IInviteCandidatePayload,
+): Promise<IInviteCandidateResponse> {
+  return apiClient(`assessment/invite-candidates/${assessmentId}`, {
     method: "POST",
     body: payload,
   });

@@ -1,8 +1,8 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
-  Award,
   Calendar,
   Check,
   Clock,
@@ -10,13 +10,17 @@ import {
   CopyX,
   Eye,
   FileCheck2,
+  FileEdit,
   Layers,
+  Loader2,
   Maximize2,
   Plus,
   RefreshCw,
   Search,
+  Send,
   Shield,
   ShieldAlert,
+  UserPlus,
   Users,
   X,
 } from "lucide-react";
@@ -40,14 +44,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
-import { useGetCompanyAllAssessments } from "@/hook/assessment.hook";
+import {
+  useGetCompanyAllAssessments,
+  usePublishAssessment,
+} from "@/hook/assessment.hook";
 import type { IAssessment } from "@/types/assessment.type";
+import { InviteCandidateDialog } from "./invite-candidate-dialog";
 
 interface GetAllAssessmentProps {
   onCreateClick?: () => void;
+  onAddProblemsClick?: (assessment: IAssessment) => void;
 }
 
-type StatusFilterType = "ALL" | "ACTIVE" | "UPCOMING" | "EXPIRED";
+type StatusFilterType = "ALL" | "DRAFT" | "ACTIVE" | "UPCOMING" | "EXPIRED";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -92,10 +101,21 @@ function formatDate(dateStr?: string): string {
 function AssessmentStatusBadge({
   startTime,
   endTime,
+  status,
 }: {
   startTime?: string;
   endTime?: string;
+  status?: string;
 }) {
+  if (status === "DRAFT") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
+        <span className="size-1.5 rounded-full bg-amber-500" />
+        Draft
+      </span>
+    );
+  }
+
   const { label, variant } = getAssessmentTimeStatus(startTime, endTime);
 
   const styleMap = {
@@ -204,10 +224,20 @@ function ProctoringBadges({
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
+export function GetAllAssessment({
+  onCreateClick,
+  onAddProblemsClick,
+}: GetAllAssessmentProps) {
+  const queryClient = useQueryClient();
+  const publishMutation = usePublishAssessment();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>("ALL");
   const [selectedAssessment, setSelectedAssessment] =
+    useState<IAssessment | null>(null);
+  const [assessmentToPublish, setAssessmentToPublish] =
+    useState<IAssessment | null>(null);
+  const [candidateInviteAssessment, setCandidateInviteAssessment] =
     useState<IAssessment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -215,7 +245,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
   const { data, isLoading, isError, error, isFetching, refetch } =
     useGetCompanyAllAssessments();
 
-  // Normalize API response safely (handles { data: [...] }, { success: true, data: [...] } or array)
+  // Normalize API response safely
   const assessments: IAssessment[] = useMemo(() => {
     if (!data) return [];
     const raw = (data as { data?: unknown })?.data ?? data;
@@ -239,6 +269,9 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
 
       // Status filter
       if (statusFilter === "ALL") return true;
+      if (statusFilter === "DRAFT") return item.status === "DRAFT";
+      if (item.status === "DRAFT") return false;
+
       const status = getAssessmentTimeStatus(
         item.startTime,
         item.endTime,
@@ -249,11 +282,16 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
 
   // Statistics calculation
   const stats = useMemo(() => {
+    let drafts = 0;
     let active = 0;
     let upcoming = 0;
     let expired = 0;
 
     for (const a of assessments) {
+      if (a.status === "DRAFT") {
+        drafts++;
+        continue;
+      }
       const { variant } = getAssessmentTimeStatus(a.startTime, a.endTime);
       if (variant === "active") active++;
       else if (variant === "upcoming") upcoming++;
@@ -262,6 +300,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
 
     return {
       total: assessments.length,
+      drafts,
       active,
       upcoming,
       expired,
@@ -278,6 +317,47 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
       type: "success",
     });
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Publish assessment action handler
+  const handleConfirmPublish = (assessment: IAssessment) => {
+    publishMutation.mutate(assessment.id, {
+      onSuccess: () => {
+        // Query invalidation in component (senior rule)
+        queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
+        queryClient.invalidateQueries({ queryKey: ["assessments"] });
+
+        toast.add({
+          title: "Assessment Published Successfully",
+          description: `"${assessment.title}" is now published and ready for candidate evaluation.`,
+          type: "success",
+        });
+
+        setAssessmentToPublish(null);
+
+        // Update active modal view if currently open
+        if (selectedAssessment?.id === assessment.id) {
+          setSelectedAssessment((prev) =>
+            prev ? { ...prev, status: "PUBLISHED" } : null,
+          );
+        }
+      },
+      onError: (err: unknown) => {
+        const apiErr = err as {
+          data?: { message?: string };
+          message?: string;
+        };
+
+        toast.add({
+          title: "Failed to Publish Assessment",
+          description:
+            apiErr?.data?.message ||
+            apiErr?.message ||
+            "An error occurred while publishing the assessment.",
+          type: "error",
+        });
+      },
+    });
   };
 
   return (
@@ -355,6 +435,22 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">
+                Drafts
+              </p>
+              <h3 className="text-2xl font-bold tracking-tight mt-1 text-amber-600 dark:text-amber-400">
+                {stats.drafts}
+              </h3>
+            </div>
+            <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-500">
+              <FileEdit className="size-5" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 shadow-xs border-border/70">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
                 Live & Active
               </p>
               <h3 className="text-2xl font-bold tracking-tight mt-1 text-emerald-600 dark:text-emerald-400">
@@ -379,22 +475,6 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
             </div>
             <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-500">
               <Calendar className="size-5" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 shadow-xs border-border/70">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Completed
-              </p>
-              <h3 className="text-2xl font-bold tracking-tight mt-1 text-muted-foreground">
-                {stats.expired}
-              </h3>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted text-muted-foreground">
-              <Award className="size-5" />
             </div>
           </div>
         </Card>
@@ -430,6 +510,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
               {(
                 [
                   { key: "ALL", label: "All Tests" },
+                  { key: "DRAFT", label: "Drafts" },
                   { key: "ACTIVE", label: "Active" },
                   { key: "UPCOMING", label: "Upcoming" },
                   { key: "EXPIRED", label: "Expired" },
@@ -622,6 +703,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
                       <AssessmentStatusBadge
                         startTime={assessment.startTime}
                         endTime={assessment.endTime}
+                        status={assessment.status}
                       />
                     </TableCell>
 
@@ -689,16 +771,61 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
 
                     {/* Actions */}
                     <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedAssessment(assessment)}
-                        className="text-xs h-7 px-2.5 gap-1"
-                      >
-                        <Eye className="size-3 text-muted-foreground" />
-                        Details
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Publish action for DRAFT assessments */}
+                        {assessment.status === "DRAFT" && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setAssessmentToPublish(assessment)}
+                            className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
+                            title="Publish this Assessment"
+                          >
+                            <Send className="size-3 text-emerald-600" />
+                            Publish
+                          </Button>
+                        )}
+
+                        {onAddProblemsClick && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => onAddProblemsClick(assessment)}
+                            className="text-xs h-7 px-2 gap-1 font-medium"
+                            title="Add Questions to this Assessment"
+                          >
+                            <Plus className="size-3 text-primary" />
+                            Questions
+                          </Button>
+                        )}
+
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            setCandidateInviteAssessment(assessment)
+                          }
+                          className="text-xs h-7 px-2 gap-1 font-medium text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
+                          title="Invite Candidates"
+                        >
+                          <UserPlus className="size-3 text-sky-600" />
+                          Invite
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedAssessment(assessment)}
+                          className="text-xs h-7 px-2.5 gap-1"
+                        >
+                          <Eye className="size-3 text-muted-foreground" />
+                          Details
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -707,6 +834,59 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
           </Table>
         </div>
       </Card>
+
+      {/* ── Publish Confirmation Modal ── */}
+      {assessmentToPublish && (
+        <Dialog
+          open={Boolean(assessmentToPublish)}
+          onOpenChange={(open) => !open && setAssessmentToPublish(null)}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold flex items-center gap-2">
+                <Send className="size-4 text-emerald-600" />
+                Publish Assessment
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground pt-1">
+                Are you sure you want to publish{" "}
+                <strong>&quot;{assessmentToPublish.title}&quot;</strong>? Once
+                published, the test becomes active and accessible to candidates
+                during the scheduled window.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={publishMutation.isPending}
+                onClick={() => setAssessmentToPublish(null)}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                disabled={publishMutation.isPending}
+                onClick={() => handleConfirmPublish(assessmentToPublish)}
+                className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              >
+                {publishMutation.isPending ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <Check className="size-3.5" />
+                    Confirm & Publish
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* ── Assessment Details Modal ── */}
       {selectedAssessment && (
@@ -720,6 +900,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
                 <AssessmentStatusBadge
                   startTime={selectedAssessment.startTime}
                   endTime={selectedAssessment.endTime}
+                  status={selectedAssessment.status}
                 />
                 <span className="text-xs text-muted-foreground font-mono">
                   {selectedAssessment.id}
@@ -858,7 +1039,7 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end items-center gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -867,18 +1048,51 @@ export function GetAllAssessment({ onCreateClick }: GetAllAssessmentProps) {
               >
                 Close
               </Button>
+
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => handleCopyId(selectedAssessment.id)}
                 className="text-xs gap-1.5"
               >
                 <Copy className="size-3.5" />
                 Copy ID
               </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setCandidateInviteAssessment(selectedAssessment);
+                }}
+                className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10"
+              >
+                <UserPlus className="size-3.5 text-sky-600" />
+                Invite Candidates
+              </Button>
+
+              {/* Publish button inside Details dialog for Drafts */}
+              {selectedAssessment.status === "DRAFT" && (
+                <Button
+                  size="sm"
+                  onClick={() => setAssessmentToPublish(selectedAssessment)}
+                  className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                >
+                  <Send className="size-3.5" />
+                  Publish Assessment
+                </Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>
       )}
+
+      {/* ── Candidate Invite Modal ── */}
+      <InviteCandidateDialog
+        assessment={candidateInviteAssessment}
+        open={Boolean(candidateInviteAssessment)}
+        onOpenChange={(open) => !open && setCandidateInviteAssessment(null)}
+      />
     </div>
   );
 }
