@@ -300,6 +300,9 @@ export function InviteCandidateDialog({
           // Query invalidation in component (senior fullstack rule)
           queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
           queryClient.invalidateQueries({ queryKey: ["assessments"] });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-invitation", targetAssessment.id],
+          });
 
           const count = emails.length;
           toast.add({

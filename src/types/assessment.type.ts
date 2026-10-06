@@ -103,3 +103,186 @@ export interface IInviteCandidateResponse {
     invitations?: unknown[];
   };
 }
+
+export interface ICandidateAttemptSummary {
+  id: string;
+  attemptNumber: number;
+  status: "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "EXPIRED" | string;
+  obtainedMarks: number;
+  totalMarks: number;
+  percentage: number;
+  startedAt?: string | null;
+  submittedAt?: string | null;
+}
+
+export interface IAssessmentInvitationCandidate {
+  id: string;
+  name?: string | null;
+  email: string;
+  profilePictureUrl?: string | null;
+  assessmentAttempts?: ICandidateAttemptSummary[];
+}
+
+export interface IAssessmentInvitation {
+  id: string;
+  assessmentId: string;
+  candidateId: string;
+  email?: string;
+  candidateEmail?: string;
+  token: string;
+  status: "PENDING" | "ACCEPTED" | "EXPIRED" | "DECLINED" | string;
+  invitedAt: string;
+  acceptedAt?: string | null;
+  expiresAt?: string | null;
+  candidate?: IAssessmentInvitationCandidate | null;
+}
+
+export interface IAssessmentInvitationsResponse {
+  success?: boolean;
+  message?: string;
+  data: IAssessmentInvitation[];
+}
+
+export interface IVerifyInvitationResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    invitation: {
+      id: string;
+      status: string;
+      email: string;
+      token: string;
+      invitedAt: string;
+      expiresAt?: string | null;
+      isExpired: boolean;
+    };
+    assessment: IAssessment;
+    candidate?: {
+      id: string;
+      name?: string | null;
+      email: string;
+    } | null;
+  };
+}
+
+export interface IStartAttemptPayload {
+  invitationToken?: string;
+}
+
+export type StartAttemptParams =
+  | string
+  | {
+      assessmentId: string;
+      invitationToken?: string;
+      payload?: IStartAttemptPayload;
+    };
+
+export interface IAssessmentAttempt {
+  id: string;
+  assessmentId: string;
+  candidateId: string;
+  attemptNumber: number;
+  status:
+    | "NOT_STARTED"
+    | "IN_PROGRESS"
+    | "SUBMITTED"
+    | "EXPIRED"
+    | "EVALUATED"
+    | string;
+  startedAt?: string | null;
+  submittedAt?: string | null;
+  expiresAt?: string | null;
+  totalMarks: number;
+  obtainedMarks?: number | null;
+  percentage?: number | null;
+  submissions?: unknown[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ISanitizedProblemOption {
+  id: string;
+  optionText: string;
+  optionOrder: number;
+}
+
+export interface ISanitizedProblemTestCase {
+  id: string;
+  input: string;
+  expectedOutput: string;
+  type: "PUBLIC" | string;
+}
+
+export interface ISanitizedAssessmentProblem {
+  id: string;
+  questionOrder: number;
+  problem: {
+    id: string;
+    title: string;
+    description: string;
+    type: "MCQ" | "CODING" | "WRITTEN" | string;
+    difficulty: string;
+    marks: number;
+    mcqQuestion?: {
+      id: string;
+      options: ISanitizedProblemOption[];
+    } | null;
+    codingQuestion?: {
+      id: string;
+      testCases: ISanitizedProblemTestCase[];
+    } | null;
+    writtenQuestion?: unknown | null;
+  };
+}
+
+export interface IStartAttemptData {
+  isResume: boolean;
+  attempt: IAssessmentAttempt;
+  remainingSeconds: number | null;
+  assessment: IAssessment & {
+    problems?: ISanitizedAssessmentProblem[];
+  };
+}
+
+export interface IStartAttemptResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: IStartAttemptData;
+}
+
+export interface ISubmitAnswerItem {
+  problemId: string;
+  selectedOptionId?: string;
+  answerText?: string;
+  sourceCode?: string;
+  language?: string;
+}
+
+export interface ISubmitAttemptPayload {
+  answers: ISubmitAnswerItem[];
+}
+
+export interface ISubmitAttemptResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data?: {
+    attempt: IAssessmentAttempt;
+    evaluatedAnswersCount?: number;
+    totalMarksObtained?: number;
+  };
+}
+
+export interface IAttemptDetailsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    attempt: IAssessmentAttempt;
+    remainingSeconds: number | null;
+    assessment?: IAssessment & {
+      problems?: ISanitizedAssessmentProblem[];
+    };
+  };
+}

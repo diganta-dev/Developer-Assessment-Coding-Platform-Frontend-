@@ -49,6 +49,7 @@ import {
   usePublishAssessment,
 } from "@/hook/assessment.hook";
 import type { IAssessment } from "@/types/assessment.type";
+import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
 import { InviteCandidateDialog } from "./invite-candidate-dialog";
 
 interface GetAllAssessmentProps {
@@ -312,6 +313,8 @@ export function GetAllAssessment({
   const [assessmentToPublish, setAssessmentToPublish] =
     useState<IAssessment | null>(null);
   const [candidateInviteAssessment, setCandidateInviteAssessment] =
+    useState<IAssessment | null>(null);
+  const [invitationsAssessment, setInvitationsAssessment] =
     useState<IAssessment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -932,10 +935,24 @@ export function GetAllAssessment({
 
                             <Button
                               type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                setInvitationsAssessment(assessment)
+                              }
+                              className="text-xs h-7 px-2 gap-1 font-medium text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-700 cursor-pointer"
+                              title="View Invited Candidates & Status"
+                            >
+                              <Users className="size-3 text-indigo-600" />
+                              Invitations
+                            </Button>
+
+                            <Button
+                              type="button"
                               variant="outline"
                               size="sm"
                               onClick={() => setSelectedAssessment(assessment)}
-                              className="text-xs h-7 px-2.5 gap-1"
+                              className="text-xs h-7 px-2.5 gap-1 cursor-pointer"
                             >
                               <Eye className="size-3 text-muted-foreground" />
                               Details
@@ -1204,12 +1221,25 @@ export function GetAllAssessment({
                   onClick={() => {
                     setCandidateInviteAssessment(selectedAssessment);
                   }}
-                  className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10"
+                  className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
                 >
                   <UserPlus className="size-3.5 text-sky-600" />
                   Invite Candidates
                 </Button>
               )}
+
+              {/* View Invitations Button in Details Dialog */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setInvitationsAssessment(selectedAssessment);
+                }}
+                className="text-xs gap-1.5 text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
+              >
+                <Users className="size-3.5 text-indigo-600" />
+                View Invitations
+              </Button>
 
               {/* Publish button inside Details dialog for Drafts */}
               {selectedAssessment.status === "DRAFT" && (
@@ -1232,6 +1262,14 @@ export function GetAllAssessment({
         assessment={candidateInviteAssessment}
         open={Boolean(candidateInviteAssessment)}
         onOpenChange={(open) => !open && setCandidateInviteAssessment(null)}
+      />
+
+      {/* ── Candidate Invitations Modal ── */}
+      <AssessmentInvitationsDialog
+        assessment={invitationsAssessment}
+        open={Boolean(invitationsAssessment)}
+        onOpenChange={(open) => !open && setInvitationsAssessment(null)}
+        onInviteMore={(a) => setCandidateInviteAssessment(a)}
       />
     </div>
   );
