@@ -16,6 +16,7 @@ import {
 import type {
   IAddProblemInAssessment,
   IAssessmentFilters,
+  ICandidateMyAttemptsFilters,
   ICreateAssessmentPayload,
   IInviteCandidatePayload,
   IStartAttemptResponse,
@@ -152,10 +153,11 @@ export function useGetMyAttempts(options?: {
   });
 }
 
-
-export function useGetCandidateMyAttempts() {
+export function useGetCandidateMyAttempts(
+  filters?: ICandidateMyAttemptsFilters,
+) {
   return useQuery({
-    queryKey: ["candidate-my-attempts"],
-    queryFn: () => getCandidateMyAttempts(),
+    queryKey: ["candidate-my-attempts", filters],
+    queryFn: () => getCandidateMyAttempts(filters),
   });
 }

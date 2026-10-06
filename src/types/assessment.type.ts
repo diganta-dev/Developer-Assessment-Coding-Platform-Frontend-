@@ -286,3 +286,53 @@ export interface IAttemptDetailsResponse {
     };
   };
 }
+
+export interface ICandidateAttemptItem extends IAssessmentAttempt {
+  assessment: {
+    id: string;
+    title: string;
+    durationMinutes: number;
+    totalMarks: number;
+    passingScore?: number | null;
+    company?: {
+      id: string;
+      name: string;
+      slug?: string;
+      logoUrl?: string | null;
+    };
+  };
+  result?: {
+    id: string;
+    totalMarks: number;
+    obtainedMarks: number;
+    percentage: number;
+    passingScore?: number | null;
+    rank?: number | null;
+    status: string;
+    publishedAt?: string | null;
+  } | null;
+  _count?: {
+    submissions: number;
+  };
+}
+
+export interface ICandidateMyAttemptsFilters {
+  page?: number;
+  limit?: number;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface ICandidateMyAttemptsResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  data: ICandidateAttemptItem[];
+}

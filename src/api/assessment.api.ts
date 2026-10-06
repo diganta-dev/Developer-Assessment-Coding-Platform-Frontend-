@@ -6,6 +6,8 @@ import type {
   IAssessmentInvitationsResponse,
   IAssessmentListResponse,
   IAttemptDetailsResponse,
+  ICandidateMyAttemptsFilters,
+  ICandidateMyAttemptsResponse,
   ICreateAssessmentPayload,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
@@ -133,8 +135,11 @@ export function getMyAttempts(options?: {
   });
 }
 
-export function getCandidateMyAttempts(){
-    return apiClient("assessment/candidate/my-attempts", {
-        method: "GET",
-    });
-} 
+export function getCandidateMyAttempts(
+  filters?: ICandidateMyAttemptsFilters,
+): Promise<ICandidateMyAttemptsResponse> {
+  return apiClient("assessment/candidate/my-attempts", {
+    method: "GET",
+    query: filters,
+  });
+}
