@@ -1,3 +1,4 @@
+export * from "./assessment.type";
 export * from "./auth.type";
 export * from "./company.type";
 export * from "./question.type";
