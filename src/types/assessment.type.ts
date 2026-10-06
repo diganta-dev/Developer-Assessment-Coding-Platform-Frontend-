@@ -12,7 +12,7 @@ export interface ICreateAssessmentPayload {
   title: string;
   description: string;
   totalMarks: number;
-  passMarks: number;
+  passingScore?: number;
   durationMinutes: number;
   startDate: string;
   endDate: string;
@@ -26,7 +26,7 @@ export interface IAssessment {
   title: string;
   description: string;
   totalMarks: number;
-  passMarks: number;
+  passingScore?: number | null;
   durationMinutes: number;
   startDate?: string;
   endDate?: string;
@@ -36,7 +36,6 @@ export interface IAssessment {
   companyId?: string;
   createdById?: string;
   status?: "DRAFT" | "PUBLISHED" | "ACTIVE" | "EXPIRED" | "ARCHIVED" | string;
-  passingScore?: number;
   settings?: {
     maxAttempts?: number;
     autoSubmitOnExpiry?: boolean;

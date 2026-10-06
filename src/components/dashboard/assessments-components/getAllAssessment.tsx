@@ -138,6 +138,19 @@ function formatDate(dateStr?: string | null, fallback = "N/A"): string {
   }
 }
 
+function getPassingMarks(assessment?: IAssessment | null): number {
+  if (!assessment) return 0;
+  if (
+    assessment.passingScore !== null &&
+    assessment.passingScore !== undefined
+  ) {
+    return assessment.passingScore;
+  }
+  return assessment.totalMarks > 0
+    ? Math.round(assessment.totalMarks * 0.5)
+    : 0;
+}
+
 // ─── Status Badge ────────────────────────────────────────────────────────────
 
 function AssessmentStatusBadge({
@@ -555,9 +568,9 @@ export function GetAllAssessment({
       {/* ── Toolbar: Search & Filters ── */}
       <Card className="shadow-xs border-border/70">
         <CardContent className="p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             {/* Search input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 min-w-[220px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 placeholder="Search assessments by title or keywords..."
@@ -578,7 +591,7 @@ export function GetAllAssessment({
             </div>
 
             {/* Filter buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <div className="flex flex-wrap items-center gap-1.5 shrink-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {(
                 [
                   { key: "ALL", label: "All Tests" },
@@ -606,8 +619,8 @@ export function GetAllAssessment({
       </Card>
 
       {/* ── Assessments Table ── */}
-      <Card className="shadow-xs border-border/70 overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="shadow-xs border-border/70 overflow-hidden min-h-[360px]">
+        <div className="overflow-x-auto [scrollbar-width:thin]">
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>
@@ -799,8 +812,8 @@ export function GetAllAssessment({
                     <TableCell>
                       <div className="space-y-0.5">
                         <p className="text-xs font-medium text-foreground">
-                          {assessment.passingScore ?? assessment.passMarks ?? 0}{" "}
-                          / {assessment.totalMarks} pts
+                          {getPassingMarks(assessment)} /{" "}
+                          {assessment.totalMarks} pts
                         </p>
                         <p className="text-[11px] text-muted-foreground">
                           {(assessment.allowedAttempts ||
@@ -1030,9 +1043,7 @@ export function GetAllAssessment({
                     Pass Marks
                   </p>
                   <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    {selectedAssessment.passingScore ??
-                      selectedAssessment.passMarks ??
-                      0}
+                    {getPassingMarks(selectedAssessment)}
                   </p>
                 </div>
                 <div>

@@ -206,7 +206,7 @@ export default function CreateAssessmentForm() {
       title: title.trim(),
       description: description.trim(),
       totalMarks: Number(totalMarks),
-      passMarks: Number(passMarks),
+      passingScore: Number(passMarks),
       durationMinutes: Number(durationMinutes),
       startDate: formattedStartTime,
       endDate: formattedEndTime,

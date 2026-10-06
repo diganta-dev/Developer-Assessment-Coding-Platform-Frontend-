@@ -400,8 +400,12 @@ export function InviteCandidateDialog({
               <span>•</span>
               <span className="flex items-center gap-1 font-medium text-foreground">
                 <Award className="size-3 text-emerald-500" />
-                Pass: {targetAssessment?.passMarks}/
-                {targetAssessment?.totalMarks} pts
+                Pass:{" "}
+                {targetAssessment?.passingScore ??
+                  (targetAssessment?.totalMarks
+                    ? Math.round(targetAssessment.totalMarks * 0.5)
+                    : 0)}
+                /{targetAssessment?.totalMarks} pts
               </span>
               <span>•</span>
               <span>Attempts: {targetAssessment?.allowedAttempts || 1}</span>
