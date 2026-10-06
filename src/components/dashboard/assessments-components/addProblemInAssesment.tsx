@@ -182,7 +182,7 @@ export function AddProblemInAssessment({
   }, [problemsData]);
 
   // React Query Mutation: Add problems into assessment
-  const addProblemsMutation = useAddProblemInAssessment(selectedAssessmentId);
+  const addProblemsMutation = useAddProblemInAssessment();
 
   // Set of staged problem IDs for quick lookup
   const stagedProblemIds = useMemo(

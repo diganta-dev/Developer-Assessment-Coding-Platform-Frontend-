@@ -208,8 +208,8 @@ export default function CreateAssessmentForm() {
       totalMarks: Number(totalMarks),
       passMarks: Number(passMarks),
       durationMinutes: Number(durationMinutes),
-      startTime: formattedStartTime,
-      endTime: formattedEndTime,
+      startDate: formattedStartTime,
+      endDate: formattedEndTime,
       allowedAttempts: Number(allowedAttempts),
       isStrictTimeLimit,
       proctoringSettings: {

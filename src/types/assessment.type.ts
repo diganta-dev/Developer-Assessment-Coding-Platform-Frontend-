@@ -14,8 +14,8 @@ export interface ICreateAssessmentPayload {
   totalMarks: number;
   passMarks: number;
   durationMinutes: number;
-  startTime: string;
-  endTime: string;
+  startDate: string;
+  endDate: string;
   allowedAttempts: number;
   isStrictTimeLimit: boolean;
   proctoringSettings: IProctoringSettings;
@@ -28,14 +28,31 @@ export interface IAssessment {
   totalMarks: number;
   passMarks: number;
   durationMinutes: number;
-  startTime: string;
-  endTime: string;
+  startDate?: string;
+  endDate?: string;
   allowedAttempts: number;
   isStrictTimeLimit: boolean;
   proctoringSettings?: IProctoringSettings;
   companyId?: string;
   createdById?: string;
   status?: "DRAFT" | "PUBLISHED" | "ACTIVE" | "EXPIRED" | "ARCHIVED" | string;
+  passingScore?: number;
+  settings?: {
+    maxAttempts?: number;
+    autoSubmitOnExpiry?: boolean;
+    [key: string]: unknown;
+  };
+  creator?: {
+    id?: string;
+    name?: string;
+    email?: string;
+    [key: string]: unknown;
+  };
+  company?: {
+    id?: string;
+    name?: string;
+    [key: string]: unknown;
+  };
   createdAt?: string;
   updatedAt?: string;
   _count?: {

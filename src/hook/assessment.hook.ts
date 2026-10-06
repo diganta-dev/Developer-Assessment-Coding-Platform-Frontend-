@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   addProblemInAssessment,
   createAssessment,
+  getAssessmentInvitation,
   getCompanyAllAssessments,
   inviteCandidate,
   publishAssessment,
@@ -27,54 +28,50 @@ export function useGetCompanyAllAssessments(filters?: IAssessmentFilters) {
   });
 }
 
-export function useAddProblemInAssessment(assessmentId?: string) {
+export function useAddProblemInAssessment() {
   return useMutation({
-    mutationFn: (
-      variables:
-        | IAddProblemInAssessment
-        | { assessmentId: string; payload: IAddProblemInAssessment },
-    ) => {
-      if ("problems" in variables) {
-        if (!assessmentId) throw new Error("Assessment ID is required");
-        return addProblemInAssessment(assessmentId, variables);
-      }
-      return addProblemInAssessment(variables.assessmentId, variables.payload);
-    },
+    mutationFn: ({
+      assessmentId,
+      payload,
+    }: {
+      assessmentId: string;
+      payload: IAddProblemInAssessment;
+    }) => addProblemInAssessment(assessmentId, payload),
   });
 }
 
-export function usePublishAssessment(assessmentId?: string) {
+export function usePublishAssessment() {
   return useMutation({
-    mutationFn: (targetId?: string) => {
-      const id = targetId || assessmentId;
-      if (!id) {
-        throw new Error("Assessment ID is required to publish assessment");
-      }
-      return publishAssessment(id);
-    },
+    mutationFn: (assessmentId: string) => publishAssessment(assessmentId),
   });
 }
-export function useInviteCandidate(assessmentId?: string) {
+
+export function useInviteCandidate() {
   return useMutation({
-    mutationFn: (
-      variables:
-        | IInviteCandidatePayload
-        | {
-            payload: IInviteCandidatePayload;
-            assessmentId?: string;
-          },
-    ) => {
-      if ("emails" in variables) {
-        if (!assessmentId) {
-          throw new Error("Assessment ID is required to invite candidates");
-        }
-        return inviteCandidate(assessmentId, variables);
-      }
-      const id = variables.assessmentId || assessmentId;
-      if (!id) {
-        throw new Error("Assessment ID is required to invite candidates");
-      }
-      return inviteCandidate(id, variables.payload);
-    },
+    mutationFn: ({
+      assessmentId,
+      payload,
+    }: {
+      assessmentId: string;
+      payload: IInviteCandidatePayload;
+    }) => inviteCandidate(assessmentId, payload),
   });
 }
+
+export function useGetAssessmentInvitation(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-invitation", assessmentId],
+    queryFn: () => getAssessmentInvitation(assessmentId),
+    enabled: Boolean(assessmentId),
+  });
+}
+
+export function usegetAssessmentInvitation(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-invitation", assessmentId],
+    queryFn: () => getAssessmentInvitation(assessmentId),
+    enabled: Boolean(assessmentId),
+  }); 
+}
+
+

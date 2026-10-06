@@ -48,3 +48,10 @@ export function inviteCandidate(
     body: payload,
   });
 }
+
+export function getAssessmentInvitation(assessmentId: string) {
+  return apiClient(`assessment/${assessmentId}/invitation`, {
+    method: "GET",
+  });
+}
+     

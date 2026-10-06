@@ -100,7 +100,7 @@ export function InviteCandidateDialog({
   }, [initialAssessment, selectedAssessmentId, assessmentsList]);
 
   // React Query Mutation
-  const inviteMutation = useInviteCandidate(targetAssessment?.id);
+  const inviteMutation = useInviteCandidate();
 
   // ── Email Parsing & Normalization Helper ───────────────────────────────────
 

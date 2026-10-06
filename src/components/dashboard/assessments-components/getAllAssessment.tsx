@@ -56,35 +56,77 @@ interface GetAllAssessmentProps {
   onAddProblemsClick?: (assessment: IAssessment) => void;
 }
 
-type StatusFilterType = "ALL" | "DRAFT" | "ACTIVE" | "UPCOMING" | "EXPIRED";
+type StatusFilterType =
+  | "ALL"
+  | "DRAFT"
+  | "PUBLISHED"
+  | "ACTIVE"
+  | "UPCOMING"
+  | "EXPIRED";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getAssessmentTimeStatus(
-  startTime?: string,
-  endTime?: string,
-): { label: string; variant: "active" | "upcoming" | "expired" | "unknown" } {
-  if (!startTime || !endTime) {
-    return { label: "Configured", variant: "unknown" };
+export function resolveAssessmentStatus(item: IAssessment): {
+  key: "DRAFT" | "PUBLISHED" | "ACTIVE" | "UPCOMING" | "EXPIRED";
+  label: string;
+  variant: "draft" | "published" | "active" | "upcoming" | "expired";
+} {
+  // 1. DRAFT status
+  if (item.status === "DRAFT") {
+    return { key: "DRAFT", label: "Draft", variant: "draft" };
   }
 
+  const startStr = item.startDate;
+  const endStr = item.endDate;
   const now = Date.now();
-  const start = new Date(startTime).getTime();
-  const end = new Date(endTime).getTime();
 
-  if (now < start) {
-    return { label: "Upcoming", variant: "upcoming" };
+  // 2. Deadline has passed or status is EXPIRED / COMPLETED / ARCHIVED
+  if (
+    item.status === "EXPIRED" ||
+    item.status === "COMPLETED" ||
+    item.status === "ARCHIVED" ||
+    (endStr && new Date(endStr).getTime() <= now)
+  ) {
+    return {
+      key: "EXPIRED",
+      label:
+        item.status === "COMPLETED"
+          ? "Completed"
+          : item.status === "ARCHIVED"
+            ? "Archived"
+            : "Expired",
+      variant: "expired",
+    };
   }
-  if (now >= start && now <= end) {
-    return { label: "Active", variant: "active" };
+
+  // 3. ACTIVE status (Candidate attempt taken / exam actively in progress)
+  if (item.status === "ACTIVE") {
+    return { key: "ACTIVE", label: "Live & Active", variant: "active" };
   }
-  return { label: "Expired", variant: "expired" };
+
+  // 4. Future start date check
+  if (startStr && new Date(startStr).getTime() > now) {
+    return { key: "UPCOMING", label: "Upcoming", variant: "upcoming" };
+  }
+
+  // 5. PUBLISHED status (Published & waiting for candidate attempts)
+  if (item.status === "PUBLISHED") {
+    return { key: "PUBLISHED", label: "Published", variant: "published" };
+  }
+
+  return {
+    key: "PUBLISHED",
+    label: item.status || "Configured",
+    variant: "published",
+  };
 }
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "N/A";
+function formatDate(dateStr?: string | null, fallback = "N/A"): string {
+  if (!dateStr) return fallback;
   try {
-    return new Date(dateStr).toLocaleString("en-US", {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return fallback;
+    return d.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -92,22 +134,28 @@ function formatDate(dateStr?: string): string {
       minute: "2-digit",
     });
   } catch {
-    return "N/A";
+    return fallback;
   }
 }
 
 // ─── Status Badge ────────────────────────────────────────────────────────────
 
 function AssessmentStatusBadge({
-  startTime,
-  endTime,
+  assessment,
   status,
 }: {
-  startTime?: string;
-  endTime?: string;
+  assessment?: IAssessment;
   status?: string;
 }) {
-  if (status === "DRAFT") {
+  const item: IAssessment =
+    assessment ||
+    ({
+      status,
+    } as IAssessment);
+
+  const { label, variant } = resolveAssessmentStatus(item);
+
+  if (variant === "draft") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
         <span className="size-1.5 rounded-full bg-amber-500" />
@@ -116,26 +164,39 @@ function AssessmentStatusBadge({
     );
   }
 
-  const { label, variant } = getAssessmentTimeStatus(startTime, endTime);
-
-  const styleMap = {
-    active:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    upcoming: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
-    expired: "bg-muted text-muted-foreground border-border/80",
-    unknown: "bg-muted text-muted-foreground border-border/80",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${styleMap[variant]}`}
-    >
-      {variant === "active" && (
+  if (variant === "active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
         <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
         </span>
-      )}
+        Live & Active
+      </span>
+    );
+  }
+
+  if (variant === "published") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20">
+        <span className="size-1.5 rounded-full bg-indigo-500" />
+        Published
+      </span>
+    );
+  }
+
+  if (variant === "upcoming") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20">
+        <span className="size-1.5 rounded-full bg-sky-500" />
+        Upcoming
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-muted text-muted-foreground border-border/80">
+      <span className="size-1.5 rounded-full bg-muted-foreground/50" />
       {label}
     </span>
   );
@@ -269,38 +330,33 @@ export function GetAllAssessment({
 
       // Status filter
       if (statusFilter === "ALL") return true;
-      if (statusFilter === "DRAFT") return item.status === "DRAFT";
-      if (item.status === "DRAFT") return false;
 
-      const status = getAssessmentTimeStatus(
-        item.startTime,
-        item.endTime,
-      ).variant;
-      return status === statusFilter.toLowerCase();
+      const computed = resolveAssessmentStatus(item);
+      return computed.key === statusFilter;
     });
   }, [assessments, searchTerm, statusFilter]);
 
   // Statistics calculation
   const stats = useMemo(() => {
     let drafts = 0;
+    let published = 0;
     let active = 0;
     let upcoming = 0;
     let expired = 0;
 
     for (const a of assessments) {
-      if (a.status === "DRAFT") {
-        drafts++;
-        continue;
-      }
-      const { variant } = getAssessmentTimeStatus(a.startTime, a.endTime);
-      if (variant === "active") active++;
-      else if (variant === "upcoming") upcoming++;
-      else if (variant === "expired") expired++;
+      const computed = resolveAssessmentStatus(a);
+      if (computed.key === "DRAFT") drafts++;
+      else if (computed.key === "PUBLISHED") published++;
+      else if (computed.key === "ACTIVE") active++;
+      else if (computed.key === "UPCOMING") upcoming++;
+      else if (computed.key === "EXPIRED") expired++;
     }
 
     return {
       total: assessments.length,
       drafts,
+      published,
       active,
       upcoming,
       expired,
@@ -414,7 +470,7 @@ export function GetAllAssessment({
       </div>
 
       {/* ── Metric Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <Card className="p-4 shadow-xs border-border/70">
           <div className="flex items-center justify-between">
             <div>
@@ -443,6 +499,22 @@ export function GetAllAssessment({
             </div>
             <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-500">
               <FileEdit className="size-5" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 shadow-xs border-border/70">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
+                Published
+              </p>
+              <h3 className="text-2xl font-bold tracking-tight mt-1 text-indigo-600 dark:text-indigo-400">
+                {stats.published}
+              </h3>
+            </div>
+            <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-500">
+              <Send className="size-5" />
             </div>
           </div>
         </Card>
@@ -511,6 +583,7 @@ export function GetAllAssessment({
                 [
                   { key: "ALL", label: "All Tests" },
                   { key: "DRAFT", label: "Drafts" },
+                  { key: "PUBLISHED", label: "Published" },
                   { key: "ACTIVE", label: "Active" },
                   { key: "UPCOMING", label: "Upcoming" },
                   { key: "EXPIRED", label: "Expired" },
@@ -522,7 +595,7 @@ export function GetAllAssessment({
                   variant={statusFilter === key ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter(key)}
-                  className="text-xs h-8 px-3 rounded-lg"
+                  className="text-xs h-8 px-3 rounded-lg font-medium transition-all cursor-pointer"
                 >
                   {label}
                 </Button>
@@ -700,11 +773,7 @@ export function GetAllAssessment({
 
                     {/* Status */}
                     <TableCell>
-                      <AssessmentStatusBadge
-                        startTime={assessment.startTime}
-                        endTime={assessment.endTime}
-                        status={assessment.status}
-                      />
+                      <AssessmentStatusBadge assessment={assessment} />
                     </TableCell>
 
                     {/* Duration & Limit */}
@@ -730,33 +799,43 @@ export function GetAllAssessment({
                     <TableCell>
                       <div className="space-y-0.5">
                         <p className="text-xs font-medium text-foreground">
-                          {assessment.passMarks} / {assessment.totalMarks} pts
+                          {assessment.passingScore ?? assessment.passMarks ?? 0}{" "}
+                          / {assessment.totalMarks} pts
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {assessment.allowedAttempts === 1
+                          {(assessment.allowedAttempts ||
+                            assessment.settings?.maxAttempts ||
+                            1) === 1
                             ? "1 attempt"
-                            : `${assessment.allowedAttempts} attempts`}
+                            : `${
+                                assessment.allowedAttempts ||
+                                assessment.settings?.maxAttempts ||
+                                1
+                              } attempts`}
                         </p>
                       </div>
                     </TableCell>
 
                     {/* Schedule */}
                     <TableCell>
-                      <div className="space-y-0.5 text-[11px]">
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <span className="w-10 text-[10px] uppercase font-mono">
+                      <div className="space-y-1 text-[11px]">
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <span className="w-10 text-[10px] uppercase font-mono font-semibold text-muted-foreground/80">
                             Start:
                           </span>
-                          <span className="text-foreground">
-                            {formatDate(assessment.startTime)}
+                          <span className="text-foreground font-medium">
+                            {formatDate(
+                              assessment.startDate || assessment.createdAt,
+                              "Immediate",
+                            )}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <span className="w-10 text-[10px] uppercase font-mono">
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <span className="w-10 text-[10px] uppercase font-mono font-semibold text-muted-foreground/80">
                             End:
                           </span>
-                          <span className="text-foreground">
-                            {formatDate(assessment.endTime)}
+                          <span className="text-foreground font-medium">
+                            {formatDate(assessment.endDate, "No Expiry / Open")}
                           </span>
                         </div>
                       </div>
@@ -771,61 +850,86 @@ export function GetAllAssessment({
 
                     {/* Actions */}
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {/* Publish action for DRAFT assessments */}
-                        {assessment.status === "DRAFT" && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setAssessmentToPublish(assessment)}
-                            className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
-                            title="Publish this Assessment"
-                          >
-                            <Send className="size-3 text-emerald-600" />
-                            Publish
-                          </Button>
-                        )}
+                      {(() => {
+                        const isExpired =
+                          resolveAssessmentStatus(assessment).key === "EXPIRED";
 
-                        {onAddProblemsClick && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => onAddProblemsClick(assessment)}
-                            className="text-xs h-7 px-2 gap-1 font-medium"
-                            title="Add Questions to this Assessment"
-                          >
-                            <Plus className="size-3 text-primary" />
-                            Questions
-                          </Button>
-                        )}
+                        return (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Publish action for DRAFT assessments */}
+                            {assessment.status === "DRAFT" && !isExpired && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  setAssessmentToPublish(assessment)
+                                }
+                                className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
+                                title="Publish this Assessment"
+                              >
+                                <Send className="size-3 text-emerald-600" />
+                                Publish
+                              </Button>
+                            )}
 
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            setCandidateInviteAssessment(assessment)
-                          }
-                          className="text-xs h-7 px-2 gap-1 font-medium text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
-                          title="Invite Candidates"
-                        >
-                          <UserPlus className="size-3 text-sky-600" />
-                          Invite
-                        </Button>
+                            {onAddProblemsClick && !isExpired && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => onAddProblemsClick(assessment)}
+                                className="text-xs h-7 px-2 gap-1 font-medium"
+                                title="Add Questions to this Assessment"
+                              >
+                                <Plus className="size-3 text-primary" />
+                                Questions
+                              </Button>
+                            )}
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedAssessment(assessment)}
-                          className="text-xs h-7 px-2.5 gap-1"
-                        >
-                          <Eye className="size-3 text-muted-foreground" />
-                          Details
-                        </Button>
-                      </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={isExpired}
+                              onClick={() =>
+                                !isExpired &&
+                                setCandidateInviteAssessment(assessment)
+                              }
+                              className={`text-xs h-7 px-2 gap-1 font-medium ${
+                                isExpired
+                                  ? "opacity-50 cursor-not-allowed text-muted-foreground border-border/40"
+                                  : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
+                              }`}
+                              title={
+                                isExpired
+                                  ? "Assessment deadline has passed"
+                                  : "Invite Candidates"
+                              }
+                            >
+                              <UserPlus
+                                className={`size-3 ${
+                                  isExpired
+                                    ? "text-muted-foreground"
+                                    : "text-sky-600"
+                                }`}
+                              />
+                              Invite
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedAssessment(assessment)}
+                              className="text-xs h-7 px-2.5 gap-1"
+                            >
+                              <Eye className="size-3 text-muted-foreground" />
+                              Details
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))
@@ -897,11 +1001,7 @@ export function GetAllAssessment({
           <DialogContent className="max-w-xl">
             <DialogHeader>
               <div className="flex items-center gap-2">
-                <AssessmentStatusBadge
-                  startTime={selectedAssessment.startTime}
-                  endTime={selectedAssessment.endTime}
-                  status={selectedAssessment.status}
-                />
+                <AssessmentStatusBadge assessment={selectedAssessment} />
                 <span className="text-xs text-muted-foreground font-mono">
                   {selectedAssessment.id}
                 </span>
@@ -930,7 +1030,9 @@ export function GetAllAssessment({
                     Pass Marks
                   </p>
                   <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    {selectedAssessment.passMarks}
+                    {selectedAssessment.passingScore ??
+                      selectedAssessment.passMarks ??
+                      0}
                   </p>
                 </div>
                 <div>
@@ -938,7 +1040,9 @@ export function GetAllAssessment({
                     Attempts Allowed
                   </p>
                   <p className="text-sm font-semibold text-foreground mt-0.5">
-                    {selectedAssessment.allowedAttempts}
+                    {selectedAssessment.allowedAttempts ||
+                      selectedAssessment.settings?.maxAttempts ||
+                      1}
                   </p>
                 </div>
               </div>
@@ -960,14 +1064,21 @@ export function GetAllAssessment({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Window Opens</span>
-                  <span className="text-foreground">
-                    {formatDate(selectedAssessment.startTime)}
+                  <span className="text-foreground font-medium">
+                    {formatDate(
+                      selectedAssessment.startDate ||
+                        selectedAssessment.createdAt,
+                      "Immediate / Open",
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Window Closes</span>
-                  <span className="text-foreground">
-                    {formatDate(selectedAssessment.endTime)}
+                  <span className="text-foreground font-medium">
+                    {formatDate(
+                      selectedAssessment.endDate,
+                      "No Deadline / Flexible",
+                    )}
                   </span>
                 </div>
               </div>
@@ -1035,6 +1146,21 @@ export function GetAllAssessment({
                         : "Disabled"}
                     </span>
                   </div>
+                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
+                    <span>Auto-Submit on Expiry</span>
+                    <span
+                      className={`font-semibold ${
+                        selectedAssessment.settings?.autoSubmitOnExpiry !==
+                        false
+                          ? "text-emerald-600"
+                          : "text-amber-600"
+                      }`}
+                    >
+                      {selectedAssessment.settings?.autoSubmitOnExpiry !== false
+                        ? "Enabled"
+                        : "Disabled"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1059,17 +1185,20 @@ export function GetAllAssessment({
                 Copy ID
               </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setCandidateInviteAssessment(selectedAssessment);
-                }}
-                className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10"
-              >
-                <UserPlus className="size-3.5 text-sky-600" />
-                Invite Candidates
-              </Button>
+              {resolveAssessmentStatus(selectedAssessment).key !==
+                "EXPIRED" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setCandidateInviteAssessment(selectedAssessment);
+                  }}
+                  className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10"
+                >
+                  <UserPlus className="size-3.5 text-sky-600" />
+                  Invite Candidates
+                </Button>
+              )}
 
               {/* Publish button inside Details dialog for Drafts */}
               {selectedAssessment.status === "DRAFT" && (
