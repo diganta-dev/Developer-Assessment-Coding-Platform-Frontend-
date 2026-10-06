@@ -227,6 +227,7 @@ export default function CreateAssessmentForm() {
       onSuccess: () => {
         // Query invalidation in form component as instructed
         queryClient.invalidateQueries({ queryKey: ["assessments"] });
+        queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
 
         toast.add({
           title: "Assessment Created Successfully",

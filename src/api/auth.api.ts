@@ -49,5 +49,6 @@ export function companyVerification(payload: VerifyAccountPayload) {
     body: payload,
   });
 }
+
   
   
