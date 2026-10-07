@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckSquare, Clock, FileText } from "lucide-react";
+import { CheckSquare, FileText, Layers } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -28,6 +28,13 @@ export default function EvaluatorPage() {
 
         <div className="flex items-center gap-2">
           <Link
+            href="/evaluator/assessments"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <Layers className="mr-1.5 size-3.5" />
+            Assigned Assessments
+          </Link>
+          <Link
             href="/evaluator/report"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
@@ -43,7 +50,22 @@ export default function EvaluatorPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="hover:border-primary/50 transition-colors">
+          <CardHeader>
+            <CardTitle>Assigned Assessments</CardTitle>
+            <CardDescription>Browse test windows, proctoring rules, and candidate rosters</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/evaluator/assessments"
+              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+            >
+              Browse Assessments
+            </Link>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Submissions</CardTitle>
@@ -61,8 +83,8 @@ export default function EvaluatorPage() {
 
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
-            <CardTitle>Detailed Assessment Reports</CardTitle>
-            <CardDescription>Inspect test case telemetry, anti-cheat audit logs, and source codes</CardDescription>
+            <CardTitle>Detailed Reports</CardTitle>
+            <CardDescription>Inspect test case telemetry, anti-cheat audit logs, and code</CardDescription>
           </CardHeader>
           <CardContent>
             <Link

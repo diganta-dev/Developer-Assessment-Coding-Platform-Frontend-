@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   Award,
+  Calculator,
   Calendar,
   CheckCircle2,
   Clock,
@@ -28,6 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAttemptResults } from "@/hook/assessment.hook";
 import type { IAttemptResultProblemBreakdown } from "@/types/assessment.type";
+import { CalculateScoreDialog } from "./calculate-score-dialog";
 
 interface AttemptResultDialogProps {
   attemptId: string | null;
@@ -74,6 +76,7 @@ export function AttemptResultDialog({
   const [problemFilter, setProblemFilter] = useState<
     "ALL" | "MCQ" | "CODING" | "WRITTEN"
   >("ALL");
+  const [calculateScoreOpen, setCalculateScoreOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetAttemptResults(attemptId || "", open);
@@ -686,17 +689,40 @@ export function AttemptResultDialog({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 z-20 flex justify-end border-t border-border/60 bg-background/95 px-6 py-4 backdrop-blur-md">
+        <div className="sticky bottom-0 z-20 flex items-center justify-between border-t border-border/60 bg-background/95 px-6 py-4 backdrop-blur-md">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCalculateScoreOpen(true)}
+            className="text-xs h-8 gap-1.5 font-medium border-indigo-500/30 text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-400 cursor-pointer"
+          >
+            <Calculator className="size-3" />
+            <span>Recalculate Score</span>
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="text-xs"
+            className="text-xs h-8 px-4 cursor-pointer"
           >
             Close
           </Button>
         </div>
       </DialogContent>
+
+      {/* Recalculate Score Sub-Dialog */}
+      <CalculateScoreDialog
+        attemptId={attemptId}
+        assessmentTitle={assessment?.title}
+        candidateName={candidate?.name}
+        open={calculateScoreOpen}
+        onOpenChange={setCalculateScoreOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </Dialog>
   );
 }

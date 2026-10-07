@@ -155,6 +155,10 @@ export const evaluatorRoutes: SidebarItems = [
     title: "Evaluations",
     items: [
       {
+        title: "Assessments",
+        url: "/evaluator/assessments",
+      },
+      {
         title: "Submissions",
         url: "/evaluator/submissions",
       },

@@ -4,6 +4,7 @@ export * from "./assessment-invitations-dialog";
 export * from "./assessment-management";
 export * from "./attempt-details-dialog";
 export * from "./attempt-result-dialog";
+export * from "./calculate-score-dialog";
 export * from "./create-assessment";
 export * from "./create-submission-dialog";
 export * from "./detailed-assessment-report-dialog";

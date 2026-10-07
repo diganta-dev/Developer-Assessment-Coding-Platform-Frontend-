@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   Award,
+  Calculator,
   CheckCircle2,
   Clock,
   Code2,
@@ -30,6 +31,7 @@ import type {
   ISanitizedAssessmentProblem,
 } from "@/types/assessment.type";
 import { AttemptResultDialog } from "./attempt-result-dialog";
+import { CalculateScoreDialog } from "./calculate-score-dialog";
 import { CreateSubmissionDialog } from "./create-submission-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { FinalizeSubmitAttemptDialog } from "./finalize-submit-attempt-dialog";
@@ -96,6 +98,7 @@ export function AttemptDetailsDialog({
   const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
   const [selectedProblemIdForSubmission, setSelectedProblemIdForSubmission] =
     useState<string | null>(null);
+  const [calculateScoreOpen, setCalculateScoreOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetAttemptDetails(attemptId || "");
@@ -723,6 +726,17 @@ export function AttemptDetailsDialog({
               type="button"
               variant="outline"
               size="sm"
+              onClick={() => setCalculateScoreOpen(true)}
+              className="text-xs h-8 gap-1.5 font-medium border-indigo-500/30 text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-400 cursor-pointer"
+            >
+              <Calculator className="size-3" />
+              <span>Calculate Score</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
               className="text-xs h-8 px-3 cursor-pointer"
             >
@@ -733,6 +747,16 @@ export function AttemptDetailsDialog({
       </DialogContent>
 
       {/* ── Sub Dialogs ── */}
+      <CalculateScoreDialog
+        attemptId={attemptId}
+        assessmentTitle={assessment?.title}
+        candidateName={candidate?.name}
+        open={calculateScoreOpen}
+        onOpenChange={setCalculateScoreOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
       <CreateSubmissionDialog
         attemptId={attemptId}
         initialProblemId={selectedProblemIdForSubmission}

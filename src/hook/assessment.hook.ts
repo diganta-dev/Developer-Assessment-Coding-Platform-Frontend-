@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addProblemInAssessment,
+  calculateAttemptScore,
   createAssessment,
   createSubmissionFromAttempt,
   finalizeAndSubmitAttempt,
@@ -10,6 +11,7 @@ import {
   getCandidateMyAttempts,
   getCompanyAllAssessments,
   getDetailedAssesssmentReport,
+  getMyAssessments,
   getMyAttempts,
   inviteCandidate,
   publishAssessment,
@@ -238,3 +240,16 @@ export function useCreateSubmissionFromAttempt() {
     }) => createSubmissionFromAttempt(variables.attemptId, variables.payload),
   });
 } 
+
+export function useCalculateAttemptScore() {
+  return useMutation({
+    mutationFn: (attemptId: string) => calculateAttemptScore(attemptId),
+    
+  });
+}
+export function useGetMyAssessments(filters?: IAssessmentFilters) {
+  return useQuery({
+    queryKey: ["my-assessments", filters],
+    queryFn: () => getMyAssessments(filters),
+  });
+}

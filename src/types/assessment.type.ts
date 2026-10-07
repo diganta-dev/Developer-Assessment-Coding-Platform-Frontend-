@@ -645,3 +645,48 @@ export interface ICreateSubmissionResponse {
   data: IAttemptSubmissionItem;
 }
 
+export interface IAttemptScoreBreakdownItem {
+  problemId: string;
+  questionOrder: number;
+  title: string;
+  type: "MCQ" | "CODING" | "WRITTEN" | string;
+  difficulty: string;
+  maxMarks: number;
+  obtainedMarks: number;
+  isCorrect: boolean;
+  submissionStatus: string;
+  submissionId: string | null;
+}
+
+export interface ICalculateAttemptScoreData {
+  attemptId: string;
+  assessmentId: string;
+  candidateId: string;
+  candidate: {
+    id: string;
+    name?: string | null;
+    email: string;
+  };
+  totalMarks: number;
+  obtainedMarks: number;
+  percentage: number;
+  passingScore: number | null;
+  isPassed: boolean;
+  resultStatus: "PASSED" | "FAILED" | string;
+  attemptStatus: string;
+  isFullyEvaluated: boolean;
+  totalProblems: number;
+  evaluatedProblems: number;
+  pendingProblems: number;
+  breakdown: IAttemptScoreBreakdownItem[];
+  resultId?: string;
+  calculatedAt: string | Date;
+}
+
+export interface ICalculateAttemptScoreResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: ICalculateAttemptScoreData;
+}
+

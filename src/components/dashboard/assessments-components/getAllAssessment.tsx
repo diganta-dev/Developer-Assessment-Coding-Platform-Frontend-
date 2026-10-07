@@ -12,6 +12,7 @@ import {
   Eye,
   FileCheck2,
   FileEdit,
+  FileText,
   Layers,
   Loader2,
   Maximize2,
@@ -25,6 +26,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,7 +48,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
 import {
-  useGetCompanyAllAssessments,
+  useGetMyAssessments,
   usePublishAssessment,
 } from "@/hook/assessment.hook";
 import type { IAssessment } from "@/types/assessment.type";
@@ -335,9 +337,64 @@ export function GetAllAssessment({
     CompanyMemberRole.ASSESSMENT_CREATOR,
   ]);
 
-  // TanStack Query to fetch company assessments
+  const canManageAssessments = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+  ]);
+
+  const userRole = currentUser?.role;
+  const memberRole = currentUser?.memberRole;
+
+  const isAdmin =
+    userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN;
+  const isCompanyOwner =
+    memberRole === CompanyMemberRole.COMPANY_OWNER;
+  const isCompanyAdmin =
+    memberRole === CompanyMemberRole.COMPANY_ADMIN;
+  const isCreator =
+    memberRole === CompanyMemberRole.ASSESSMENT_CREATOR;
+  const isEvaluator =
+    memberRole === CompanyMemberRole.EVALUATOR ||
+    userRole === (CompanyMemberRole.EVALUATOR as string);
+
+  const roleBadgeLabel = isAdmin
+    ? "Platform Assessments (Admin Oversight)"
+    : isCompanyOwner
+      ? "Company Assessments (Owner)"
+      : isCompanyAdmin
+        ? "Company Assessments (Admin)"
+        : isCreator
+          ? "My Created Assessments (Creator)"
+          : isEvaluator
+            ? "My Assigned Assessments (Evaluator)"
+            : "My Assessments";
+
+  const roleHeading = isEvaluator
+    ? "Assigned Assessments"
+    : isAdmin
+      ? "Assessments Oversight"
+      : isCompanyOwner || isCompanyAdmin
+        ? "Company Assessments"
+        : isCreator
+          ? "Assessment Builder & Tests"
+          : "Manage Assessments";
+
+  const roleSubtitle = isEvaluator
+    ? "Browse assigned candidate benchmarks, verify proctoring policies, and review candidate grading reports."
+    : isAdmin
+      ? "Platform-wide assessment oversight, proctoring supervision, and official result publishing."
+      : isCompanyOwner || isCompanyAdmin
+        ? "Manage company assessment benchmarks, invite candidates, and monitor live test windows."
+        : isCreator
+          ? "Design coding assessments, curate question banks, invite candidate cohorts, and publish test results."
+          : "Overview of technical benchmarks, scheduled test windows, and candidate proctoring.";
+
+  // TanStack Query to fetch staff assessments (Admin, Owner, Admin, Creator, Evaluator)
   const { data, isLoading, isError, error, isFetching, refetch } =
-    useGetCompanyAllAssessments();
+    useGetMyAssessments();
 
   // Normalize API response safely
   const assessments: IAssessment[] = useMemo(() => {
@@ -413,6 +470,7 @@ export function GetAllAssessment({
     publishMutation.mutate(assessment.id, {
       onSuccess: () => {
         // Query invalidation in component (senior rule)
+        queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
         queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
         queryClient.invalidateQueries({ queryKey: ["assessments"] });
 
@@ -457,18 +515,17 @@ export function GetAllAssessment({
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
               <Layers className="size-3" />
-              Company Assessments
+              {roleBadgeLabel}
             </span>
             <span className="text-xs text-muted-foreground font-mono">
               Dashboard
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground mt-1.5">
-            Manage Assessments
+            {roleHeading}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Overview of technical benchmarks, scheduled test windows, and
-            candidate proctoring.
+            {roleSubtitle}
           </p>
         </div>
 
@@ -487,7 +544,7 @@ export function GetAllAssessment({
             />
             Refresh
           </Button>
-          {onCreateClick && (
+          {canManageAssessments && onCreateClick && (
             <Button
               type="button"
               size="sm"
@@ -775,32 +832,57 @@ export function GetAllAssessment({
                   >
                     {/* Assessment Info */}
                     <TableCell>
-                      <div className="space-y-0.5">
-                        <p className="text-xs font-semibold text-foreground leading-snug">
-                          {assessment.title}
-                        </p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-semibold text-foreground leading-snug">
+                            {assessment.title}
+                          </p>
+                          {assessment.company?.name && (
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] bg-muted/80 text-muted-foreground border border-border/60">
+                              {assessment.company.name}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-muted-foreground line-clamp-1 max-w-[280px]">
                           {assessment.description || "No description provided."}
                         </p>
-                        {assessment.id && (
-                          <div className="flex items-center gap-1 pt-0.5">
-                            <span className="text-[10px] font-mono text-muted-foreground/70">
-                              ID: {assessment.id.slice(0, 8)}...
+                        <div className="flex items-center gap-2 pt-0.5 flex-wrap">
+                          {assessment.id && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] font-mono text-muted-foreground/70">
+                                ID: {assessment.id.slice(0, 8)}...
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyId(assessment.id)}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                title="Copy Assessment ID"
+                              >
+                                {copiedId === assessment.id ? (
+                                  <Check className="size-2.5 text-emerald-500" />
+                                ) : (
+                                  <Copy className="size-2.5" />
+                                )}
+                              </button>
+                            </div>
+                          )}
+                          {Boolean(
+                            assessment._count?.problems ||
+                              assessment.problems?.length,
+                          ) && (
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              •{" "}
+                              {assessment._count?.problems ||
+                                assessment.problems?.length}{" "}
+                              Problems
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => handleCopyId(assessment.id)}
-                              className="text-muted-foreground hover:text-foreground transition-colors"
-                              title="Copy Assessment ID"
-                            >
-                              {copiedId === assessment.id ? (
-                                <Check className="size-2.5 text-emerald-500" />
-                              ) : (
-                                <Copy className="size-2.5" />
-                              )}
-                            </button>
-                          </div>
-                        )}
+                          )}
+                          {Boolean(assessment.creator?.name) && (
+                            <span className="text-[10px] text-muted-foreground/80">
+                              • by {assessment.creator?.name}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
 
@@ -890,65 +972,71 @@ export function GetAllAssessment({
                         return (
                           <div className="flex items-center justify-end gap-1.5">
                             {/* Publish action for DRAFT assessments */}
-                            {assessment.status === "DRAFT" && !isExpired && (
+                            {canManageAssessments &&
+                              assessment.status === "DRAFT" &&
+                              !isExpired && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setAssessmentToPublish(assessment)
+                                  }
+                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
+                                  title="Publish this Assessment"
+                                >
+                                  <Send className="size-3 text-emerald-600" />
+                                  Publish
+                                </Button>
+                              )}
+
+                            {canManageAssessments &&
+                              onAddProblemsClick &&
+                              !isExpired && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => onAddProblemsClick(assessment)}
+                                  className="text-xs h-7 px-2 gap-1 font-medium"
+                                  title="Add Questions to this Assessment"
+                                >
+                                  <Plus className="size-3 text-primary" />
+                                  Questions
+                                </Button>
+                              )}
+
+                            {canManageAssessments && (
                               <Button
                                 type="button"
                                 size="sm"
                                 variant="outline"
+                                disabled={isExpired}
                                 onClick={() =>
-                                  setAssessmentToPublish(assessment)
+                                  !isExpired &&
+                                  setCandidateInviteAssessment(assessment)
                                 }
-                                className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
-                                title="Publish this Assessment"
-                              >
-                                <Send className="size-3 text-emerald-600" />
-                                Publish
-                              </Button>
-                            )}
-
-                            {onAddProblemsClick && !isExpired && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => onAddProblemsClick(assessment)}
-                                className="text-xs h-7 px-2 gap-1 font-medium"
-                                title="Add Questions to this Assessment"
-                              >
-                                <Plus className="size-3 text-primary" />
-                                Questions
-                              </Button>
-                            )}
-
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              disabled={isExpired}
-                              onClick={() =>
-                                !isExpired &&
-                                setCandidateInviteAssessment(assessment)
-                              }
-                              className={`text-xs h-7 px-2 gap-1 font-medium ${
-                                isExpired
-                                  ? "opacity-50 cursor-not-allowed text-muted-foreground border-border/40"
-                                  : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
-                              }`}
-                              title={
-                                isExpired
-                                  ? "Assessment deadline has passed"
-                                  : "Invite Candidates"
-                              }
-                            >
-                              <UserPlus
-                                className={`size-3 ${
+                                className={`text-xs h-7 px-2 gap-1 font-medium ${
                                   isExpired
-                                    ? "text-muted-foreground"
-                                    : "text-sky-600"
+                                    ? "opacity-50 cursor-not-allowed text-muted-foreground border-border/40"
+                                    : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
                                 }`}
-                              />
-                              Invite
-                            </Button>
+                                title={
+                                  isExpired
+                                    ? "Assessment deadline has passed"
+                                    : "Invite Candidates"
+                                }
+                              >
+                                <UserPlus
+                                  className={`size-3 ${
+                                    isExpired
+                                      ? "text-muted-foreground"
+                                      : "text-sky-600"
+                                  }`}
+                                />
+                                Invite
+                              </Button>
+                            )}
 
                             <Button
                               type="button"
@@ -980,6 +1068,18 @@ export function GetAllAssessment({
                                   <Award className="size-3 text-emerald-600 dark:text-emerald-400" />
                                   Results
                                 </Button>
+                              )}
+
+                              {/* Evaluator Report shortcut */}
+                              {isEvaluator && (
+                                <Link
+                                  href="/evaluator/report"
+                                  className="inline-flex items-center text-xs h-7 px-2 gap-1 font-medium text-primary border border-primary/30 rounded-md hover:bg-primary/10 transition-colors"
+                                  title="Candidate Reports"
+                                >
+                                  <FileText className="size-3" />
+                                  Reports
+                                </Link>
                               )}
 
                             <Button
@@ -1248,20 +1348,21 @@ export function GetAllAssessment({
                 Copy ID
               </Button>
 
-              {resolveAssessmentStatus(selectedAssessment).key !==
-                "EXPIRED" && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setCandidateInviteAssessment(selectedAssessment);
-                  }}
-                  className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
-                >
-                  <UserPlus className="size-3.5 text-sky-600" />
-                  Invite Candidates
-                </Button>
-              )}
+              {canManageAssessments &&
+                resolveAssessmentStatus(selectedAssessment).key !==
+                  "EXPIRED" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setCandidateInviteAssessment(selectedAssessment);
+                    }}
+                    className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
+                  >
+                    <UserPlus className="size-3.5 text-sky-600" />
+                    Invite Candidates
+                  </Button>
+                )}
 
               {/* View Invitations Button in Details Dialog */}
               <Button
@@ -1293,16 +1394,17 @@ export function GetAllAssessment({
                 )}
 
               {/* Publish button inside Details dialog for Drafts */}
-              {selectedAssessment.status === "DRAFT" && (
-                <Button
-                  size="sm"
-                  onClick={() => setAssessmentToPublish(selectedAssessment)}
-                  className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                >
-                  <Send className="size-3.5" />
-                  Publish Assessment
-                </Button>
-              )}
+              {canManageAssessments &&
+                selectedAssessment.status === "DRAFT" && (
+                  <Button
+                    size="sm"
+                    onClick={() => setAssessmentToPublish(selectedAssessment)}
+                    className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                  >
+                    <Send className="size-3.5" />
+                    Publish Assessment
+                  </Button>
+                )}
             </div>
           </DialogContent>
         </Dialog>

@@ -9,6 +9,7 @@ import type {
   IAttemptResultResponse,
   ICandidateMyAttemptsFilters,
   ICandidateMyAttemptsResponse,
+  ICalculateAttemptScoreResponse,
   ICreateAssessmentPayload,
   ICreateSubmissionPayload,
   ICreateSubmissionResponse,
@@ -202,3 +203,20 @@ export function createSubmissionFromAttempt(
     },
   });
 }
+export function calculateAttemptScore(
+  attemptId: string,
+): Promise<ICalculateAttemptScoreResponse> {
+  return apiClient(`assessment/attempts/${attemptId}/calculate-score`, {
+    method: "POST",
+  });
+}
+
+export function getMyAssessments(
+  filters?: IAssessmentFilters,
+): Promise<IAssessmentListResponse> {
+  return apiClient("assessment/get-my-assessments", {
+    method: "GET",
+    query: filters,
+  });
+}
+
