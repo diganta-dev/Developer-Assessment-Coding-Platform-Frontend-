@@ -4,6 +4,7 @@ import {
   calculateAttemptScore,
   createAssessment,
   createSubmissionFromAttempt,
+  deleteAssessment,
   finalizeAndSubmitAttempt,
   getAssessmentInvitation,
   getAttemptDetails,
@@ -13,11 +14,13 @@ import {
   getDetailedAssesssmentReport,
   getMyAssessments,
   getMyAttempts,
+  GetSingleAssessment,
   inviteCandidate,
   publishAssessment,
   publishResults,
   startAttempt,
   submitAssessmentAttempt,
+  updateAssessment,
   verifyAssessmentInvitation,
 } from "@/api/assessment.api";
 import type {
@@ -30,6 +33,7 @@ import type {
   IStartAttemptResponse,
   ISubmitAttemptPayload,
   StartAttemptParams,
+  IUpdateAssessmentPayload,
 } from "@/types/assessment.type";
 
 export function useCreateAssessment() {
@@ -253,3 +257,39 @@ export function useGetMyAssessments(filters?: IAssessmentFilters) {
     queryFn: () => getMyAssessments(filters),
   });
 }
+export function useGetSingleAssessment(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-single", assessmentId],
+    queryFn: () => GetSingleAssessment(assessmentId),
+    enabled: Boolean(assessmentId),
+    refetchInterval: false,
+  });
+} 
+
+export function useUpdateAssessment(
+  assessmentId?: string,
+  payload?: IUpdateAssessmentPayload | ICreateAssessmentPayload,
+) {
+  return useMutation({
+    mutationFn: (variables?: {
+      assessmentId: string;
+      payload: IUpdateAssessmentPayload | ICreateAssessmentPayload;
+    }) => {
+      const targetId = variables?.assessmentId ?? assessmentId;
+      const targetPayload = variables?.payload ?? payload;
+      
+      if (!targetId || !targetPayload) {
+        throw new Error("assessmentId and payload are required");
+      }
+      
+      return updateAssessment(targetId, targetPayload);
+    },
+  });
+}
+
+export function useDeleteAssessment() {
+  return useMutation({
+    mutationFn: (assessmentId: string) => deleteAssessment(assessmentId),
+  });
+}
+

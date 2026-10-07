@@ -14,13 +14,17 @@ import type {
   ICreateSubmissionPayload,
   ICreateSubmissionResponse,
   IDetailedAssessmentReportResponse,
+  IDeleteAssessmentResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
   IPublishResultsResponse,
+  ISingleAssessmentResponse,
   IStartAttemptPayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
   ISubmitAttemptResponse,
+  IUpdateAssessmentPayload,
+  IUpdateAssessmentResponse,
   IVerifyInvitationResponse,
   StartAttemptParams,
 } from "@/types/assessment.type";
@@ -220,3 +224,32 @@ export function getMyAssessments(
   });
 }
 
+export function GetSingleAssessment(
+  assessmentId: string,
+): Promise<ISingleAssessmentResponse> {
+  return apiClient(`assessment/get-single-assessment/${assessmentId}`, {
+    method: "GET",
+  });
+}
+
+export function updateAssessment(
+  assessmentId: string,
+  payload: IUpdateAssessmentPayload | ICreateAssessmentPayload,
+): Promise<IUpdateAssessmentResponse> {
+  return apiClient(`assessment/update-assessment/${assessmentId}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export function deleteAssessment(
+  assessmentId: string,
+): Promise<IDeleteAssessmentResponse> {
+  return apiClient(`assessment/delete-assessment/${assessmentId}`, {
+    method: "DELETE",
+  });
+}
+
+
+
+ 

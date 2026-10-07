@@ -23,6 +23,7 @@ import {
   AttemptResultDialog,
   CreateSubmissionDialog,
   FinalizeSubmitAttemptDialog,
+  SingleAssessmentDialog,
 } from "@/components/dashboard/assessments-components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,11 @@ export function CandidateMyAttempts() {
     null,
   );
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
+
+  // Single Assessment briefing inspection dialog
+  const [inspectAssessmentId, setInspectAssessmentId] = useState<string | null>(
+    null,
+  );
 
   const pageSize = 10;
 
@@ -492,9 +498,21 @@ export function CandidateMyAttempts() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="space-y-0.5">
-                            <p className="text-xs font-semibold text-foreground leading-tight">
-                              {item.assessment?.title || "Technical Assessment"}
-                            </p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setInspectAssessmentId(
+                                  item.assessmentId || item.assessment?.id || null,
+                                )
+                              }
+                              className="text-xs font-semibold text-foreground leading-tight hover:text-primary transition-colors cursor-pointer text-left flex items-center gap-1 group"
+                              title="Inspect Assessment Syllabus & Guidelines"
+                            >
+                              <span>
+                                {item.assessment?.title || "Technical Assessment"}
+                              </span>
+                              <Eye className="size-3 text-muted-foreground group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100" />
+                            </button>
                             <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 leading-tight">
                               <span>
                                 {company?.name || "DevAssess Benchmark"}
@@ -762,6 +780,13 @@ export function CandidateMyAttempts() {
         open={resultOpen}
         onOpenChange={setResultOpen}
         isCandidateView={true}
+      />
+
+      {/* ── Single Assessment Details Briefing Dialog (Candidate View) ── */}
+      <SingleAssessmentDialog
+        assessmentId={inspectAssessmentId}
+        open={Boolean(inspectAssessmentId)}
+        onOpenChange={(open) => !open && setInspectAssessmentId(null)}
       />
     </div>
   );

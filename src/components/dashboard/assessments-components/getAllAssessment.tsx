@@ -22,6 +22,7 @@ import {
   Send,
   Shield,
   ShieldAlert,
+  Trash2,
   UserPlus,
   Users,
   X,
@@ -58,6 +59,11 @@ import { CompanyMemberRole, UserRole } from "@/types";
 import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
 import { InviteCandidateDialog } from "./invite-candidate-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
+import { SingleAssessmentDialog } from "./single-assessment-dialog";
+import { EditAssessmentDialog } from "./edit-assessment-dialog";
+import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
+import { Settings2 } from "lucide-react";
+
 
 interface GetAllAssessmentProps {
   onCreateClick?: () => void;
@@ -317,6 +323,8 @@ export function GetAllAssessment({
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>("ALL");
   const [selectedAssessment, setSelectedAssessment] =
     useState<IAssessment | null>(null);
+  const [assessmentToEdit, setAssessmentToEdit] =
+    useState<IAssessment | null>(null);
   const [assessmentToPublish, setAssessmentToPublish] =
     useState<IAssessment | null>(null);
   const [candidateInviteAssessment, setCandidateInviteAssessment] =
@@ -324,6 +332,8 @@ export function GetAllAssessment({
   const [invitationsAssessment, setInvitationsAssessment] =
     useState<IAssessment | null>(null);
   const [assessmentToPublishResults, setAssessmentToPublishResults] =
+    useState<IAssessment | null>(null);
+  const [assessmentToDelete, setAssessmentToDelete] =
     useState<IAssessment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -343,6 +353,13 @@ export function GetAllAssessment({
     CompanyMemberRole.COMPANY_OWNER,
     CompanyMemberRole.COMPANY_ADMIN,
     CompanyMemberRole.ASSESSMENT_CREATOR,
+  ]);
+
+  const canDeleteAssessments = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
   ]);
 
   const userRole = currentUser?.role;
@@ -1082,6 +1099,34 @@ export function GetAllAssessment({
                                 </Link>
                               )}
 
+                            {canManageAssessments && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setAssessmentToEdit(assessment)}
+                                className="text-xs h-7 px-2.5 gap-1 cursor-pointer"
+                              >
+                                <Settings2 className="size-3 text-muted-foreground" />
+                                Edit
+                              </Button>
+                            )}
+
+                            {canDeleteAssessments && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setAssessmentToDelete(assessment)}
+                                className="text-xs h-7 px-2.5 gap-1 cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                                title="Delete Assessment"
+                                id={`delete-assessment-${assessment.id}-btn`}
+                              >
+                                <Trash2 className="size-3 text-destructive" />
+                                Delete
+                              </Button>
+                            )}
+
                             <Button
                               type="button"
                               variant="outline"
@@ -1157,258 +1202,13 @@ export function GetAllAssessment({
         </Dialog>
       )}
 
-      {/* ── Assessment Details Modal ── */}
-      {selectedAssessment && (
-        <Dialog
-          open={Boolean(selectedAssessment)}
-          onOpenChange={(open) => !open && setSelectedAssessment(null)}
-        >
-          <DialogContent className="max-w-xl">
-            <DialogHeader>
-              <div className="flex items-center gap-2">
-                <AssessmentStatusBadge assessment={selectedAssessment} />
-                <span className="text-xs text-muted-foreground font-mono">
-                  {selectedAssessment.id}
-                </span>
-              </div>
-              <DialogTitle className="text-lg font-bold text-foreground mt-1">
-                {selectedAssessment.title}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                {selectedAssessment.description}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 pt-2">
-              {/* Scoring & Limits Grid */}
-              <div className="grid grid-cols-3 gap-3 p-3 rounded-lg bg-muted/40 border border-border/70 text-xs">
-                <div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Total Marks
-                  </p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">
-                    {selectedAssessment.totalMarks}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Pass Marks
-                  </p>
-                  <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    {getPassingMarks(selectedAssessment)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Attempts Allowed
-                  </p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">
-                    {selectedAssessment.allowedAttempts ||
-                      selectedAssessment.settings?.maxAttempts ||
-                      1}
-                  </p>
-                </div>
-              </div>
-
-              {/* Timing */}
-              <div className="p-3 rounded-lg border border-border/70 space-y-2 text-xs">
-                <div className="flex items-center justify-between pb-1 border-b border-border/40">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <Clock className="size-3.5 text-primary" />
-                    Duration
-                  </span>
-                  <span className="font-semibold text-foreground">
-                    {selectedAssessment.durationMinutes} Minutes (
-                    {selectedAssessment.isStrictTimeLimit
-                      ? "Strict"
-                      : "Flexible"}
-                    )
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Window Opens</span>
-                  <span className="text-foreground font-medium">
-                    {formatDate(
-                      selectedAssessment.startDate ||
-                        selectedAssessment.createdAt,
-                      "Immediate / Open",
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Window Closes</span>
-                  <span className="text-foreground font-medium">
-                    {formatDate(
-                      selectedAssessment.endDate,
-                      "No Deadline / Flexible",
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Anti-Cheating Settings */}
-              <div className="p-3 rounded-lg border border-border/70 space-y-2 text-xs">
-                <div className="flex items-center gap-1.5 font-semibold text-foreground pb-1 border-b border-border/40">
-                  <Shield className="size-3.5 text-primary" />
-                  Anti-Cheating Proctoring Safeguards
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
-                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
-                    <span>Fullscreen Enforced</span>
-                    <span
-                      className={`font-semibold ${
-                        selectedAssessment.proctoringSettings?.requireFullscreen
-                          ? "text-emerald-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {selectedAssessment.proctoringSettings?.requireFullscreen
-                        ? "Enabled"
-                        : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
-                    <span>Block Copy/Paste</span>
-                    <span
-                      className={`font-semibold ${
-                        selectedAssessment.proctoringSettings?.blockCopyPaste
-                          ? "text-emerald-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {selectedAssessment.proctoringSettings?.blockCopyPaste
-                        ? "Enabled"
-                        : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
-                    <span>Track Focus Loss</span>
-                    <span
-                      className={`font-semibold ${
-                        selectedAssessment.proctoringSettings?.trackFocusLoss
-                          ? "text-emerald-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {selectedAssessment.proctoringSettings?.trackFocusLoss
-                        ? "Enabled"
-                        : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
-                    <span>Tab Switch Limit</span>
-                    <span
-                      className={`font-semibold ${
-                        selectedAssessment.proctoringSettings?.trackTabSwitches
-                          ? "text-amber-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {selectedAssessment.proctoringSettings?.trackTabSwitches
-                        ? `Max ${selectedAssessment.proctoringSettings.maxTabSwitches}`
-                        : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-muted/30">
-                    <span>Auto-Submit on Expiry</span>
-                    <span
-                      className={`font-semibold ${
-                        selectedAssessment.settings?.autoSubmitOnExpiry !==
-                        false
-                          ? "text-emerald-600"
-                          : "text-amber-600"
-                      }`}
-                    >
-                      {selectedAssessment.settings?.autoSubmitOnExpiry !== false
-                        ? "Enabled"
-                        : "Disabled"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end items-center gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedAssessment(null)}
-                className="text-xs"
-              >
-                Close
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleCopyId(selectedAssessment.id)}
-                className="text-xs gap-1.5"
-              >
-                <Copy className="size-3.5" />
-                Copy ID
-              </Button>
-
-              {canManageAssessments &&
-                resolveAssessmentStatus(selectedAssessment).key !==
-                  "EXPIRED" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setCandidateInviteAssessment(selectedAssessment);
-                    }}
-                    className="text-xs gap-1.5 text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
-                  >
-                    <UserPlus className="size-3.5 text-sky-600" />
-                    Invite Candidates
-                  </Button>
-                )}
-
-              {/* View Invitations Button in Details Dialog */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setInvitationsAssessment(selectedAssessment);
-                }}
-                className="text-xs gap-1.5 text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
-              >
-                <Users className="size-3.5 text-indigo-600" />
-                View Invitations
-              </Button>
-
-              {/* Publish Results Button inside Details dialog */}
-              {canPublishResults &&
-                selectedAssessment.status !== "DRAFT" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setAssessmentToPublishResults(selectedAssessment);
-                    }}
-                    className="text-xs gap-1.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 font-semibold cursor-pointer"
-                  >
-                    <Award className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                    Publish Results
-                  </Button>
-                )}
-
-              {/* Publish button inside Details dialog for Drafts */}
-              {canManageAssessments &&
-                selectedAssessment.status === "DRAFT" && (
-                  <Button
-                    size="sm"
-                    onClick={() => setAssessmentToPublish(selectedAssessment)}
-                    className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                  >
-                    <Send className="size-3.5" />
-                    Publish Assessment
-                  </Button>
-                )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* ── Single Assessment Details Dialog (Role-Aware) ── */}
+      <SingleAssessmentDialog
+        assessmentId={selectedAssessment?.id || null}
+        open={Boolean(selectedAssessment)}
+        onOpenChange={(open) => !open && setSelectedAssessment(null)}
+        onAddProblemsClick={onAddProblemsClick}
+      />
 
       {/* ── Candidate Invite Modal ── */}
       <InviteCandidateDialog
@@ -1431,6 +1231,21 @@ export function GetAllAssessment({
         open={Boolean(assessmentToPublishResults)}
         onOpenChange={(open) => !open && setAssessmentToPublishResults(null)}
         onSuccess={() => refetch()}
+      />
+
+      {/* ── Edit Assessment Dialog ── */}
+      <EditAssessmentDialog
+        // @ts-ignore
+        assessment={assessmentToEdit}
+        open={Boolean(assessmentToEdit)}
+        onOpenChange={(open) => !open && setAssessmentToEdit(null)}
+      />
+
+      {/* ── Delete Assessment Dialog ── */}
+      <DeleteAssessmentDialog
+        assessment={assessmentToDelete}
+        open={Boolean(assessmentToDelete)}
+        onOpenChange={(open) => !open && setAssessmentToDelete(null)}
       />
     </div>
   );

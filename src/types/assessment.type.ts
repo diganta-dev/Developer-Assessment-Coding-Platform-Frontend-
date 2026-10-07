@@ -21,6 +21,37 @@ export interface ICreateAssessmentPayload {
   proctoringSettings: IProctoringSettings;
 }
 
+export interface IUpdateAssessmentPayload {
+  title?: string;
+  description?: string | null;
+  totalMarks?: number;
+  passingScore?: number | null;
+  durationMinutes?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  status?: "DRAFT" | "PUBLISHED" | "ACTIVE" | "COMPLETED" | "ARCHIVED" | string;
+  allowedAttempts?: number;
+  isStrictTimeLimit?: boolean;
+  proctoringSettings?: IProctoringSettings;
+  settings?: {
+    maxAttempts?: number;
+    shuffleQuestions?: boolean;
+    shuffleMCQOptions?: boolean;
+    allowMultipleAttempts?: boolean;
+    preventCopyPaste?: boolean;
+    requireFullscreen?: boolean;
+    autoSubmitOnExpiry?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+export interface IUpdateAssessmentResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: IAssessment;
+}
+
 export interface IAssessment {
   id: string;
   title: string;
@@ -688,5 +719,100 @@ export interface ICalculateAttemptScoreResponse {
   success: boolean;
   message: string;
   data: ICalculateAttemptScoreData;
+}
+
+export interface ISingleAssessmentProblemItem {
+  id: string;
+  assessmentId: string;
+  problemId: string;
+  marks: number;
+  questionOrder: number;
+  problem: {
+    id: string;
+    title: string;
+    description: string;
+    difficulty: "EASY" | "MEDIUM" | "HARD" | string;
+    type: "MCQ" | "CODING" | "WRITTEN" | string;
+    tags?: string[];
+    mcqQuestion?: {
+      id: string;
+      problemId: string;
+      explanation?: string;
+      options: Array<{
+        id: string;
+        optionText: string;
+        optionOrder: number;
+        isCorrect?: boolean;
+      }>;
+    } | null;
+    codingQuestion?: {
+      id: string;
+      problemId: string;
+      allowedLanguages?: string[];
+      starterCode?: Record<string, string>;
+      testCases?: Array<{
+        id: string;
+        type: "PUBLIC" | "HIDDEN" | string;
+        input: string;
+        expectedOutput: string;
+        explanation?: string;
+      }>;
+    } | null;
+    writtenQuestion?: {
+      id: string;
+      problemId: string;
+      guidelines?: string;
+      wordLimit?: number;
+      expectedAnswer?: string;
+    } | null;
+  };
+}
+
+export interface ISingleAssessmentDetail extends IAssessment {
+  problems: ISingleAssessmentProblemItem[];
+  settings?: {
+    id?: string;
+    maxAttempts?: number;
+    autoSubmitOnExpiry?: boolean;
+    requireFullscreen?: boolean;
+    blockCopyPaste?: boolean;
+    trackFocusLoss?: boolean;
+    trackTabSwitches?: boolean;
+    maxTabSwitches?: number;
+    [key: string]: unknown;
+  };
+  company?: {
+    id: string;
+    name: string;
+    slug?: string;
+    logoUrl?: string;
+    website?: string;
+    email?: string;
+  };
+  creator?: {
+    id: string;
+    name?: string;
+    email?: string;
+    role?: string;
+  };
+  _count?: {
+    problems: number;
+    invitations: number;
+    attempts: number;
+  };
+}
+
+export interface ISingleAssessmentResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: ISingleAssessmentDetail;
+}
+
+export interface IDeleteAssessmentResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data?: unknown;
 }
 

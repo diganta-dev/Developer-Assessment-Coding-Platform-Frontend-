@@ -13,3 +13,6 @@ export * from "./finalize-submit-attempt-dialog";
 export * from "./getAllAssessment";
 export * from "./invite-candidate-dialog";
 export * from "./publish-results-dialog";
+export * from "./single-assessment-dialog";
+export * from "./edit-assessment-dialog";
+export * from "./delete-assessment-dialog";
