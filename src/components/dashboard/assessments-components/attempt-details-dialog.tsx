@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  Award,
   CheckCircle2,
   Clock,
   Code2,
@@ -29,6 +30,7 @@ import type {
   ISanitizedAssessmentProblem,
 } from "@/types/assessment.type";
 import { AttemptResultDialog } from "./attempt-result-dialog";
+import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { FinalizeSubmitAttemptDialog } from "./finalize-submit-attempt-dialog";
 
 interface AttemptDetailsDialogProps {
@@ -89,6 +91,7 @@ export function AttemptDetailsDialog({
   );
   const [resultOpen, setResultOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
+  const [detailedReportOpen, setDetailedReportOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetAttemptDetails(attemptId || "");
@@ -160,6 +163,19 @@ export function AttemptDetailsDialog({
             </div>
 
             <div className="flex items-center gap-2">
+              {!isCandidateView && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setDetailedReportOpen(true)}
+                  className="h-8 text-xs gap-1.5 font-semibold bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                  title="Open Detailed Assessment & Proctoring Report"
+                >
+                  <Award className="size-3.5" />
+                  <span>Detailed Report</span>
+                </Button>
+              )}
+
               <Button
                 type="button"
                 variant="outline"
@@ -700,6 +716,11 @@ export function AttemptDetailsDialog({
           setResultOpen(true);
           refetch();
         }}
+      />
+      <DetailedAssessmentReportDialog
+        attemptId={attemptId}
+        open={detailedReportOpen}
+        onOpenChange={setDetailedReportOpen}
       />
     </Dialog>
   );

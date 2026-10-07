@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckSquare, Clock } from "lucide-react";
+import { CheckSquare, Clock, FileText } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -22,11 +22,18 @@ export default function EvaluatorPage() {
             Evaluator Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Review candidate code submissions, grade evaluations, and provide feedback.
+            Review candidate code submissions, grade evaluations, and inspect detailed attempt reports.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/evaluator/report"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <FileText className="mr-1.5 size-3.5" />
+            Candidate Reports
+          </Link>
           <Link
             href="/evaluator/submissions"
             className={buttonVariants({ variant: "default", size: "sm" })}
@@ -48,6 +55,21 @@ export default function EvaluatorPage() {
               className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
             >
               View Submissions
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/50 transition-colors">
+          <CardHeader>
+            <CardTitle>Detailed Assessment Reports</CardTitle>
+            <CardDescription>Inspect test case telemetry, anti-cheat audit logs, and source codes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/evaluator/report"
+              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+            >
+              View Candidate Reports
             </Link>
           </CardContent>
         </Card>

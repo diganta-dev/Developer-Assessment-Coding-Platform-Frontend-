@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, Building2, FileCode2, ShieldCheck, Activity } from "lucide-react";
+import { Users, Building2, FileCode2, ShieldCheck, Activity, FileText } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -56,6 +56,13 @@ export default function AdminPage() {
 
         <div className="flex items-center gap-2">
           <Link
+            href="/admin/report"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <FileText className="size-3.5 mr-1" />
+            View Reports
+          </Link>
+          <Link
             href="/admin/users"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
@@ -96,7 +103,7 @@ export default function AdminPage() {
       </div>
 
       {/* Quick Navigation Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
             <CardTitle>User Management</CardTitle>
@@ -144,6 +151,23 @@ export default function AdminPage() {
               className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
             >
               Browse Assessments
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/50 transition-colors">
+          <CardHeader>
+            <CardTitle>Assessment Reports</CardTitle>
+            <CardDescription>
+              Submission breakdown, score telemetry, and anti-cheat audit logs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/admin/report"
+              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+            >
+              Browse Reports
             </Link>
           </CardContent>
         </Card>

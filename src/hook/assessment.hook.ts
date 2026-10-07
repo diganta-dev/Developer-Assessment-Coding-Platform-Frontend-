@@ -8,9 +8,11 @@ import {
   getAttemptResult,
   getCandidateMyAttempts,
   getCompanyAllAssessments,
+  getDetailedAssesssmentReport,
   getMyAttempts,
   inviteCandidate,
   publishAssessment,
+  publishResults,
   startAttempt,
   submitAssessmentAttempt,
   verifyAssessmentInvitation,
@@ -204,3 +206,20 @@ export function useGetAttemptResults(attemptId: string, enabled = true) {
     refetchInterval: false,
   });
 }
+
+export function useGetDetailedAssesssmentReport(attemptId: string) {
+  return useQuery({
+    queryKey: ["assessment-attempt-detailed-report", attemptId],
+    queryFn: () => getDetailedAssesssmentReport(attemptId),
+    enabled: Boolean(attemptId),
+    refetchInterval: false,
+  });
+}
+
+export function usePublishResult(assessmentId: string){
+  return useMutation({
+    mutationFn: () => publishResults(assessmentId), 
+    
+  })
+}
+ 

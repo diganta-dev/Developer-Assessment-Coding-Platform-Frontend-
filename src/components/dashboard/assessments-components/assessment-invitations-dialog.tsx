@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  FileText,
   Mail,
   RefreshCw,
   Search,
@@ -41,6 +42,7 @@ import type {
   IAssessmentInvitation,
 } from "@/types/assessment.type";
 import { AttemptDetailsDialog } from "./attempt-details-dialog";
+import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 
 interface AssessmentInvitationsDialogProps {
   assessment: IAssessment | null;
@@ -102,6 +104,10 @@ export function AssessmentInvitationsDialog({
     null,
   );
   const [attemptDetailsOpen, setAttemptDetailsOpen] = useState(false);
+  const [detailedReportAttemptId, setDetailedReportAttemptId] = useState<
+    string | null
+  >(null);
+  const [detailedReportOpen, setDetailedReportOpen] = useState(false);
 
   const assessmentId = assessment?.id || "";
 
@@ -570,9 +576,31 @@ export function AssessmentInvitationsDialog({
                         </span>
                       </TableCell>
 
-                      {/* Actions: Copy Link / Token */}
+                      {/* Actions: Copy Link / Token / Detailed Report */}
                       <TableCell className="text-right">
                         <div className="inline-flex items-center justify-end gap-1">
+                          {invitation.candidate?.assessmentAttempts?.[0] && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const attId =
+                                  invitation.candidate
+                                    ?.assessmentAttempts?.[0]?.id;
+                                if (attId) {
+                                  setDetailedReportAttemptId(attId);
+                                  setDetailedReportOpen(true);
+                                }
+                              }}
+                              className="text-xs h-7 px-2 gap-1 font-semibold text-primary border-primary/30 hover:bg-primary/10 transition-all cursor-pointer"
+                              title="View Detailed Assessment & Proctoring Report"
+                            >
+                              <FileText className="size-3 text-primary" />
+                              <span>Report</span>
+                            </Button>
+                          )}
+
                           <Button
                             type="button"
                             size="sm"
@@ -634,6 +662,13 @@ export function AssessmentInvitationsDialog({
         open={attemptDetailsOpen}
         onOpenChange={setAttemptDetailsOpen}
         isCandidateView={false}
+      />
+
+      {/* ── Detailed Assessment Report Dialog (Admin / Company Staff) ── */}
+      <DetailedAssessmentReportDialog
+        attemptId={detailedReportAttemptId}
+        open={detailedReportOpen}
+        onOpenChange={setDetailedReportOpen}
       />
     </Dialog>
   );

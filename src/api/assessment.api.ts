@@ -10,6 +10,7 @@ import type {
   ICandidateMyAttemptsFilters,
   ICandidateMyAttemptsResponse,
   ICreateAssessmentPayload,
+  IDetailedAssessmentReportResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
   IStartAttemptPayload,
@@ -168,5 +169,18 @@ export function getAttemptResult(
 ): Promise<IAttemptResultResponse> {
   return apiClient(`assessment/attempts/${attemptId}/result`, {
     method: "GET",
+  });
+}
+export function getDetailedAssesssmentReport(
+  attemptId: string,
+): Promise<IDetailedAssessmentReportResponse> {
+  return apiClient(`assessment/attempts/${attemptId}/detailed-report`, {
+    method: "GET",
+  });
+}
+
+export function publishResults(assessmentId: string) {
+  return apiClient(`assessment/publish-results/${assessmentId}`, {
+    method: "POST",
   });
 }

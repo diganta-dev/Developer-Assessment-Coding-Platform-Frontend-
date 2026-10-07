@@ -505,3 +505,119 @@ export interface IAttemptResultResponse {
   message: string;
   data: IAttemptResultData;
 }
+
+export type AntiCheatEventType =
+  | "TAB_SWITCH"
+  | "COPY"
+  | "PASTE"
+  | "FULLSCREEN_EXIT"
+  | "MULTIPLE_TAB"
+  | "WINDOW_BLUR";
+
+export interface IAntiCheatEvent {
+  id: string;
+  attemptId?: string;
+  type: AntiCheatEventType | string;
+  metadata?: Record<string, unknown> | null;
+  occurredAt: string;
+}
+
+export interface IAntiCheatAuditData {
+  totalViolations: number;
+  summary: Record<string, number>;
+  events: IAntiCheatEvent[];
+}
+
+export interface IDetailedReportSubmissionEvaluation {
+  id: string;
+  marksAwarded: number;
+  feedback?: string | null;
+  evaluatorId?: string;
+  evaluator?: {
+    id: string;
+    name?: string | null;
+    email: string;
+  } | null;
+}
+
+export interface IDetailedReportSubmissionItem {
+  id: string;
+  attemptId?: string;
+  problemId: string;
+  selectedOptionId?: string | null;
+  answerText?: string | null;
+  sourceCode?: string | null;
+  language?: string | null;
+  status: string;
+  executionTimeMs?: number | null;
+  memoryUsedMb?: number | null;
+  passedTests?: number;
+  failedTests?: number;
+  executionResult?: Record<string, unknown> | null;
+  marks?: number | null;
+  isCorrect?: boolean | null;
+  submittedAt: string;
+  evaluations?: IDetailedReportSubmissionEvaluation[];
+}
+
+export interface IDetailedAssessmentReportData {
+  candidate: {
+    id: string;
+    name?: string | null;
+    email: string;
+    profile?: {
+      id?: string;
+      title?: string | null;
+      bio?: string | null;
+      skills?: string[];
+      resumeUrl?: string | null;
+      githubUrl?: string | null;
+      linkedinUrl?: string | null;
+      portfolioUrl?: string | null;
+      yearsOfExperience?: number | null;
+      [key: string]: unknown;
+    } | null;
+  };
+  assessment: {
+    id: string;
+    title: string;
+    totalMarks: number;
+    passingScore?: number | null;
+    durationMinutes: number;
+    company?: {
+      id: string;
+      name: string;
+      slug?: string;
+      logoUrl?: string | null;
+    } | null;
+    problems?: ISanitizedAssessmentProblem[];
+  };
+  attempt: {
+    id: string;
+    attemptNumber: number;
+    status: string;
+    startedAt?: string | null;
+    submittedAt?: string | null;
+    durationMinutes?: number | null;
+  };
+  result?: {
+    id: string;
+    totalMarks: number;
+    obtainedMarks: number;
+    percentage: number;
+    passingScore?: number | null;
+    rank?: number | null;
+    status: string;
+    publishedAt?: string | null;
+  } | null;
+  antiCheat: IAntiCheatAuditData;
+  submissions: IDetailedReportSubmissionItem[];
+}
+
+export interface IDetailedAssessmentReportResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: IDetailedAssessmentReportData;
+}
+

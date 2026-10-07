@@ -26,6 +26,10 @@ export const adminRoutes: SidebarItems = [
         title: "Assessments",
         url: "/admin/assessments",
       },
+      {
+        title: "Reports",
+        url: "/admin/report",
+      },
     ],
   },
 ];
@@ -100,6 +104,10 @@ export const companyAdminRoutes: SidebarItems = [
         title: "Candidates",
         url: "/company-admin/candidates",
       },
+      {
+        title: "Reports",
+        url: "/company-admin/report",
+      },
     ],
   },
 ];
@@ -125,6 +133,10 @@ export const assessmentCreatorRoutes: SidebarItems = [
         title: "Problem Bank",
         url: "/assessment-creator/problems",
       },
+      {
+        title: "Reports",
+        url: "/assessment-creator/report",
+      },
     ],
   },
 ];
@@ -145,6 +157,10 @@ export const evaluatorRoutes: SidebarItems = [
       {
         title: "Submissions",
         url: "/evaluator/submissions",
+      },
+      {
+        title: "Reports",
+        url: "/evaluator/report",
       },
     ],
   },

@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileCode2, Database } from "lucide-react";
+import { FileCode2, Database, FileText } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -22,11 +22,18 @@ export default function AssessmentCreatorPage() {
             Assessment Creator Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Author coding challenges, manage problem banks, and design tests.
+            Author coding challenges, manage problem banks, and inspect candidate attempt reports.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/assessment-creator/report"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <FileText className="mr-1.5 size-3.5" />
+            Detailed Reports
+          </Link>
           <Link
             href="/assessment-creator/problems"
             className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -43,7 +50,7 @@ export default function AssessmentCreatorPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Assessments</CardTitle>
@@ -70,6 +77,21 @@ export default function AssessmentCreatorPage() {
               className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
             >
               View Problem Bank
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/50 transition-colors">
+          <CardHeader>
+            <CardTitle>Assessment Reports</CardTitle>
+            <CardDescription>Audit test submissions, scoring rubrics, and proctoring logs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/assessment-creator/report"
+              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+            >
+              View Detailed Reports
             </Link>
           </CardContent>
         </Card>

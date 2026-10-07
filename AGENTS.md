@@ -7,3 +7,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Project Architectural Guidelines
+
+## 1. Static Site Export (`output: "export"`)
+- This project is configured with `output: "export"` in `next.config.ts`.
+- **NEVER use `"use client"` in `page.tsx` files**. Keep all `page.tsx` files as Server Components.
+- `page.tsx` files should export `Metadata`, render server layout/navigation, and embed interactive client components wrapped in `<Suspense>`.
+- All client-side hooks (`useState`, `useEffect`, `useSearchParams`, `@tanstack/react-query`, DOM event handlers) must be placed inside dedicated client components in `src/components/`, not in `page.tsx`.
+

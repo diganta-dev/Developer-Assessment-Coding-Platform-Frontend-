@@ -5,6 +5,8 @@ export * from "./assessment-management";
 export * from "./attempt-details-dialog";
 export * from "./attempt-result-dialog";
 export * from "./create-assessment";
+export * from "./detailed-assessment-report-dialog";
+export * from "./detailed-assessment-report-view";
 export * from "./finalize-submit-attempt-dialog";
 export * from "./getAllAssessment";
 export * from "./invite-candidate-dialog";
