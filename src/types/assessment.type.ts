@@ -125,16 +125,20 @@ export interface IAddProblemInAssessment {
 }
 
 export interface IInviteCandidatePayload {
-  emails: string[];
+  emails?: string[];
+  email?: string;
+  expiresAt?: string | null;
 }
 
 export interface IInviteCandidateResponse {
+  statusCode?: number;
   success?: boolean;
   message?: string;
   data?: {
+    count?: number;
     invitedCount?: number;
     failedCount?: number;
-    invitations?: unknown[];
+    invitations?: IAssessmentInvitation[];
   };
 }
 

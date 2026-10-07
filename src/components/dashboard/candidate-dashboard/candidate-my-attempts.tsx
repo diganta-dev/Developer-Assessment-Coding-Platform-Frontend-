@@ -16,8 +16,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import {
   AttemptDetailsDialog,
   AttemptResultDialog,
@@ -106,10 +106,19 @@ export function CandidateMyAttempts() {
   );
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
 
+  const searchParams = useSearchParams();
+  const urlAssessmentId = searchParams?.get("assessmentId") || null;
+
   // Single Assessment briefing inspection dialog
   const [inspectAssessmentId, setInspectAssessmentId] = useState<string | null>(
-    null,
+    urlAssessmentId,
   );
+
+  useEffect(() => {
+    if (urlAssessmentId) {
+      setInspectAssessmentId(urlAssessmentId);
+    }
+  }, [urlAssessmentId]);
 
   // Assessment Leaderboard dialog state
   const [leaderboardAssessmentId, setLeaderboardAssessmentId] = useState<

@@ -2,3 +2,4 @@ export * from "./assessment.hook";
 export * from "./auth.hook";
 export * from "./company.hook";
 export * from "./question.hook";
+export * from "./anti-cheating.hook";

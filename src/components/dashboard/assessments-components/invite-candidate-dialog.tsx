@@ -3,24 +3,34 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  AlertTriangle,
   Award,
+  Calendar,
   Check,
+  CheckCircle2,
   ChevronDown,
   Clock,
+  Copy,
+  FileCheck2,
   FileSpreadsheet,
   Info,
   Layers,
   Loader2,
+  Lock,
   Mail,
   Plus,
   Send,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
   Upload,
   UserPlus,
   Users,
   X,
 } from "lucide-react";
 import type React from "react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,14 +46,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import {
   useGetCompanyAllAssessments,
-  useInviteCandidate,
+  useInviteCandidateDirectRoute,
 } from "@/hook/assessment.hook";
-import type { IAssessment } from "@/types/assessment.type";
+import { useGetMe } from "@/hook";
+import { isUserAuthorized } from "@/utils";
+import { CompanyMemberRole, UserRole } from "@/types";
+import type {
+  IAssessment,
+  ISingleAssessmentDetail,
+} from "@/types/assessment.type";
 
 export interface InviteCandidateDialogProps {
-  assessment: IAssessment | null;
+  assessment: IAssessment | ISingleAssessmentDetail | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialEmail?: string;
   onSuccess?: () => void;
 }
 
@@ -54,11 +71,19 @@ export function InviteCandidateDialog({
   assessment: initialAssessment,
   open,
   onOpenChange,
+  initialEmail = "",
   onSuccess,
 }: InviteCandidateDialogProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileInputId = useId();
+
+  // Role verification from authentication context
+  const { data: meData } = useGetMe();
+  const currentUser = meData?.data;
+
+  // Direct Route Mutation Hook
+  const inviteMutation = useInviteCandidateDirectRoute();
 
   // Selected assessment state (if not passed as prop)
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>(
@@ -70,11 +95,33 @@ export function InviteCandidateDialog({
   const [emails, setEmails] = useState<string[]>([]);
   const [inputError, setInputError] = useState<string | null>(null);
 
+  // Expiration duration setting: "DEFAULT" | "3_DAYS" | "7_DAYS" | "14_DAYS"
+  const [expirationSetting, setExpirationSetting] = useState<
+    "DEFAULT" | "3_DAYS" | "7_DAYS" | "14_DAYS"
+  >("DEFAULT");
+
   // Input tabs/modes: "CHIPS" | "BULK_TEXT" | "FILE"
   const [inputMode, setInputMode] = useState<"CHIPS" | "BULK_TEXT" | "FILE">(
     "CHIPS",
   );
   const [bulkTextInput, setBulkTextInput] = useState("");
+
+  // Sync initialAssessment or initialEmail
+  useEffect(() => {
+    if (initialAssessment?.id) {
+      setSelectedAssessmentId(initialAssessment.id);
+    }
+  }, [initialAssessment?.id]);
+
+  useEffect(() => {
+    if (initialEmail && EMAIL_REGEX.test(initialEmail.trim())) {
+      setEmails((prev) =>
+        prev.includes(initialEmail.trim().toLowerCase())
+          ? prev
+          : [...prev, initialEmail.trim().toLowerCase()],
+      );
+    }
+  }, [initialEmail]);
 
   // Fetch assessments list if no initial assessment provided
   const { data: assessmentsData, isLoading: isLoadingAssessments } =
@@ -99,11 +146,43 @@ export function InviteCandidateDialog({
     return assessmentsList.find((a) => a.id === selectedAssessmentId) || null;
   }, [initialAssessment, selectedAssessmentId, assessmentsList]);
 
-  // React Query Mutation
-  const inviteMutation = useInviteCandidate();
+  // ── Role & Permission Verification ──
+  // Backend direct route /:id/invite strictly enforces:
+  // UserRole.SUPER_ADMIN, UserRole.ADMIN, CompanyMemberRole.COMPANY_OWNER, CompanyMemberRole.COMPANY_ADMIN
+  const isPlatformAdmin =
+    currentUser?.role === UserRole.SUPER_ADMIN ||
+    currentUser?.role === UserRole.ADMIN;
+
+  const canInviteCandidates = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+  ]);
+
+  const userRoleDisplay = isPlatformAdmin
+    ? "Platform Administrator"
+    : currentUser?.memberRole === CompanyMemberRole.COMPANY_OWNER
+      ? "Company Owner"
+      : currentUser?.memberRole === CompanyMemberRole.COMPANY_ADMIN
+        ? "Company Admin"
+        : currentUser?.memberRole === CompanyMemberRole.ASSESSMENT_CREATOR
+          ? "Assessment Creator (Restricted)"
+          : currentUser?.memberRole === CompanyMemberRole.EVALUATOR
+            ? "Evaluator (Restricted)"
+            : currentUser?.role || "Non-Admin";
+
+  // Assessment lifecycle checks
+  const isArchivedOrCompleted =
+    targetAssessment?.status === "COMPLETED" ||
+    targetAssessment?.status === "ARCHIVED" ||
+    targetAssessment?.status === "EXPIRED";
+
+  const isPastDeadline =
+    targetAssessment?.endDate &&
+    new Date(targetAssessment.endDate) < new Date();
 
   // ── Email Parsing & Normalization Helper ───────────────────────────────────
-
   const parseAndAddEmails = (
     rawText: string,
   ): { added: number; skipped: number } => {
@@ -134,7 +213,6 @@ export function InviteCandidateDialog({
     return { added: addedCount, skipped: skippedCount };
   };
 
-  // Add single email or auto-split if pasted with delimiters
   const handleAddSingleEmail = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
@@ -165,7 +243,7 @@ export function InviteCandidateDialog({
 
     if (!EMAIL_REGEX.test(normalized)) {
       setInputError(
-        "Please enter a valid email address (e.g. dev@company.com)",
+        "Please enter a valid email address (e.g. tested.candidate@devassess.com)",
       );
       return;
     }
@@ -180,7 +258,6 @@ export function InviteCandidateDialog({
     setInputError(null);
   };
 
-  // Handle key down (Enter, Comma)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
@@ -188,18 +265,15 @@ export function InviteCandidateDialog({
     }
   };
 
-  // Remove email chip
   const handleRemoveEmail = (emailToRemove: string) => {
     setEmails((prev) => prev.filter((e) => e !== emailToRemove));
   };
 
-  // Clear all staged emails
   const handleClearAll = () => {
     setEmails([]);
     setInputError(null);
   };
 
-  // Apply Bulk Text
   const handleApplyBulkText = () => {
     if (!bulkTextInput.trim()) {
       setInputMode("CHIPS");
@@ -213,7 +287,7 @@ export function InviteCandidateDialog({
     if (added > 0) {
       toast.add({
         title: "Bulk Emails Parsed",
-        description: `Successfully added ${added} valid candidate email${added > 1 ? "s" : ""}.`,
+        description: `Successfully added ${added} candidate email${added > 1 ? "s" : ""}.`,
         type: "success",
       });
     }
@@ -227,7 +301,6 @@ export function InviteCandidateDialog({
     }
   };
 
-  // File Upload (.csv or .txt)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -259,8 +332,8 @@ export function InviteCandidateDialog({
     e.target.value = "";
   };
 
-  // Close modal and reset state
   const handleClose = () => {
+    if (inviteMutation.isPending) return;
     setEmails([]);
     setCurrentEmailInput("");
     setInputError(null);
@@ -269,12 +342,21 @@ export function InviteCandidateDialog({
     onOpenChange(false);
   };
 
-  // Submit invitations
   const handleSubmit = () => {
     if (!targetAssessment?.id) {
       toast.add({
         title: "Assessment Required",
         description: "Please select an assessment to invite candidates to.",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!canInviteCandidates) {
+      toast.add({
+        title: "Permission Denied",
+        description:
+          "Only Platform Admins, Company Owners, and Company Admins can dispatch invitations.",
         type: "error",
       });
       return;
@@ -290,24 +372,52 @@ export function InviteCandidateDialog({
       return;
     }
 
+    // Calculate optional expiresAt if selected
+    let expiresAt: string | null = null;
+    if (expirationSetting === "3_DAYS") {
+      const d = new Date();
+      d.setDate(d.getDate() + 3);
+      expiresAt = d.toISOString();
+    } else if (expirationSetting === "7_DAYS") {
+      const d = new Date();
+      d.setDate(d.getDate() + 7);
+      expiresAt = d.toISOString();
+    } else if (expirationSetting === "14_DAYS") {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      expiresAt = d.toISOString();
+    }
+
     inviteMutation.mutate(
       {
         assessmentId: targetAssessment.id,
-        payload: { emails },
+        payload: {
+          emails,
+          expiresAt: expiresAt || undefined,
+        },
       },
       {
-        onSuccess: () => {
-          // Query invalidation in component (senior fullstack rule)
+        onSuccess: (res) => {
+          // React Query invalidation in calling component (AGENTS.md Rule 2)
           queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
+          queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
           queryClient.invalidateQueries({ queryKey: ["assessments"] });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-invitations", targetAssessment.id],
+          });
           queryClient.invalidateQueries({
             queryKey: ["assessment-invitation", targetAssessment.id],
           });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-single", targetAssessment.id],
+          });
 
-          const count = emails.length;
+          const count = res?.data?.count || res?.data?.invitedCount || emails.length;
           toast.add({
             title: "Invitations Dispatched Successfully",
-            description: `Access links sent to ${count} candidate${count > 1 ? "s" : ""} for "${targetAssessment.title}".`,
+            description:
+              res?.message ||
+              `Access tokens sent to ${count} candidate${count > 1 ? "s" : ""} for "${targetAssessment.title}".`,
             type: "success",
           });
 
@@ -321,11 +431,11 @@ export function InviteCandidateDialog({
           };
 
           toast.add({
-            title: "Failed to Send Invitations",
+            title: "Failed to Dispatch Invitations",
             description:
               apiErr?.data?.message ||
               apiErr?.message ||
-              "An unexpected error occurred while communicating with the invitation server.",
+              "An unexpected error occurred while sending candidate invitations.",
             type: "error",
           });
         },
@@ -334,198 +444,232 @@ export function InviteCandidateDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
-              <UserPlus className="size-3" />
-              Candidate Invitations
-            </span>
-            {targetAssessment && (
-              <span className="text-xs text-muted-foreground font-mono">
-                ID: {targetAssessment.id.slice(0, 8)}...
-              </span>
-            )}
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-xl p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl space-y-4">
+        {/* Header */}
+        <DialogHeader className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 shadow-sm">
+              <UserPlus className="size-5" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <DialogTitle className="text-base font-bold text-foreground">
+                  Invite Candidates
+                </DialogTitle>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 font-semibold">
+                  Direct Route
+                </span>
+              </div>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Generate secure access tokens and dispatch test invitation emails to candidates
+              </DialogDescription>
+            </div>
           </div>
-          <DialogTitle className="text-lg font-bold text-foreground mt-1.5">
-            Invite Candidates to Assessment
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Invited candidates will receive an assessment access link, benchmark
-            details, and scheduling windows.
-          </DialogDescription>
         </DialogHeader>
 
-        {/* ── Assessment Target Picker or Banner ── */}
-        {!initialAssessment ? (
-          <div className="space-y-1.5 pt-1">
-            <Label
-              htmlFor="modal-assessment-select"
-              className="text-xs font-semibold flex items-center gap-1.5"
-            >
-              <Layers className="size-3.5 text-primary" />
-              Target Assessment <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <select
-                id="modal-assessment-select"
-                value={selectedAssessmentId}
-                onChange={(e) => setSelectedAssessmentId(e.target.value)}
-                disabled={isLoadingAssessments}
-                className="w-full h-9 pl-3 pr-8 rounded-lg border border-border bg-background text-xs font-medium text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="">-- Select Assessment --</option>
-                {assessmentsList.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.title} ({a.durationMinutes} mins • {a.totalMarks} pts)
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+        {/* ── Role & Permission Guard (Admin / Company Owner / Company Admin Only) ── */}
+        {!canInviteCandidates && (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3.5 text-xs space-y-2 text-destructive">
+            <div className="flex items-center gap-2 font-semibold">
+              <ShieldAlert className="size-4" />
+              <span>Invitation Permission Denied (Role Restricted)</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              You are currently authenticated as{" "}
+              <strong className="text-foreground">{userRoleDisplay}</strong>. Under
+              system access policies, only <strong>Platform Admins</strong>,{" "}
+              <strong>Company Owners</strong>, and <strong>Company Admins</strong> are
+              authorized to dispatch candidate invitations. Assessment Creators and
+              Evaluators do not have permission to invite candidates.
+            </p>
           </div>
-        ) : (
-          <div className="p-3 rounded-xl border border-border/70 bg-muted/30 space-y-1">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-foreground">
-                {targetAssessment?.title}
-              </p>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-border/60 bg-background text-muted-foreground capitalize">
-                {targetAssessment?.status || "Configured"}
+        )}
+
+        {/* Assessment Lifecycle Warnings */}
+        {isArchivedOrCompleted && (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs space-y-1 text-destructive">
+            <div className="flex items-center gap-2 font-semibold">
+              <AlertCircle className="size-4" />
+              <span>Assessment Archived / Completed</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Cannot dispatch invitations to an assessment that is closed, expired, or
+              archived.
+            </p>
+          </div>
+        )}
+
+        {isPastDeadline && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs space-y-1 text-amber-900 dark:text-amber-200">
+            <div className="flex items-center gap-2 font-semibold">
+              <Clock className="size-4 text-amber-600" />
+              <span>Assessment Deadline Passed</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              The submission deadline for this test has already passed. Please update
+              the end date before inviting candidates.
+            </p>
+          </div>
+        )}
+
+        {/* Assessment Target Card */}
+        {targetAssessment && (
+          <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate">
+                  {targetAssessment.title}
+                </p>
+                <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+                  ID: {targetAssessment.id.slice(0, 16)}...
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 uppercase">
+                {targetAssessment.status}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground pt-0.5">
-              <span className="flex items-center gap-1 font-medium text-foreground">
-                <Clock className="size-3 text-primary" />
-                {targetAssessment?.durationMinutes} mins
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1 font-medium text-foreground">
-                <Award className="size-3 text-emerald-500" />
-                Pass:{" "}
-                {targetAssessment?.passingScore ??
-                  (targetAssessment?.totalMarks
-                    ? Math.round(targetAssessment.totalMarks * 0.5)
-                    : 0)}
-                /{targetAssessment?.totalMarks} pts
-              </span>
-              <span>•</span>
-              <span>Attempts: {targetAssessment?.allowedAttempts || 1}</span>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1.5 border-t border-border/50 text-[11px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Clock className="size-3.5 text-amber-500" />
+                <span>
+                  Duration:{" "}
+                  <strong className="text-foreground">
+                    {targetAssessment.durationMinutes}m
+                  </strong>
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <FileCheck2 className="size-3.5 text-primary" />
+                <span>
+                  Total Marks:{" "}
+                  <strong className="text-foreground">
+                    {targetAssessment.totalMarks}
+                  </strong>
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CheckCircle2 className="size-3.5 text-emerald-500" />
+                <span>
+                  Passing:{" "}
+                  <strong className="text-foreground">
+                    {targetAssessment.passingScore ?? "N/A"}
+                  </strong>
+                </span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ── Mode Switcher & Input Section ── */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-semibold flex items-center gap-1.5">
-              <Users className="size-3.5 text-primary" />
-              Candidate Email List ({emails.length} added)
-            </Label>
-
-            {/* Input Mode Switch Tabs */}
-            <div className="inline-flex items-center p-0.5 rounded-lg bg-muted text-[11px] font-medium border border-border/60">
-              <button
+        {/* ── Mode Selection Tabs (Chips / Bulk / Upload) ── */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-border/60 pb-2">
+            <div className="flex items-center gap-1">
+              <Button
                 type="button"
+                variant={inputMode === "CHIPS" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setInputMode("CHIPS")}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
-                  inputMode === "CHIPS"
-                    ? "bg-background text-foreground shadow-xs font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="h-7 text-xs px-2.5 cursor-pointer font-medium"
               >
-                Tag Input
-              </button>
-              <button
+                Direct Add
+              </Button>
+              <Button
                 type="button"
+                variant={inputMode === "BULK_TEXT" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setInputMode("BULK_TEXT")}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
-                  inputMode === "BULK_TEXT"
-                    ? "bg-background text-foreground shadow-xs font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="h-7 text-xs px-2.5 cursor-pointer font-medium"
               >
                 Bulk Paste
-              </button>
+              </Button>
+              <Button
+                type="button"
+                variant={inputMode === "FILE" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setInputMode("FILE")}
+                className="h-7 text-xs px-2.5 cursor-pointer font-medium"
+              >
+                CSV Upload
+              </Button>
+            </div>
+
+            {emails.length > 0 && (
               <button
                 type="button"
-                onClick={() => setInputMode("FILE")}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
-                  inputMode === "FILE"
-                    ? "bg-background text-foreground shadow-xs font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                onClick={handleClearAll}
+                className="text-[11px] text-destructive hover:underline cursor-pointer"
               >
-                CSV / File
+                Clear all ({emails.length})
               </button>
-            </div>
+            )}
           </div>
 
-          {/* Mode 1: Interactive Tag Input */}
+          {/* Mode 1: Individual / Delimited Input */}
           {inputMode === "CHIPS" && (
             <div className="space-y-2">
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <Mail className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Enter email and press Enter, comma, or paste multiple..."
+                    type="email"
+                    placeholder="Enter email e.g. tested.candidate@devassess.com..."
                     value={currentEmailInput}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      if (
-                        val.includes(",") ||
-                        val.includes(";") ||
-                        val.includes("\n")
-                      ) {
-                        handleAddSingleEmail(val);
-                      } else {
-                        setCurrentEmailInput(val);
-                        if (inputError) setInputError(null);
-                      }
+                      setCurrentEmailInput(e.target.value);
+                      if (inputError) setInputError(null);
                     }}
                     onKeyDown={handleKeyDown}
-                    className="pl-9 text-xs h-9"
-                    id="candidate-email-input"
+                    disabled={!canInviteCandidates || inviteMutation.isPending}
+                    className="text-xs h-8 pl-8 placeholder:text-muted-foreground/70"
+                    id="single-candidate-email-input"
                   />
                 </div>
                 <Button
                   type="button"
                   size="sm"
+                  variant="outline"
                   onClick={() => handleAddSingleEmail(currentEmailInput)}
-                  className="text-xs h-9 px-3 gap-1"
+                  disabled={
+                    !canInviteCandidates ||
+                    !currentEmailInput.trim() ||
+                    inviteMutation.isPending
+                  }
+                  className="text-xs h-8 px-3 cursor-pointer shrink-0"
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-3.5 mr-1" />
                   Add
                 </Button>
               </div>
 
               {inputError && (
-                <p className="text-xs text-destructive flex items-center gap-1 font-medium">
+                <p className="text-[11px] text-destructive flex items-center gap-1">
                   <AlertCircle className="size-3" />
-                  {inputError}
+                  <span>{inputError}</span>
                 </p>
               )}
             </div>
           )}
 
-          {/* Mode 2: Bulk Text Paste */}
+          {/* Mode 2: Bulk Text Input */}
           {inputMode === "BULK_TEXT" && (
             <div className="space-y-2">
               <Textarea
-                rows={4}
-                placeholder="Paste candidate emails separated by commas, spaces, or newlines (e.g. from an Excel column or email list)..."
+                placeholder="Paste candidate emails separated by commas, spaces, or newlines..."
                 value={bulkTextInput}
                 onChange={(e) => setBulkTextInput(e.target.value)}
-                className="text-xs font-mono"
+                disabled={!canInviteCandidates || inviteMutation.isPending}
+                className="text-xs min-h-[90px] font-mono leading-relaxed"
+                id="bulk-candidate-emails-textarea"
               />
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
                   size="sm"
+                  variant="outline"
                   onClick={() => setInputMode("CHIPS")}
-                  className="text-xs h-7"
+                  className="text-xs h-7 cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -533,109 +677,138 @@ export function InviteCandidateDialog({
                   type="button"
                   size="sm"
                   onClick={handleApplyBulkText}
-                  className="text-xs h-7 gap-1 font-semibold"
+                  disabled={!bulkTextInput.trim() || inviteMutation.isPending}
+                  className="text-xs h-7 bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
                 >
-                  <Check className="size-3" />
                   Parse & Add Emails
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Mode 3: CSV / TXT Upload */}
+          {/* Mode 3: CSV / File Upload */}
           {inputMode === "FILE" && (
-            <div className="p-4 rounded-xl border border-dashed border-border/70 bg-muted/20 text-center space-y-2.5">
-              <div className="p-2.5 rounded-full bg-primary/10 text-primary w-fit mx-auto">
-                <FileSpreadsheet className="size-6" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-foreground">
-                  Upload CSV or Text File
-                </p>
-                <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
-                  Upload a spreadsheet or text file containing candidate email
-                  addresses.
-                </p>
-              </div>
+            <div className="rounded-xl border-2 border-dashed border-border/80 p-5 text-center space-y-2 bg-muted/20">
+              <Upload className="size-6 text-muted-foreground mx-auto" />
               <div>
-                <input
-                  id={fileInputId}
-                  type="file"
-                  accept=".csv,.txt"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-xs gap-1.5 h-8"
-                >
-                  <Upload className="size-3.5" />
-                  Choose File (.csv, .txt)
-                </Button>
+                <p className="text-xs font-semibold text-foreground">
+                  Upload CSV or TXT candidate list
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  File should contain email addresses separated by commas or lines
+                </p>
               </div>
+              <input
+                ref={fileInputRef}
+                id={fileInputId}
+                type="file"
+                accept=".csv,.txt"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={!canInviteCandidates || inviteMutation.isPending}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={!canInviteCandidates || inviteMutation.isPending}
+                className="text-xs h-7 cursor-pointer mx-auto mt-2"
+              >
+                <FileSpreadsheet className="size-3.5 mr-1" />
+                Choose File
+              </Button>
             </div>
           )}
 
-          {/* ── Staged Candidates Chips Container ── */}
+          {/* ── Staged Candidates Chips View ── */}
           {emails.length > 0 && (
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Staged for invitation:</span>
-                <button
-                  type="button"
-                  onClick={handleClearAll}
-                  className="text-destructive hover:underline font-medium cursor-pointer"
-                >
-                  Clear all ({emails.length})
-                </button>
+            <div className="rounded-xl border border-border/70 bg-card p-3 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Users className="size-3.5 text-sky-600 dark:text-sky-400" />
+                  <span>Staged Candidates ({emails.length})</span>
+                </span>
+                <span className="text-muted-foreground font-mono text-[10px]">
+                  payload.emails
+                </span>
               </div>
 
-              <div className="p-3 rounded-xl border border-border/70 bg-card max-h-44 overflow-y-auto space-y-1.5 shadow-xs">
-                <div className="flex flex-wrap gap-1.5">
-                  {emails.map((email) => (
-                    <span
-                      key={email}
-                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-muted/60 border border-border text-foreground shadow-xs"
+              <div className="max-h-36 overflow-y-auto flex flex-wrap gap-1.5 pr-1">
+                {emails.map((email) => (
+                  <span
+                    key={email}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20"
+                  >
+                    <span>{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEmail(email)}
+                      disabled={inviteMutation.isPending}
+                      className="text-sky-600/70 hover:text-sky-900 dark:hover:text-sky-100 cursor-pointer"
+                      title="Remove candidate"
                     >
-                      <Mail className="size-2.5 text-muted-foreground" />
-                      {email}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEmail(email)}
-                        className="text-muted-foreground hover:text-destructive transition-colors ml-0.5 cursor-pointer"
-                        title="Remove candidate"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
+                      <X className="size-3" />
+                    </button>
+                  </span>
+                ))}
               </div>
             </div>
           )}
 
-          {emails.length === 0 && inputMode === "CHIPS" && (
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 pt-1">
-              <Info className="size-3 text-primary shrink-0" />
-              Tip: You can paste comma-separated email lists directly into the
-              input field above.
-            </p>
-          )}
+          {/* Expiration Configuration */}
+          <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50 text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Calendar className="size-3 text-primary" />
+              <span>Token Expiry:</span>
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setExpirationSetting("DEFAULT")}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  expirationSetting === "DEFAULT"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80 text-foreground"
+                }`}
+              >
+                Default
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpirationSetting("3_DAYS")}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  expirationSetting === "3_DAYS"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80 text-foreground"
+                }`}
+              >
+                3 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpirationSetting("7_DAYS")}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  expirationSetting === "7_DAYS"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80 text-foreground"
+                }`}
+              >
+                7 Days
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* ── Footer ── */}
-        <DialogFooter className="gap-2 pt-3 border-t border-border/40">
+        {/* Footer Actions */}
+        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleClose}
             disabled={inviteMutation.isPending}
-            className="text-xs"
+            className="text-xs h-8 cursor-pointer"
           >
             Cancel
           </Button>
@@ -643,25 +816,34 @@ export function InviteCandidateDialog({
           <Button
             type="button"
             size="sm"
+            onClick={handleSubmit}
             disabled={
+              !canInviteCandidates ||
               emails.length === 0 ||
-              !targetAssessment?.id ||
+              isArchivedOrCompleted ||
               inviteMutation.isPending
             }
-            onClick={handleSubmit}
-            className="text-xs gap-1.5 font-semibold"
-            id="send-candidate-invitations-btn"
+            className={`text-xs h-8 gap-1.5 font-semibold text-white shadow-sm cursor-pointer ${
+              canInviteCandidates && emails.length > 0 && !isArchivedOrCompleted
+                ? "bg-sky-600 hover:bg-sky-700"
+                : "bg-muted-foreground/50 cursor-not-allowed"
+            }`}
+            id="confirm-dispatch-invitations-btn"
           >
             {inviteMutation.isPending ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" />
-                Dispatching Invites...
+                <span>Dispatching Invitations...</span>
+              </>
+            ) : !canInviteCandidates ? (
+              <>
+                <Lock className="size-3.5" />
+                <span>Invite Restricted</span>
               </>
             ) : (
               <>
                 <Send className="size-3.5" />
-                Send {emails.length}{" "}
-                {emails.length === 1 ? "Invitation" : "Invitations"}
+                <span>Send Invitations ({emails.length})</span>
               </>
             )}
           </Button>

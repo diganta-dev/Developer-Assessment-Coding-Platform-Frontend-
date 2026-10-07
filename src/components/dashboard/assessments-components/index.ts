@@ -21,3 +21,4 @@ export * from "./assessment-results-dialog";
 export * from "./assessment-leaderboard-dialog";
 export * from "./start-attempt-dialog";
 export * from "./publish-assessment-dialog";
+export * from "./cheating-risk-dialog";

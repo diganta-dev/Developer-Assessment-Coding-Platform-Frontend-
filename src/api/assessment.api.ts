@@ -310,7 +310,50 @@ export function PublishAssessmentProtected(
 export const publishAssessmentDirect = PublishAssessmentProtected;
 
 
- 
+export function inviteCandidateDirectRoute(
+  assessmentId: string,
+  payload: IInviteCandidatePayload,
+): Promise<IInviteCandidateResponse> {
+  return apiClient(`assessment/${assessmentId}/invite`, {
+    method: "POST",
+    body: payload,
+  });
+}
 
+export function addProblemsDirectRoute(
+  assessmentId: string,
+  payload: IAddProblemInAssessment,
+) {
+  return apiClient(`assessment/${assessmentId}/problems`, {
+    method: "POST",
+    body: payload,
+  });
+}
 
- 
+export function getSingleAssessmentDirectRoute(
+  assessmentId: string,
+): Promise<ISingleAssessmentResponse> {
+  return apiClient(`assessment/${assessmentId}`, {
+    method: "GET",
+  });
+}
+
+export const getSingleAssessmentDirect = getSingleAssessmentDirectRoute;
+
+export function updateAssessmentDirectRoute(
+  assessmentId: string,
+  payload: IUpdateAssessmentPayload | ICreateAssessmentPayload,
+): Promise<IUpdateAssessmentResponse> {
+  return apiClient(`assessment/${assessmentId}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export function deleteAssessmentDirectRoute(
+  assessmentId: string,
+): Promise<IDeleteAssessmentResponse> {
+  return apiClient(`assessment/${assessmentId}`, {
+    method: "DELETE",
+  });
+}

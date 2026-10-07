@@ -28,6 +28,11 @@ import {
   pubLishResults,
   startAttemptDirectRoute,
   PublishAssessmentProtected,
+  inviteCandidateDirectRoute,
+  getSingleAssessmentDirectRoute,
+  addProblemsDirectRoute,
+  updateAssessmentDirectRoute,
+  deleteAssessmentDirectRoute,
 } from "@/api/assessment.api";
 import type {
   IAddProblemInAssessment,
@@ -36,6 +41,7 @@ import type {
   ICreateAssessmentPayload,
   ICreateSubmissionPayload,
   IInviteCandidatePayload,
+  IInviteCandidateResponse,
   IStartAttemptPayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
@@ -408,4 +414,75 @@ export function usePublishAssessmentProtected(defaultAssessmentId?: string) {
     },
   });
 }
-   
+
+export function useInviteCandidateDirectRoute(defaultAssessmentId?: string) {
+  return useMutation<
+    IInviteCandidateResponse,
+    Error,
+    {
+      assessmentId?: string;
+      payload: IInviteCandidatePayload;
+    }
+  >({
+    mutationFn: ({ assessmentId, payload }) => {
+      const targetId = assessmentId || defaultAssessmentId;
+      if (!targetId) {
+        throw new Error("Assessment ID is required to invite candidates.");
+      }
+      return inviteCandidateDirectRoute(targetId, payload);
+    },
+  });
+}
+
+export const useInviteCandidateRirectRoute = useInviteCandidateDirectRoute;
+
+export function useGetSingleAssessmentDirectRoute(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-single-direct", assessmentId],
+    queryFn: () => getSingleAssessmentDirectRoute(assessmentId),
+    enabled: Boolean(assessmentId),
+    refetchInterval: false,
+  });
+}
+
+export function useAddProblemsDirectRoute(defaultAssessmentId?: string) {
+  return useMutation({
+    mutationFn: ({
+      assessmentId,
+      payload,
+    }: {
+      assessmentId?: string;
+      payload: IAddProblemInAssessment;
+    }) => {
+      const targetId = assessmentId || defaultAssessmentId;
+      if (!targetId) {
+        throw new Error("Assessment ID is required to add problems.");
+      }
+      return addProblemsDirectRoute(targetId, payload);
+    },
+  });
+}
+
+export function useUpdateAssessmentDirectRoute(defaultAssessmentId?: string) {
+  return useMutation({
+    mutationFn: ({
+      assessmentId,
+      payload,
+    }: {
+      assessmentId?: string;
+      payload: IUpdateAssessmentPayload | ICreateAssessmentPayload;
+    }) => {
+      const targetId = assessmentId || defaultAssessmentId;
+      if (!targetId) {
+        throw new Error("Assessment ID is required to update assessment.");
+      }
+      return updateAssessmentDirectRoute(targetId, payload);
+    },
+  });
+}
+
+export function useDeleteAssessmentDirectRoute() {
+  return useMutation({
+    mutationFn: (assessmentId: string) => deleteAssessmentDirectRoute(assessmentId),
+  });
+}

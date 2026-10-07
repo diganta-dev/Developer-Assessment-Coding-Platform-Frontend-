@@ -39,6 +39,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { useGetDetailedAssesssmentReport } from "@/hook/assessment.hook";
+import { CheatingRiskAuditDialog } from "./cheating-risk-dialog";
 import type {
   AntiCheatEventType,
   IAntiCheatEvent,
@@ -130,6 +131,7 @@ export function DetailedAssessmentReportView({
   const [activeTab, setActiveTab] = useState<"questions" | "proctoring" | "candidate">("questions");
   const [questionFilter, setQuestionFilter] = useState<QuestionFilterType>("ALL");
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+  const [isCheatingRiskDialogOpen, setIsCheatingRiskDialogOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetDetailedAssesssmentReport(effectiveAttemptId);
@@ -1182,13 +1184,25 @@ export function DetailedAssessmentReportView({
                 </div>
               </div>
 
-              <div className="text-right sm:border-l sm:border-border/60 sm:pl-5 shrink-0">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Total Violations
-                </p>
-                <p className="text-3xl font-black text-foreground mt-0.5">
-                  {totalViolations}
-                </p>
+              <div className="flex items-center gap-4 sm:border-l sm:border-border/60 sm:pl-5 shrink-0">
+                <div className="text-right">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Total Violations
+                  </p>
+                  <p className="text-3xl font-black text-foreground mt-0.5">
+                    {totalViolations}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsCheatingRiskDialogOpen(true)}
+                  className="h-9 text-xs font-semibold gap-1.5 border-primary/30 text-primary hover:bg-primary/10 shadow-xs cursor-pointer"
+                >
+                  <ShieldAlert className="size-3.5" />
+                  <span>Audit Risk & Flag</span>
+                </Button>
               </div>
             </div>
           </Card>
@@ -1451,6 +1465,13 @@ export function DetailedAssessmentReportView({
             </CardContent>
           </Card>
         </div>
+      )}
+      {effectiveAttemptId && (
+        <CheatingRiskAuditDialog
+          attemptId={effectiveAttemptId}
+          isOpen={isCheatingRiskDialogOpen}
+          onClose={() => setIsCheatingRiskDialogOpen(false)}
+        />
       )}
     </div>
   );

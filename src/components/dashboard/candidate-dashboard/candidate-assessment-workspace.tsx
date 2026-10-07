@@ -21,6 +21,12 @@ import {
   Sparkles,
   Terminal,
   Trophy,
+  Eye,
+  Maximize2,
+  Minimize2,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -39,6 +45,12 @@ import {
   useGetAttemptDetails,
   useGetCandidateMyAttempts,
 } from "@/hook/assessment.hook";
+import {
+  useDetectCopyPaste,
+  useDetectFullscreenExit,
+  useDetectMultipleTabs,
+  useDetectTabSwitch,
+} from "@/hook/anti-cheating.hook";
 import type {
   IAttemptSubmissionItem,
   ICreateSubmissionPayload,
@@ -308,6 +320,215 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
 
   const isAttemptActive = attempt?.status === "IN_PROGRESS";
 
+  // Anti-cheating telemetry mutations (Module 06)
+  const detectTabSwitchMutation = useDetectTabSwitch();
+  const detectFullscreenExitMutation = useDetectFullscreenExit();
+  const detectCopyPasteMutation = useDetectCopyPaste();
+  const detectMultipleTabsMutation = useDetectMultipleTabs();
+
+  const settings = assessment?.settings;
+  const isFullscreenRequired = Boolean(settings?.requireFullscreen);
+  const isCopyPastePrevented = Boolean(settings?.preventCopyPaste);
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [fullscreenExitCount, setFullscreenExitCount] = useState(0);
+  const [copyPasteBlockedCount, setCopyPasteBlockedCount] = useState(0);
+  const [showFullscreenModal, setShowFullscreenModal] = useState(false);
+
+  // 1. Fullscreen departure telemetry
+  useEffect(() => {
+    if (!isAttemptActive) return;
+
+    const handleFullscreenChange = () => {
+      const active = Boolean(document.fullscreenElement);
+      setIsFullscreen(active);
+
+      if (isFullscreenRequired && !active) {
+        setFullscreenExitCount((c) => c + 1);
+        setShowFullscreenModal(true);
+
+        detectFullscreenExitMutation.mutate({
+          attemptId,
+          payload: {
+            durationOutsideSeconds: 0,
+            screenResolution:
+              typeof window !== "undefined"
+                ? `${window.screen.width}x${window.screen.height}`
+                : undefined,
+            reason: "Candidate exited fullscreen exam environment",
+            clientTimestamp: new Date().toISOString(),
+          },
+        });
+
+        toast.add({
+          title: "Fullscreen Required",
+          description:
+            "This assessment enforces fullscreen mode. Please return to fullscreen immediately.",
+          type: "error",
+        });
+      } else if (active) {
+        setShowFullscreenModal(false);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [isAttemptActive, isFullscreenRequired, attemptId, detectFullscreenExitMutation]);
+
+  // 2. Tab switch & visibility loss telemetry
+  useEffect(() => {
+    if (!isAttemptActive) return;
+
+    let hiddenAt: number | null = null;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+      } else if (document.visibilityState === "visible") {
+        const durationSeconds = hiddenAt
+          ? Math.max(0, Math.round((Date.now() - hiddenAt) / 1000))
+          : 0;
+        hiddenAt = null;
+
+        setTabSwitchCount((c) => c + 1);
+
+        detectTabSwitchMutation.mutate({
+          attemptId,
+          payload: {
+            durationSeconds,
+            count: 1,
+            clientTimestamp: new Date().toISOString(),
+            userAgent:
+              typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+          },
+        });
+
+        toast.add({
+          title: "Security Telemetry Warning",
+          description:
+            "Tab switch detected. This event has been recorded in the proctoring audit log.",
+          type: "info",
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isAttemptActive, attemptId, detectTabSwitchMutation]);
+
+  // 3. Copy / Paste blocker & telemetry
+  useEffect(() => {
+    if (!isAttemptActive) return;
+
+    const handleCopy = (e: ClipboardEvent) => {
+      if (isCopyPastePrevented) {
+        e.preventDefault();
+        setCopyPasteBlockedCount((c) => c + 1);
+        detectCopyPasteMutation.mutate({
+          attemptId,
+          payload: {
+            operation: "COPY",
+            targetElement: (e.target as HTMLElement)?.tagName || undefined,
+            clientTimestamp: new Date().toISOString(),
+          },
+        });
+        toast.add({
+          title: "Action Restricted",
+          description: "Copying text is restricted during this assessment.",
+          type: "error",
+        });
+      }
+    };
+
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isCopyPastePrevented) {
+        e.preventDefault();
+        setCopyPasteBlockedCount((c) => c + 1);
+        detectCopyPasteMutation.mutate({
+          attemptId,
+          payload: {
+            operation: "PASTE",
+            targetElement: (e.target as HTMLElement)?.tagName || undefined,
+            clientTimestamp: new Date().toISOString(),
+          },
+        });
+        toast.add({
+          title: "Action Restricted",
+          description: "Pasting content is restricted during this assessment.",
+          type: "error",
+        });
+      }
+    };
+
+    window.addEventListener("copy", handleCopy);
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("copy", handleCopy);
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [isAttemptActive, isCopyPastePrevented, attemptId, detectCopyPasteMutation]);
+
+  // 4. Multi-tab concurrent session guard
+  useEffect(() => {
+    if (
+      !isAttemptActive ||
+      typeof window === "undefined" ||
+      !("BroadcastChannel" in window)
+    )
+      return;
+
+    const tabId = Math.random().toString(36).slice(2);
+    const channel = new BroadcastChannel(`assessment-attempt-${attemptId}`);
+
+    channel.postMessage({ type: "EXAM_PING", tabId });
+
+    channel.onmessage = (event) => {
+      if (event.data?.type === "EXAM_PING" && event.data?.tabId !== tabId) {
+        channel.postMessage({ type: "EXAM_PONG", tabId });
+        detectMultipleTabsMutation.mutate({
+          attemptId,
+          payload: {
+            activeTabCount: 2,
+            details: "Concurrent browser tab session detected",
+            clientTimestamp: new Date().toISOString(),
+          },
+        });
+        toast.add({
+          title: "Multiple Tabs Detected",
+          description:
+            "Multiple tabs open for this exam session. Please keep only one tab open.",
+          type: "error",
+        });
+      }
+    };
+
+    return () => {
+      channel.close();
+    };
+  }, [isAttemptActive, attemptId, detectMultipleTabsMutation]);
+
+  const handleEnterFullscreen = async () => {
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+        setShowFullscreenModal(false);
+      }
+    } catch {
+      toast.add({
+        title: "Fullscreen Error",
+        description:
+          "Could not activate fullscreen mode. Please check browser permissions.",
+        type: "error",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* ── Top Header Navigation ── */}
@@ -363,6 +584,100 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
           )}
         </div>
       </div>
+
+      {/* ── Live Proctoring Telemetry Status Strip ── */}
+      {isAttemptActive && (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 px-3.5 rounded-xl border border-primary/20 bg-primary/[0.03] text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Anti-Cheat Guard
+            </span>
+
+            {/* Fullscreen status */}
+            {isFullscreenRequired ? (
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${
+                  isFullscreen
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                }`}
+              >
+                <Maximize2 className="size-3" />
+                Fullscreen: {isFullscreen ? "Active" : "Required"}
+              </span>
+            ) : (
+              <span className="text-[11px] text-muted-foreground">
+                Fullscreen: Optional
+              </span>
+            )}
+
+            {/* Clipboard status */}
+            {isCopyPastePrevented && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                <Shield className="size-3" />
+                Clipboard Protected
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {tabSwitchCount > 0 && (
+              <span className="text-[11px] font-mono text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border border-border/50">
+                Tab Switches: <strong className="text-foreground">{tabSwitchCount}</strong>
+              </span>
+            )}
+
+            {fullscreenExitCount > 0 && (
+              <span className="text-[11px] font-mono text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                Fullscreen Exits: <strong>{fullscreenExitCount}</strong>
+              </span>
+            )}
+
+            {isFullscreenRequired && !isFullscreen && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleEnterFullscreen}
+                className="h-6 text-[11px] font-semibold px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
+              >
+                <Maximize2 className="size-3" />
+                Enter Fullscreen
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Mandatory Fullscreen Modal Warning ── */}
+      {isFullscreenRequired && showFullscreenModal && isAttemptActive && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-md animate-in fade-in-0">
+          <Card className="max-w-md w-full border-rose-500/30 shadow-2xl p-6 text-center space-y-4 bg-card">
+            <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-600 w-fit mx-auto">
+              <Maximize2 className="size-8" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold text-foreground">
+                Fullscreen Mode Required
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Exam security policies require you to remain in fullscreen mode throughout this assessment. Fullscreen departure events have been recorded.
+              </p>
+            </div>
+            <div className="pt-2">
+              <Button
+                type="button"
+                onClick={handleEnterFullscreen}
+                className="w-full text-xs font-semibold gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground h-9"
+              >
+                <Maximize2 className="size-3.5" />
+                Re-enter Fullscreen Mode
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* ── Question Navigator Bar ── */}
       {problems.length > 0 && (

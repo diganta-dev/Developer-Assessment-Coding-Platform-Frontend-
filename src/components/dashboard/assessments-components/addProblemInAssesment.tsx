@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import {
-  useAddProblemInAssessment,
+  useAddProblemsDirectRoute,
   useGetCompanyAllAssessments,
 } from "@/hook/assessment.hook";
 import { useGetCompanyProblems } from "@/hook/question.hook";
@@ -181,8 +181,8 @@ export function AddProblemInAssessment({
     return [];
   }, [problemsData]);
 
-  // React Query Mutation: Add problems into assessment
-  const addProblemsMutation = useAddProblemInAssessment();
+  // React Query Mutation: Add problems into assessment (Direct route POST /assessment/:id/problems)
+  const addProblemsMutation = useAddProblemsDirectRoute(selectedAssessmentId);
 
   // Set of staged problem IDs for quick lookup
   const stagedProblemIds = useMemo(
@@ -323,6 +323,12 @@ export function AddProblemInAssessment({
           queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
           queryClient.invalidateQueries({ queryKey: ["assessments"] });
           queryClient.invalidateQueries({ queryKey: ["company-questions"] });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-single", selectedAssessmentId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-single-direct", selectedAssessmentId],
+          });
 
           toast.add({
             title: "Problems Added Successfully",

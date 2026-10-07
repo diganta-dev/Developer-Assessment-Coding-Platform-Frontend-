@@ -86,6 +86,7 @@ import { toast } from "@/components/ui/toast";
 import { useGetMe } from "@/hook";
 import {
   useGetSingleAssessment,
+  useGetSingleAssessmentDirectRoute,
   usePublishAssessment,
 } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
@@ -213,8 +214,9 @@ export function SingleAssessmentDialog({
   ]);
 
   const canPublishResults = canManageAssessments;
+  const canInviteCandidates = canDeleteAssessments;
 
-  // Single Assessment Query
+  // Single Assessment Query (Direct Route GET /assessment/:id)
   const {
     data: apiResponse,
     isLoading,
@@ -222,7 +224,28 @@ export function SingleAssessmentDialog({
     error,
     refetch,
     isFetching,
-  } = useGetSingleAssessment(assessmentId || "");
+  } = useGetSingleAssessmentDirectRoute(assessmentId || "");
+
+  const errorMessage = useMemo(() => {
+    if (!error) return null;
+    const apiErr = error as { data?: { message?: string }; message?: string };
+    return (
+      apiErr?.data?.message ||
+      apiErr?.message ||
+      "Could not retrieve assessment information. Please verify your permissions or try again."
+    );
+  }, [error]);
+
+  const isForbiddenError = useMemo(() => {
+    if (!errorMessage) return false;
+    const lower = errorMessage.toLowerCase();
+    return (
+      lower.includes("permission") ||
+      lower.includes("access") ||
+      lower.includes("forbidden") ||
+      lower.includes("organization")
+    );
+  }, [errorMessage]);
 
   const assessment: ISingleAssessmentDetail | null = useMemo(() => {
     if (!apiResponse) return null;
@@ -524,24 +547,50 @@ export function SingleAssessmentDialog({
             {/* Error State */}
             {isError && (
               <div className="py-12 text-center space-y-3">
-                <div className="p-3 rounded-full bg-destructive/10 text-destructive w-fit mx-auto">
-                  <AlertCircle className="size-7" />
+                <div
+                  className={`p-3 rounded-full w-fit mx-auto ${
+                    isForbiddenError
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                      : "bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  {isForbiddenError ? (
+                    <ShieldAlert className="size-7" />
+                  ) : (
+                    <AlertCircle className="size-7" />
+                  )}
                 </div>
                 <h4 className="text-sm font-semibold text-foreground">
-                  Failed to load assessment details
+                  {isForbiddenError
+                    ? "Access Restricted / Permission Required"
+                    : "Failed to load assessment details"}
                 </h4>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  {(error as Error)?.message ||
-                    "Could not retrieve assessment information. Please verify your permissions or try again."}
+                  {errorMessage}
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => refetch()}
-                  className="text-xs mt-2"
-                >
-                  Try Again
-                </Button>
+                {isForbiddenError && isCandidate && (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400 max-w-sm mx-auto">
+                    If this is a private company assessment, please ensure you have received an invitation from the hiring organization.
+                  </p>
+                )}
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetch()}
+                    className="text-xs"
+                  >
+                    Try Again
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onOpenChange(false)}
+                    className="text-xs"
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -1278,17 +1327,21 @@ export function SingleAssessmentDialog({
                       </Button>
                     )}
 
-                    {/* Invite Button */}
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setInviteModalOpen(true)}
-                      className="text-xs gap-1.5 font-medium text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
-                    >
-                      <UserPlus className="size-3.5 text-sky-600" />
-                      Invite
-                    </Button>
+                    {/* Invite Button (Admin / Company Owner / Company Admin) */}
+                    {canInviteCandidates && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setInviteModalOpen(true)}
+                        className="text-xs gap-1.5 font-medium text-sky-600 border-sky-500/30 hover:bg-sky-500/10 cursor-pointer"
+                        id="invite-candidates-dialog-btn"
+                        title="Invite Candidates (Direct Route)"
+                      >
+                        <UserPlus className="size-3.5 text-sky-600" />
+                        Invite
+                      </Button>
+                    )}
 
                     {/* Invitations Roster Button */}
                     <Button

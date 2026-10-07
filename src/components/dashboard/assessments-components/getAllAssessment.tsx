@@ -30,7 +30,8 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -325,6 +326,18 @@ export function GetAllAssessment({
   const queryClient = useQueryClient();
   const publishMutation = usePublishAssessment();
 
+  const searchParams = useSearchParams();
+  const urlAssessmentId = searchParams?.get("assessmentId") || null;
+  const [directAssessmentId, setDirectAssessmentId] = useState<string | null>(
+    urlAssessmentId,
+  );
+
+  useEffect(() => {
+    if (urlAssessmentId) {
+      setDirectAssessmentId(urlAssessmentId);
+    }
+  }, [urlAssessmentId]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>("ALL");
   const [selectedAssessment, setSelectedAssessment] =
@@ -373,6 +386,8 @@ export function GetAllAssessment({
     CompanyMemberRole.COMPANY_OWNER,
     CompanyMemberRole.COMPANY_ADMIN,
   ]);
+
+  const canInviteCandidates = canDeleteAssessments;
 
   const canViewAttempts = isUserAuthorized(currentUser, [
     UserRole.ADMIN,
@@ -1053,7 +1068,7 @@ export function GetAllAssessment({
                                 </Button>
                               )}
 
-                            {canManageAssessments && (
+                            {canInviteCandidates && (
                               <Button
                                 type="button"
                                 size="sm"
@@ -1066,13 +1081,14 @@ export function GetAllAssessment({
                                 className={`text-xs h-7 px-2 gap-1 font-medium ${
                                   isExpired
                                     ? "opacity-50 cursor-not-allowed text-muted-foreground border-border/40"
-                                    : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700"
+                                    : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700 cursor-pointer"
                                 }`}
                                 title={
                                   isExpired
                                     ? "Assessment deadline has passed"
-                                    : "Invite Candidates"
+                                    : "Invite Candidates (Direct Route)"
                                 }
+                                id={`invite-candidates-${assessment.id}-btn`}
                               >
                                 <UserPlus
                                   className={`size-3 ${
@@ -1252,9 +1268,14 @@ export function GetAllAssessment({
 
       {/* ── Single Assessment Details Dialog (Role-Aware) ── */}
       <SingleAssessmentDialog
-        assessmentId={selectedAssessment?.id || null}
-        open={Boolean(selectedAssessment)}
-        onOpenChange={(open) => !open && setSelectedAssessment(null)}
+        assessmentId={selectedAssessment?.id || directAssessmentId || null}
+        open={Boolean(selectedAssessment || directAssessmentId)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedAssessment(null);
+            setDirectAssessmentId(null);
+          }
+        }}
         onAddProblemsClick={onAddProblemsClick}
       />
 
