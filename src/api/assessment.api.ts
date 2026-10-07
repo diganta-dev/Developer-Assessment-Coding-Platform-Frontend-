@@ -15,6 +15,7 @@ import type {
   ICreateSubmissionResponse,
   IDetailedAssessmentReportResponse,
   IDeleteAssessmentResponse,
+  IGetAssessmentAttemptsResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
   IPublishResultsResponse,
@@ -249,6 +250,16 @@ export function deleteAssessment(
     method: "DELETE",
   });
 }
+
+export function getAssessmentAttempts(
+  assessmentId: string,
+): Promise<IGetAssessmentAttemptsResponse> {
+  return apiClient(`assessment/${assessmentId}/attempts`, {
+    method: "GET",
+  });
+}
+
+
 
 
 

@@ -98,6 +98,7 @@ import { InviteCandidateDialog } from "./invite-candidate-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
 import { EditAssessmentDialog } from "./edit-assessment-dialog";
 import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
+import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
 
 export interface SingleAssessmentDialogProps {
   assessmentId: string | null;
@@ -156,6 +157,7 @@ export function SingleAssessmentDialog({
   // Sub-dialogs state for staff actions
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invitationsModalOpen, setInvitationsModalOpen] = useState(false);
+  const [attemptsModalOpen, setAttemptsModalOpen] = useState(false);
   const [publishResultsModalOpen, setPublishResultsModalOpen] = useState(false);
 
   // TanStack Query for User Identity & Permissions
@@ -1127,17 +1129,30 @@ export function SingleAssessmentDialog({
                     <p className="text-2xl font-bold tracking-tight text-foreground mt-1">
                       {assessment._count?.attempts ?? 0}
                     </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPublishResultsModalOpen(true)}
-                      disabled={assessment.status === "DRAFT"}
-                      className="text-xs h-7 mt-3 w-full gap-1 cursor-pointer"
-                    >
-                      <Award className="size-3 text-emerald-600" />
-                      Publish Results
-                    </Button>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setAttemptsModalOpen(true)}
+                        className="text-xs h-7 flex-1 gap-1 cursor-pointer bg-primary text-primary-foreground font-semibold"
+                        id="view-attempts-telemetry-btn"
+                      >
+                        <FileCheck2 className="size-3" />
+                        View Attempts
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPublishResultsModalOpen(true)}
+                        disabled={assessment.status === "DRAFT"}
+                        className="text-xs h-7 gap-1 cursor-pointer"
+                        title="Publish Results"
+                      >
+                        <Award className="size-3 text-emerald-600" />
+                        Results
+                      </Button>
+                    </div>
                   </Card>
 
                   <Card className="p-4 shadow-2xs border-border/60">
@@ -1243,6 +1258,19 @@ export function SingleAssessmentDialog({
                       Invitations ({assessment._count?.invitations ?? 0})
                     </Button>
 
+                    {/* Candidate Attempts Button */}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setAttemptsModalOpen(true)}
+                      className="text-xs gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                      id="view-attempts-footer-btn"
+                    >
+                      <FileCheck2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                      Attempts ({assessment._count?.attempts ?? 0})
+                    </Button>
+
                     {/* Publish Results Button */}
                     {canPublishResults && assessment.status !== "DRAFT" && (
                       <Button
@@ -1316,6 +1344,12 @@ export function SingleAssessmentDialog({
             open={invitationsModalOpen}
             onOpenChange={setInvitationsModalOpen}
             onInviteMore={() => setInviteModalOpen(true)}
+          />
+
+          <AssessmentAttemptsDialog
+            assessment={assessment}
+            open={attemptsModalOpen}
+            onOpenChange={setAttemptsModalOpen}
           />
 
           <PublishResultsDialog

@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  FileCheck2,
   FileText,
   Mail,
   RefreshCw,
@@ -48,6 +49,7 @@ import { CompanyMemberRole, UserRole } from "@/types";
 import { AttemptDetailsDialog } from "./attempt-details-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
+import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
 
 interface AssessmentInvitationsDialogProps {
   assessment: IAssessment | null;
@@ -114,6 +116,7 @@ export function AssessmentInvitationsDialog({
   >(null);
   const [detailedReportOpen, setDetailedReportOpen] = useState(false);
   const [publishResultsOpen, setPublishResultsOpen] = useState(false);
+  const [attemptsOpen, setAttemptsOpen] = useState(false);
 
   const { data: meData } = useGetMe();
   const currentUser = meData?.data;
@@ -279,6 +282,19 @@ export function AssessmentInvitationsDialog({
                   <span>Publish Results</span>
                 </Button>
               )}
+
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setAttemptsOpen(true)}
+                className="h-8 text-xs gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                title="View Candidate Test Attempts"
+                id="invitations-to-attempts-btn"
+              >
+                <FileCheck2 className="size-3.5" />
+                <span>Attempts</span>
+              </Button>
 
               {onInviteMore && (
                 <Button
@@ -707,6 +723,13 @@ export function AssessmentInvitationsDialog({
         open={publishResultsOpen}
         onOpenChange={setPublishResultsOpen}
         onSuccess={() => refetch()}
+      />
+
+      {/* ── Candidate Attempts Dialog ── */}
+      <AssessmentAttemptsDialog
+        assessment={assessment}
+        open={attemptsOpen}
+        onOpenChange={setAttemptsOpen}
       />
     </Dialog>
   );

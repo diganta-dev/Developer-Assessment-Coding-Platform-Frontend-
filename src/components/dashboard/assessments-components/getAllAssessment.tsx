@@ -62,6 +62,7 @@ import { PublishResultsDialog } from "./publish-results-dialog";
 import { SingleAssessmentDialog } from "./single-assessment-dialog";
 import { EditAssessmentDialog } from "./edit-assessment-dialog";
 import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
+import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
 import { Settings2 } from "lucide-react";
 
 
@@ -331,6 +332,8 @@ export function GetAllAssessment({
     useState<IAssessment | null>(null);
   const [invitationsAssessment, setInvitationsAssessment] =
     useState<IAssessment | null>(null);
+  const [attemptsAssessment, setAttemptsAssessment] =
+    useState<IAssessment | null>(null);
   const [assessmentToPublishResults, setAssessmentToPublishResults] =
     useState<IAssessment | null>(null);
   const [assessmentToDelete, setAssessmentToDelete] =
@@ -360,6 +363,15 @@ export function GetAllAssessment({
     UserRole.SUPER_ADMIN,
     CompanyMemberRole.COMPANY_OWNER,
     CompanyMemberRole.COMPANY_ADMIN,
+  ]);
+
+  const canViewAttempts = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+    CompanyMemberRole.EVALUATOR,
   ]);
 
   const userRole = currentUser?.role;
@@ -1069,6 +1081,24 @@ export function GetAllAssessment({
                               Invitations
                             </Button>
 
+                            {/* Candidate Attempts action (Admin, Owner, Admin, Creator, Evaluator) */}
+                            {canViewAttempts && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  setAttemptsAssessment(assessment)
+                                }
+                                className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                                title="View candidate test sessions and submitted attempts"
+                                id={`view-attempts-${assessment.id}-btn`}
+                              >
+                                <FileCheck2 className="size-3 text-emerald-600 dark:text-emerald-400" />
+                                Attempts
+                              </Button>
+                            )}
+
                             {/* Publish Results action */}
                             {canPublishResults &&
                               assessment.status !== "DRAFT" && (
@@ -1246,6 +1276,13 @@ export function GetAllAssessment({
         assessment={assessmentToDelete}
         open={Boolean(assessmentToDelete)}
         onOpenChange={(open) => !open && setAssessmentToDelete(null)}
+      />
+
+      {/* ── Assessment Attempts Dialog ── */}
+      <AssessmentAttemptsDialog
+        assessment={attemptsAssessment}
+        open={Boolean(attemptsAssessment)}
+        onOpenChange={(open) => !open && setAttemptsAssessment(null)}
       />
     </div>
   );

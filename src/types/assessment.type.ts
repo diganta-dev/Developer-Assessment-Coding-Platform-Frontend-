@@ -816,3 +816,43 @@ export interface IDeleteAssessmentResponse {
   data?: unknown;
 }
 
+export interface IAssessmentAttemptCandidate {
+  id: string;
+  name?: string | null;
+  email: string;
+  profilePictureUrl?: string | null;
+}
+
+export interface IAssessmentAttemptListItem extends IAssessmentAttempt {
+  candidate?: IAssessmentAttemptCandidate | null;
+  assessment?: {
+    id: string;
+    title: string;
+    durationMinutes: number;
+    totalMarks: number;
+    passingScore?: number | null;
+  };
+  result?: {
+    id: string;
+    totalMarks: number;
+    obtainedMarks: number;
+    percentage: number;
+    passingScore?: number | null;
+    rank?: number | null;
+    status: string;
+    publishedAt?: string | null;
+  } | null;
+  _count?: {
+    submissions?: number;
+  };
+}
+
+export interface IGetAssessmentAttemptsResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data:
+    | IAssessmentAttemptListItem[]
+    | { attempts: IAssessmentAttemptListItem[]; count?: number };
+}
+

@@ -6,6 +6,7 @@ import {
   createSubmissionFromAttempt,
   deleteAssessment,
   finalizeAndSubmitAttempt,
+  getAssessmentAttempts,
   getAssessmentInvitation,
   getAttemptDetails,
   getAttemptResult,
@@ -292,4 +293,13 @@ export function useDeleteAssessment() {
     mutationFn: (assessmentId: string) => deleteAssessment(assessmentId),
   });
 }
+
+export function useGetAssessmentAttempts(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-attempts", assessmentId],
+    queryFn: () => getAssessmentAttempts(assessmentId),
+    enabled: Boolean(assessmentId),
+    refetchInterval: false,
+  });
+} 
 
