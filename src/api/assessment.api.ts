@@ -20,6 +20,8 @@ import type {
   IGetAssessmentLeaderboardResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
+  IPublishAssessmentResponse,
+  IPublishResultsPayload,
   IPublishResultsResponse,
   ISingleAssessmentResponse,
   IStartAttemptPayload,
@@ -275,8 +277,40 @@ export function getAssessmentLeaderBoard(
     method: "GET",
   });
 }
+export function pubLishResults(
+  assessmentId: string,
+  payload?: IPublishResultsPayload,
+): Promise<IPublishResultsResponse> {
+  return apiClient(`assessment/${assessmentId}/publish-results`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export const publishResultsDirect = pubLishResults;
+
+export function startAttemptDirectRoute(
+  assessmentId: string,
+  payload?: IStartAttemptPayload,
+): Promise<IStartAttemptResponse> {
+  return apiClient(`assessment/${assessmentId}/start-attempt`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function PublishAssessmentProtected(
+  assessmentId: string,
+): Promise<IPublishAssessmentResponse> {
+  return apiClient(`assessment/${assessmentId}/publish`, {
+    method: "PATCH",
+  });
+}
+
+export const publishAssessmentDirect = PublishAssessmentProtected;
 
 
+ 
 
 
  

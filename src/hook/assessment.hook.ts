@@ -25,6 +25,9 @@ import {
   submitAssessmentAttempt,
   updateAssessment,
   verifyAssessmentInvitation,
+  pubLishResults,
+  startAttemptDirectRoute,
+  PublishAssessmentProtected,
 } from "@/api/assessment.api";
 import type {
   IAddProblemInAssessment,
@@ -33,10 +36,12 @@ import type {
   ICreateAssessmentPayload,
   ICreateSubmissionPayload,
   IInviteCandidatePayload,
+  IStartAttemptPayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
   StartAttemptParams,
   IUpdateAssessmentPayload,
+  IPublishResultsPayload,
 } from "@/types/assessment.type";
 
 export function useCreateAssessment() {
@@ -323,4 +328,84 @@ export function useGetAssessmentLeaderboard(assessmentId: string) {
   });
 }
 
+export function usePublishResults(defaultAssessmentId?: string) {
+  return useMutation({
+    mutationFn: (
+      variables?:
+        | {
+            assessmentId?: string;
+            payload?: IPublishResultsPayload;
+          }
+        | string,
+    ) => {
+      const targetId =
+        typeof variables === "string"
+          ? variables
+          : variables?.assessmentId || defaultAssessmentId;
 
+      if (!targetId) {
+        throw new Error("Assessment ID is required to publish results.");
+      }
+
+      const payload =
+        typeof variables === "object" &&
+        variables !== null &&
+        "payload" in variables
+          ? variables.payload
+          : undefined;
+
+      return pubLishResults(targetId, payload);
+    },
+  });
+}
+
+export function useStartAttemptDirectRoute(defaultAssessmentId?: string) {
+  return useMutation<
+    IStartAttemptResponse,
+    Error,
+    | {
+        assessmentId?: string;
+        payload?: IStartAttemptPayload;
+        invitationToken?: string;
+      }
+    | string
+    | void
+  >({
+    mutationFn: (variables) => {
+      const targetId =
+        typeof variables === "string"
+          ? variables
+          : variables?.assessmentId || defaultAssessmentId;
+
+      if (!targetId) {
+        throw new Error("Assessment ID is required to start an attempt.");
+      }
+
+      let payload: IStartAttemptPayload | undefined = undefined;
+      if (typeof variables === "object" && variables !== null) {
+        if ("payload" in variables && variables.payload) {
+          payload = variables.payload;
+        } else if ("invitationToken" in variables && variables.invitationToken) {
+          payload = { invitationToken: variables.invitationToken };
+        }
+      }
+
+      return startAttemptDirectRoute(targetId, payload);
+    },
+  });
+}
+
+ 
+
+export function usePublishAssessmentProtected(defaultAssessmentId?: string) {
+  return useMutation({
+    mutationFn: (overrideAssessmentId?: string) => {
+      const targetId = overrideAssessmentId || defaultAssessmentId;
+      if (!targetId) {
+        throw new Error("Assessment ID is required to publish assessment.");
+      }
+      return PublishAssessmentProtected(targetId);
+    },
+  });
+}
+   

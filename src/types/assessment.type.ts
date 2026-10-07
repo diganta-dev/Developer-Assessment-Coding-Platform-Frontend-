@@ -66,6 +66,7 @@ export interface IAssessment {
   proctoringSettings?: IProctoringSettings;
   companyId?: string;
   createdById?: string;
+  creatorId?: string;
   status?: "DRAFT" | "PUBLISHED" | "ACTIVE" | "EXPIRED" | "ARCHIVED" | string;
   isResultPublished?: boolean;
   resultsPublishedAt?: string | null;
@@ -655,11 +656,41 @@ export interface IDetailedAssessmentReportResponse {
   data: IDetailedAssessmentReportData;
 }
 
+export interface IPublishResultsPayload {
+  publishAll?: boolean;
+  attemptIds?: string[];
+  recalculateRanks?: boolean;
+}
+
+export interface IPublishResultsOverview {
+  totalAttempts: number;
+  completedAttempts: number;
+  passedCount: number;
+  failedCount: number;
+  passRate: number;
+  averageScore: number;
+  highestScore: number;
+  lowestScore: number;
+}
+
+export interface IPublishResultsData {
+  publishedCount: number;
+  publishedAt: string;
+  overview?: IPublishResultsOverview;
+}
+
 export interface IPublishResultsResponse {
   statusCode?: number;
   success: boolean;
   message: string;
-  data?: unknown;
+  data?: IPublishResultsData;
+}
+
+export interface IPublishAssessmentResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data?: IAssessment;
 }
 
 export interface ICreateSubmissionPayload {

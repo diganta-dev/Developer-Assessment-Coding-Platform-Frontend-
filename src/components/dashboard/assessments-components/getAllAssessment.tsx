@@ -16,6 +16,7 @@ import {
   Layers,
   Loader2,
   Maximize2,
+  Megaphone,
   Plus,
   RefreshCw,
   Search,
@@ -60,6 +61,7 @@ import { CompanyMemberRole, UserRole } from "@/types";
 import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
 import { InviteCandidateDialog } from "./invite-candidate-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
+import { PublishAssessmentDialog } from "./publish-assessment-dialog";
 import { SingleAssessmentDialog } from "./single-assessment-dialog";
 import { EditAssessmentDialog } from "./edit-assessment-dialog";
 import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
@@ -1153,6 +1155,25 @@ export function GetAllAssessment({
                                 </Button>
                               )}
 
+                            {/* Publish Results (Direct Route) Action (Admin / Company Owner / Company Admin / Assessment Creator) */}
+                            {canPublishResults &&
+                              assessment.status !== "DRAFT" && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setAssessmentToPublishResults(assessment)
+                                  }
+                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700 cursor-pointer"
+                                  title="Publish Assessment Results (Direct Route)"
+                                  id={`publish-results-${assessment.id}-btn`}
+                                >
+                                  <Megaphone className="size-3 text-emerald-600 dark:text-emerald-400" />
+                                  Publish Results
+                                </Button>
+                              )}
+
                               {/* Evaluator Report shortcut */}
                               {isEvaluator && (
                                 <Link
@@ -1215,58 +1236,19 @@ export function GetAllAssessment({
         </div>
       </Card>
 
-      {/* ── Publish Confirmation Modal ── */}
-      {assessmentToPublish && (
-        <Dialog
-          open={Boolean(assessmentToPublish)}
-          onOpenChange={(open) => !open && setAssessmentToPublish(null)}
-        >
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-base font-bold flex items-center gap-2">
-                <Send className="size-4 text-emerald-600" />
-                Publish Assessment
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground pt-1">
-                Are you sure you want to publish{" "}
-                <strong>&quot;{assessmentToPublish.title}&quot;</strong>? Once
-                published, the test becomes active and accessible to candidates
-                during the scheduled window.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={publishMutation.isPending}
-                onClick={() => setAssessmentToPublish(null)}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                disabled={publishMutation.isPending}
-                onClick={() => handleConfirmPublish(assessmentToPublish)}
-                className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-              >
-                {publishMutation.isPending ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin" />
-                    Publishing...
-                  </>
-                ) : (
-                  <>
-                    <Check className="size-3.5" />
-                    Confirm & Publish
-                  </>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* ── Publish Assessment Dialog (Direct Route) ── */}
+      <PublishAssessmentDialog
+        assessment={assessmentToPublish}
+        open={Boolean(assessmentToPublish)}
+        onOpenChange={(open) => !open && setAssessmentToPublish(null)}
+        onSuccess={() => {
+          if (selectedAssessment?.id === assessmentToPublish?.id) {
+            setSelectedAssessment((prev) =>
+              prev ? { ...prev, status: "PUBLISHED" } : null,
+            );
+          }
+        }}
+      />
 
       {/* ── Single Assessment Details Dialog (Role-Aware) ── */}
       <SingleAssessmentDialog

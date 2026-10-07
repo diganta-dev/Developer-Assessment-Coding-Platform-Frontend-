@@ -25,6 +25,7 @@ import {
   Lock,
   Mail,
   Maximize2,
+  Megaphone,
   Play,
   Plus,
   RefreshCw,
@@ -102,6 +103,8 @@ import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
 import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
 import { AssessmentResultsDialog } from "./assessment-results-dialog";
 import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
+import { StartAttemptDialog } from "./start-attempt-dialog";
+import { PublishAssessmentDialog } from "./publish-assessment-dialog";
 
 export interface SingleAssessmentDialogProps {
   assessmentId: string | null;
@@ -164,6 +167,8 @@ export function SingleAssessmentDialog({
   const [resultsModalOpen, setResultsModalOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [publishResultsModalOpen, setPublishResultsModalOpen] = useState(false);
+  const [startAttemptModalOpen, setStartAttemptModalOpen] = useState(false);
+  const [publishAssessmentModalOpen, setPublishAssessmentModalOpen] = useState(false);
 
   // TanStack Query for User Identity & Permissions
   const { data: meData } = useGetMe();
@@ -1246,11 +1251,9 @@ export function SingleAssessmentDialog({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => {
-                        onOpenChange(false);
-                        router.push("/candidate/assessments");
-                      }}
+                      onClick={() => setStartAttemptModalOpen(true)}
                       className="text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                      id="candidate-take-assessment-btn"
                     >
                       <Play className="size-3.5 fill-current" />
                       Take Assessment
@@ -1266,14 +1269,12 @@ export function SingleAssessmentDialog({
                       <Button
                         type="button"
                         size="sm"
-                        disabled={publishMutation.isPending}
-                        onClick={() => handlePublish(assessment)}
+                        onClick={() => setPublishAssessmentModalOpen(true)}
                         className="text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                        id="publish-draft-assessment-btn"
                       >
                         <Send className="size-3.5" />
-                        {publishMutation.isPending
-                          ? "Publishing..."
-                          : "Publish Assessment"}
+                        Publish Assessment
                       </Button>
                     )}
 
@@ -1314,17 +1315,19 @@ export function SingleAssessmentDialog({
                       Attempts ({assessment._count?.attempts ?? 0})
                     </Button>
 
-                    {/* Publish Results Button */}
+                    {/* Publish Results Button (Direct Route) */}
                     {canPublishResults && assessment.status !== "DRAFT" && (
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         onClick={() => setPublishResultsModalOpen(true)}
-                        className="text-xs gap-1.5 font-medium text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
+                        className="text-xs gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                        title="Publish Results (Direct Route)"
+                        id="publish-assessment-results-dialog-btn"
                       >
-                        <Send className="size-3.5 text-indigo-600" />
-                        Publish
+                        <Megaphone className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                        Publish Results
                       </Button>
                     )}
 
@@ -1444,6 +1447,19 @@ export function SingleAssessmentDialog({
             assessment={assessment}
             open={publishResultsModalOpen}
             onOpenChange={setPublishResultsModalOpen}
+            onSuccess={() => refetch()}
+          />
+
+          <StartAttemptDialog
+            assessment={assessment}
+            open={startAttemptModalOpen}
+            onOpenChange={setStartAttemptModalOpen}
+          />
+
+          <PublishAssessmentDialog
+            assessment={assessment}
+            open={publishAssessmentModalOpen}
+            onOpenChange={setPublishAssessmentModalOpen}
             onSuccess={() => refetch()}
           />
         </>
