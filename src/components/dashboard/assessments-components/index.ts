@@ -10,3 +10,4 @@ export * from "./detailed-assessment-report-view";
 export * from "./finalize-submit-attempt-dialog";
 export * from "./getAllAssessment";
 export * from "./invite-candidate-dialog";
+export * from "./publish-results-dialog";

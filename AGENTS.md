@@ -16,3 +16,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `page.tsx` files should export `Metadata`, render server layout/navigation, and embed interactive client components wrapped in `<Suspense>`.
 - All client-side hooks (`useState`, `useEffect`, `useSearchParams`, `@tanstack/react-query`, DOM event handlers) must be placed inside dedicated client components in `src/components/`, not in `page.tsx`.
 
+## 2. React Query Mutation Guidelines
+- Keep mutation hooks in `src/hook/` pure: they should only define `mutationFn`.
+- **Do NOT** perform `queryClient.invalidateQueries`, toast messages, or side-effects inside mutation hooks in `src/hook/`.
+- Handle all `onSuccess`, `onError`, toast notifications, and cache invalidations (`queryClient.invalidateQueries`) inside the calling components.
+

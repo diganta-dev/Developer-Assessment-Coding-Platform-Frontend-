@@ -13,6 +13,7 @@ import type {
   IDetailedAssessmentReportResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
+  IPublishResultsResponse,
   IStartAttemptPayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
@@ -179,7 +180,9 @@ export function getDetailedAssesssmentReport(
   });
 }
 
-export function publishResults(assessmentId: string) {
+export function publishResults(
+  assessmentId: string,
+): Promise<IPublishResultsResponse> {
   return apiClient(`assessment/publish-results/${assessmentId}`, {
     method: "POST",
   });

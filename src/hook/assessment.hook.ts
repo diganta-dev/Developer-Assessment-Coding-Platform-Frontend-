@@ -216,10 +216,15 @@ export function useGetDetailedAssesssmentReport(attemptId: string) {
   });
 }
 
-export function usePublishResult(assessmentId: string){
+export function usePublishResult(assessmentId?: string) {
   return useMutation({
-    mutationFn: () => publishResults(assessmentId), 
-    
-  })
+    mutationFn: (overrideAssessmentId?: string) => {
+      const targetId = overrideAssessmentId || assessmentId;
+      if (!targetId) {
+        throw new Error("Assessment ID is required to publish results.");
+      }
+      return publishResults(targetId);
+    },
+  });
 }
  

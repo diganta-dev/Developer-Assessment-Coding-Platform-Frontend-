@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  Award,
   Calendar,
   Check,
   Clock,
@@ -49,8 +50,12 @@ import {
   usePublishAssessment,
 } from "@/hook/assessment.hook";
 import type { IAssessment } from "@/types/assessment.type";
+import { useGetMe } from "@/hook";
+import { isUserAuthorized } from "@/utils";
+import { CompanyMemberRole, UserRole } from "@/types";
 import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
 import { InviteCandidateDialog } from "./invite-candidate-dialog";
+import { PublishResultsDialog } from "./publish-results-dialog";
 
 interface GetAllAssessmentProps {
   onCreateClick?: () => void;
@@ -316,7 +321,19 @@ export function GetAllAssessment({
     useState<IAssessment | null>(null);
   const [invitationsAssessment, setInvitationsAssessment] =
     useState<IAssessment | null>(null);
+  const [assessmentToPublishResults, setAssessmentToPublishResults] =
+    useState<IAssessment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const { data: meData } = useGetMe();
+  const currentUser = meData?.data;
+  const canPublishResults = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+  ]);
 
   // TanStack Query to fetch company assessments
   const { data, isLoading, isError, error, isFetching, refetch } =
@@ -947,6 +964,24 @@ export function GetAllAssessment({
                               Invitations
                             </Button>
 
+                            {/* Publish Results action */}
+                            {canPublishResults &&
+                              assessment.status !== "DRAFT" && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setAssessmentToPublishResults(assessment)
+                                  }
+                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700 cursor-pointer"
+                                  title="Publish Results for Candidates"
+                                >
+                                  <Award className="size-3 text-emerald-600 dark:text-emerald-400" />
+                                  Results
+                                </Button>
+                              )}
+
                             <Button
                               type="button"
                               variant="outline"
@@ -1241,6 +1276,22 @@ export function GetAllAssessment({
                 View Invitations
               </Button>
 
+              {/* Publish Results Button inside Details dialog */}
+              {canPublishResults &&
+                selectedAssessment.status !== "DRAFT" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setAssessmentToPublishResults(selectedAssessment);
+                    }}
+                    className="text-xs gap-1.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 font-semibold cursor-pointer"
+                  >
+                    <Award className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                    Publish Results
+                  </Button>
+                )}
+
               {/* Publish button inside Details dialog for Drafts */}
               {selectedAssessment.status === "DRAFT" && (
                 <Button
@@ -1270,6 +1321,14 @@ export function GetAllAssessment({
         open={Boolean(invitationsAssessment)}
         onOpenChange={(open) => !open && setInvitationsAssessment(null)}
         onInviteMore={(a) => setCandidateInviteAssessment(a)}
+      />
+
+      {/* ── Publish Results Modal ── */}
+      <PublishResultsDialog
+        assessment={assessmentToPublishResults}
+        open={Boolean(assessmentToPublishResults)}
+        onOpenChange={(open) => !open && setAssessmentToPublishResults(null)}
+        onSuccess={() => refetch()}
       />
     </div>
   );

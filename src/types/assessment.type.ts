@@ -621,3 +621,10 @@ export interface IDetailedAssessmentReportResponse {
   data: IDetailedAssessmentReportData;
 }
 
+export interface IPublishResultsResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+

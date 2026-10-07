@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  Award,
   Check,
   CheckCircle2,
   Clock,
@@ -41,8 +42,12 @@ import type {
   IAssessment,
   IAssessmentInvitation,
 } from "@/types/assessment.type";
+import { useGetMe } from "@/hook";
+import { isUserAuthorized } from "@/utils";
+import { CompanyMemberRole, UserRole } from "@/types";
 import { AttemptDetailsDialog } from "./attempt-details-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
+import { PublishResultsDialog } from "./publish-results-dialog";
 
 interface AssessmentInvitationsDialogProps {
   assessment: IAssessment | null;
@@ -108,6 +113,17 @@ export function AssessmentInvitationsDialog({
     string | null
   >(null);
   const [detailedReportOpen, setDetailedReportOpen] = useState(false);
+  const [publishResultsOpen, setPublishResultsOpen] = useState(false);
+
+  const { data: meData } = useGetMe();
+  const currentUser = meData?.data;
+  const canPublishResults = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+  ]);
 
   const assessmentId = assessment?.id || "";
 
@@ -249,6 +265,20 @@ export function AssessmentInvitationsDialog({
                 />
                 <span>Refresh</span>
               </Button>
+
+              {canPublishResults && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPublishResultsOpen(true)}
+                  className="h-8 text-xs gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                  title="Publish results to all candidates who took this assessment"
+                >
+                  <Award className="size-3.5" />
+                  <span>Publish Results</span>
+                </Button>
+              )}
 
               {onInviteMore && (
                 <Button
@@ -669,6 +699,14 @@ export function AssessmentInvitationsDialog({
         attemptId={detailedReportAttemptId}
         open={detailedReportOpen}
         onOpenChange={setDetailedReportOpen}
+      />
+
+      {/* ── Publish Results Dialog ── */}
+      <PublishResultsDialog
+        assessment={assessment}
+        open={publishResultsOpen}
+        onOpenChange={setPublishResultsOpen}
+        onSuccess={() => refetch()}
       />
     </Dialog>
   );
