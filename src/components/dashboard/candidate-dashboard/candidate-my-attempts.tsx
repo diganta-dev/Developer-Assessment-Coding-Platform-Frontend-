@@ -6,6 +6,7 @@ import {
   Award,
   CheckCircle2,
   Clock,
+  Code2,
   Eye,
   FileCheck2,
   Play,
@@ -20,6 +21,7 @@ import { useMemo, useState } from "react";
 import {
   AttemptDetailsDialog,
   AttemptResultDialog,
+  CreateSubmissionDialog,
   FinalizeSubmitAttemptDialog,
 } from "@/components/dashboard/assessments-components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -95,6 +97,12 @@ export function CandidateMyAttempts() {
   // Result dialog state
   const [resultAttemptId, setResultAttemptId] = useState<string | null>(null);
   const [resultOpen, setResultOpen] = useState(false);
+
+  // Submission workspace dialog state
+  const [workspaceAttemptId, setWorkspaceAttemptId] = useState<string | null>(
+    null,
+  );
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
 
   const pageSize = 10;
 
@@ -598,11 +606,24 @@ export function CandidateMyAttempts() {
                               <Button
                                 type="button"
                                 size="sm"
+                                onClick={() => {
+                                  setWorkspaceAttemptId(item.id);
+                                  setWorkspaceOpen(true);
+                                }}
+                                className="h-7 text-xs px-2.5 gap-1 font-medium bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
+                              >
+                                <Code2 className="size-3" />
+                                <span>Solve</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
                                 onClick={() => handleResumeAttempt(item)}
                                 disabled={startAttemptMutation.isPending}
-                                className="h-7 text-xs px-2.5 gap-1.5 font-medium bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
+                                className="h-7 text-xs px-2 gap-1 font-medium text-amber-600 border-amber-500/30 hover:bg-amber-500/10 dark:text-amber-400 cursor-pointer"
                               >
-                                <Play className="size-3 fill-white" />
+                                <Play className="size-3 fill-amber-500 text-amber-500" />
                                 <span>Resume</span>
                               </Button>
                               <Button
@@ -713,6 +734,25 @@ export function CandidateMyAttempts() {
         onSuccess={(id) => {
           setResultAttemptId(id);
           setResultOpen(true);
+        }}
+      />
+
+      {/* ── Candidate Submission Workspace Modal Dialog ── */}
+      <CreateSubmissionDialog
+        attemptId={workspaceAttemptId}
+        open={workspaceOpen}
+        onOpenChange={setWorkspaceOpen}
+        onSubmissionSuccess={() => {
+          refetch();
+          queryClient.invalidateQueries({
+            queryKey: ["candidate-my-attempts"],
+          });
+        }}
+        onAllCompleted={() => {
+          refetch();
+          queryClient.invalidateQueries({
+            queryKey: ["candidate-my-attempts"],
+          });
         }}
       />
 

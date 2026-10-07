@@ -10,6 +10,8 @@ import type {
   ICandidateMyAttemptsFilters,
   ICandidateMyAttemptsResponse,
   ICreateAssessmentPayload,
+  ICreateSubmissionPayload,
+  ICreateSubmissionResponse,
   IDetailedAssessmentReportResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
@@ -185,5 +187,18 @@ export function publishResults(
 ): Promise<IPublishResultsResponse> {
   return apiClient(`assessment/publish-results/${assessmentId}`, {
     method: "POST",
+  });
+}
+
+export function createSubmissionFromAttempt(
+  attemptId: string,
+  payload: ICreateSubmissionPayload,
+): Promise<ICreateSubmissionResponse> {
+  return apiClient(`assessment/attempts/${attemptId}/submissions`, {
+    method: "POST",
+    body: {
+      attemptId,
+      ...payload,
+    },
   });
 }

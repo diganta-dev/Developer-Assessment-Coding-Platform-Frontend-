@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addProblemInAssessment,
   createAssessment,
+  createSubmissionFromAttempt,
   finalizeAndSubmitAttempt,
   getAssessmentInvitation,
   getAttemptDetails,
@@ -22,6 +23,7 @@ import type {
   IAssessmentFilters,
   ICandidateMyAttemptsFilters,
   ICreateAssessmentPayload,
+  ICreateSubmissionPayload,
   IInviteCandidatePayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
@@ -227,4 +229,12 @@ export function usePublishResult(assessmentId?: string) {
     },
   });
 }
- 
+
+export function useCreateSubmissionFromAttempt() {
+  return useMutation({
+    mutationFn: (variables: {
+      attemptId: string;
+      payload: ICreateSubmissionPayload;
+    }) => createSubmissionFromAttempt(variables.attemptId, variables.payload),
+  });
+} 

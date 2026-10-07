@@ -30,6 +30,7 @@ import type {
   ISanitizedAssessmentProblem,
 } from "@/types/assessment.type";
 import { AttemptResultDialog } from "./attempt-result-dialog";
+import { CreateSubmissionDialog } from "./create-submission-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { FinalizeSubmitAttemptDialog } from "./finalize-submit-attempt-dialog";
 
@@ -92,6 +93,9 @@ export function AttemptDetailsDialog({
   const [resultOpen, setResultOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [detailedReportOpen, setDetailedReportOpen] = useState(false);
+  const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
+  const [selectedProblemIdForSubmission, setSelectedProblemIdForSubmission] =
+    useState<string | null>(null);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetAttemptDetails(attemptId || "");
@@ -452,6 +456,22 @@ export function AttemptDetailsDialog({
                               <Clock className="size-3" /> Unanswered
                             </span>
                           )}
+
+                          {isCandidateView && status === "IN_PROGRESS" && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedProblemIdForSubmission(problem.id);
+                                setSubmissionDialogOpen(true);
+                              }}
+                              className="h-6 text-[11px] px-2 font-medium border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
+                            >
+                              <Code2 className="size-2.5 mr-1" />
+                              <span>{isAnswered ? "Edit Answer" : "Answer"}</span>
+                            </Button>
+                          )}
                         </div>
                       </div>
 
@@ -672,6 +692,18 @@ export function AttemptDetailsDialog({
                   type="button"
                   size="sm"
                   onClick={() => {
+                    setSelectedProblemIdForSubmission(null);
+                    setSubmissionDialogOpen(true);
+                  }}
+                  className="text-xs h-8 gap-1.5 font-medium bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-sm"
+                >
+                  <Code2 className="size-3" />
+                  <span>Solve Questions</span>
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
                     onOpenChange(false);
                     if (attempt) {
                       startAttemptMutation.mutate({
@@ -701,6 +733,18 @@ export function AttemptDetailsDialog({
       </DialogContent>
 
       {/* ── Sub Dialogs ── */}
+      <CreateSubmissionDialog
+        attemptId={attemptId}
+        initialProblemId={selectedProblemIdForSubmission}
+        open={submissionDialogOpen}
+        onOpenChange={setSubmissionDialogOpen}
+        onSubmissionSuccess={() => {
+          refetch();
+        }}
+        onAllCompleted={() => {
+          refetch();
+        }}
+      />
       <AttemptResultDialog
         attemptId={attemptId}
         open={resultOpen}

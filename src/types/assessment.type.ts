@@ -230,6 +230,7 @@ export interface ISanitizedAssessmentProblem {
     codingQuestion?: {
       id: string;
       testCases: ISanitizedProblemTestCase[];
+      supportedLanguages?: string[];
     } | null;
     writtenQuestion?: unknown | null;
   };
@@ -626,5 +627,21 @@ export interface IPublishResultsResponse {
   success: boolean;
   message: string;
   data?: unknown;
+}
+
+export interface ICreateSubmissionPayload {
+  attemptId?: string;
+  problemId: string;
+  selectedOptionId?: string | null;
+  answerText?: string | null;
+  sourceCode?: string | null;
+  language?: string | null;
+}
+
+export interface ICreateSubmissionResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data: IAttemptSubmissionItem;
 }
 
