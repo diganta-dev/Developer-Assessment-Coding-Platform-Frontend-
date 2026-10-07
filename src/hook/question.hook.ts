@@ -4,7 +4,9 @@ import {
   deleteProblem,
   getAllProblem,
   getCompanyProblems,
+  getMyCompanyProblems,
   getOneProblem,
+  getProblemsDirect,
   updateProblem,
 } from "@/api";
 import type {
@@ -31,10 +33,24 @@ export function useGetAllQuestion(filters?: IProblemFilters) {
   });
 }
 
+export function useGetProblemsDirect(filters?: IProblemFilters) {
+  return useQuery({
+    queryKey: ["all-questions-direct", filters],
+    queryFn: () => getProblemsDirect(filters),
+  });
+}
+
 export function useGetCompanyProblems(filters?: IProblemFilters) {
   return useQuery({
     queryKey: ["company-questions", filters],
     queryFn: () => getCompanyProblems(filters),
+  });
+}
+
+export function useGetMyCompanyProblems(filters?: IProblemFilters) {
+  return useQuery({
+    queryKey: ["my-company-questions", filters],
+    queryFn: () => getMyCompanyProblems(filters),
   });
 }
 

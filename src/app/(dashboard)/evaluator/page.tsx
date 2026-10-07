@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/card";
 import { CheckSquare, FileText, Layers } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { EvaluatorGradingQueue } from "@/components/dashboard/evaluator/evaluator-grading-queue";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function EvaluatorPage() {
@@ -95,6 +97,19 @@ export default function EvaluatorPage() {
             </Link>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="pt-4 border-t border-border/40">
+        <Suspense
+          fallback={
+            <div className="space-y-3 p-4">
+              <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+              <div className="h-40 w-full bg-muted/40 animate-pulse rounded-xl" />
+            </div>
+          }
+        >
+          <EvaluatorGradingQueue />
+        </Suspense>
       </div>
     </div>
   );

@@ -59,6 +59,10 @@ export const candidateRoutes: SidebarItems = [
         title: "Results",
         url: "/candidate/results",
       },
+      {
+        title: "Submissions",
+        url: "/candidate/submissions",
+      },
     ],
   },
   {

@@ -126,6 +126,12 @@ export function CalculateScoreDialog({
         queryClient.invalidateQueries({
           queryKey: ["detailed-assessment-report", attemptId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["score-calculation-attempt", attemptId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["score-calculation-submission"],
+        });
 
         toast.add({
           title: "Attempt Score Calculated",

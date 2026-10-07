@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAttemptResults } from "@/hook/assessment.hook";
 import type { IAttemptResultProblemBreakdown } from "@/types/assessment.type";
 import { CalculateScoreDialog } from "./calculate-score-dialog";
+import { SubmissionScoreBreakdownCard } from "./submission-score-breakdown-card";
 
 interface AttemptResultDialogProps {
   attemptId: string | null;
@@ -671,6 +672,12 @@ export function AttemptResultDialog({
                                 </div>
                               )}
                             </div>
+                          )}
+
+                          {hasSubmission && submission?.id && (
+                            <SubmissionScoreBreakdownCard
+                              submissionId={submission.id}
+                            />
                           )}
 
                           {!hasSubmission && (

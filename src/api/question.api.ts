@@ -22,6 +22,15 @@ export function getAllProblem(
   });
 }
 
+export function getProblemsDirect(
+  filters?: IProblemFilters,
+): Promise<IProblemListResponse> {
+  return apiClient("problem", {
+    method: "GET",
+    query: filters,
+  });
+}
+
 export function getCompanyProblems(
   filters?: IProblemFilters,
 ): Promise<IProblemListResponse> {
@@ -30,11 +39,22 @@ export function getCompanyProblems(
     query: filters,
   });
 }
+
+export function getMyCompanyProblems(
+  filters?: IProblemFilters,
+): Promise<IProblemListResponse> {
+  return apiClient("problem/my-company-problems", {
+    method: "GET",
+    query: filters,
+  });
+}
+
 export function deleteProblem(problemId: string) {
   return apiClient(`problem/${problemId}`, {
     method: "DELETE",
   });
 }
+
 export function getOneProblem(problemId: string) {
   return apiClient(`problem/${problemId}`, {
     method: "GET",

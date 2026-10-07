@@ -43,6 +43,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import {
   useDeleteCompanyProblem,
+  useGetAllQuestion,
   useGetCompanyProblems,
   useGetOneProblem,
 } from "@/hook/question.hook";
@@ -55,6 +56,11 @@ import type {
 } from "@/types";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
+
+const SCOPE_OPTIONS = [
+  { value: "COMPANY" as const, label: "My Company" },
+  { value: "ALL" as const, label: "Platform Bank" },
+];
 
 const DIFFICULTY_OPTIONS: { value: Difficulty | "ALL"; label: string }[] = [
   { value: "ALL", label: "All Difficulties" },
@@ -517,6 +523,7 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
     "ALL",
   );
   const [typeFilter, setTypeFilter] = useState<ProblemType | "ALL">("ALL");
+  const [scopeFilter, setScopeFilter] = useState<"COMPANY" | "ALL">("COMPANY");
 
   // Sorting state
   const [sortBy, setSortBy] = useState<string | undefined>("createdAt");
@@ -581,8 +588,13 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
     ],
   );
 
-  const { data, isLoading, isFetching, isError, error, refetch } =
-    useGetCompanyProblems(filters);
+  const companyProblemsQuery = useGetCompanyProblems(filters);
+  const allProblemsQuery = useGetAllQuestion(filters);
+
+  const activeQuery =
+    scopeFilter === "ALL" ? allProblemsQuery : companyProblemsQuery;
+
+  const { data, isLoading, isFetching, isError, error, refetch } = activeQuery;
 
   const problems: IProblemListItem[] = data?.data ?? [];
   const meta = data?.meta;
@@ -687,6 +699,17 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
             <Filter className="size-3" />
             <span className="hidden sm:inline">Filters:</span>
           </div>
+
+          {/* Scope filter */}
+          <SelectFilter
+            id="problem-scope-filter"
+            value={scopeFilter}
+            options={SCOPE_OPTIONS}
+            onChange={(v) => {
+              setScopeFilter(v as "COMPANY" | "ALL");
+              setPage(1);
+            }}
+          />
 
           {/* Type filter */}
           <SelectFilter

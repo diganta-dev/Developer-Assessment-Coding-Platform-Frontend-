@@ -42,3 +42,10 @@ export interface AddCompanyMemberPayload {
   email: string;
   role: string;
 }
+
+export interface UpdateCompanyPayload {
+  name?: string;
+  description?: string | null;
+  website?: string | null;
+  logoUrl?: string | null;
+}

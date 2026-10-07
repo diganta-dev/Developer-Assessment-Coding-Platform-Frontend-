@@ -67,23 +67,32 @@ Server Page (src/app/**/page.tsx - Server Component, Metadata, Suspense)
 | `/assessment/invitation` | Public (Token verified) | `AssessmentInvitationView` | Complete |
 | `/dashboard` | Authenticated (Any role) | Role Redirector | Complete |
 | `/candidate` | Authenticated Candidate | Candidate Overview & Attempts | Complete |
-| `/candidate/assessments` | Authenticated Candidate | `CandidateAssessmentWorkspace` | Partial (Direct `assessmentId` preview missing) |
+| `/candidate/assessments` | Authenticated Candidate | `CandidateAssessmentWorkspace` | Complete |
+| `/candidate/results` | Authenticated Candidate | `CandidateMyResults` | Complete |
+| `/candidate/submissions` | Authenticated Candidate | `CandidateMySubmissions` | Complete |
 | `/company-admin` | Company Admin / Owner | Company Dashboard Overview | Complete |
 | `/company-admin/assessments` | Company Admin / Owner | `AssessmentManagement` | Complete |
 | `/company-admin/assessments/report` | Company Admin / Owner / Evaluator | `DetailedAssessmentReportView` | Complete |
 | `/company-admin/company-members` | Company Admin / Owner | `CompanyManageTeam` | Complete |
 | `/company-admin/create-problems-bank` | Company Admin / Owner / Creator | `ProblemBankManagement` | Complete |
 | `/company-admin/invitation` | Company Admin / Owner | Member Invitation Form | Complete |
-| `/company-admin/report` | Company Admin / Owner | Organization Report View | Complete |
+| `/company-admin/candidates` | Company Admin / Owner | `CompanyCandidatesView` | Complete |
+| `/company-admin/report` | Company Admin / Owner | `ReportsHub` (Analytics & Organization Pipeline) | Complete |
 | `/assessment-creator` | Assessment Creator | Creator Overview | Complete |
 | `/assessment-creator/assessments` | Assessment Creator | `AssessmentManagement` | Complete |
-| `/assessment-creator/report` | Assessment Creator | Creator Attempt Reports | Complete |
+| `/assessment-creator/problems` | Assessment Creator | `ProblemBankCreate` | Complete |
+| `/assessment-creator/report` | Assessment Creator | `ReportsHub` (Analytics & Attempt Reports) | Complete |
 | `/evaluator` | Evaluator | Evaluator Workspace & Queue | Complete |
 | `/evaluator/assessments` | Evaluator | `AssessmentManagement` | Complete |
-| `/evaluator/report` | Evaluator | Evaluator Report View | Complete |
-| `/admin` | Platform Admin / Super Admin | Admin Control Center | Complete |
+| `/evaluator/submissions` | Evaluator | `EvaluatorGradingQueue` | Complete |
+| `/evaluator/report` | Evaluator | `ReportsHub` (Analytics & Attempt Reports) | Complete |
+| `/admin` | Platform Admin / Super Admin | Admin Control Center (`AdminOverview`) | Complete |
+| `/admin/users` | Platform Admin / Super Admin | `AdminUserManagement` Directory | Complete |
+| `/admin/companies` | Platform Admin / Super Admin | `AdminCompanyManagement` Directory | Complete |
 | `/admin/assessments` | Platform Admin / Super Admin | `AssessmentManagement` | Complete |
-| `/admin/report` | Platform Admin / Super Admin | Global Telemetry & Reports | Complete |
+| `/admin/report` | Platform Admin / Super Admin | `ReportsHub` (Global Analytics & Reports) | Complete |
+| `/candidate/invitations` | Authenticated Candidate | `CandidateMyAttempts` | Complete |
+| `/candidate/profile` | Authenticated Candidate | `CandidateProfileView` | Complete |
 
 ---
 
@@ -98,13 +107,13 @@ Server Page (src/app/**/page.tsx - Server Component, Metadata, Suspense)
 | `02. Company & Workspace` | 9 | 7 | 2 |
 | `03. Problem Bank Management` | 8 | 6 | 2 |
 | `04. Assessment Lifecycle` | 36 | 32 | 4 |
-| `05. Solution Submissions` | 8 | 0 | 8 |
-| `06. Anti-Cheating Telemetry` | 8 | 0 | 8 |
-| `07. Evaluation Engine` | 8 | 0 | 8 |
-| `08. Score Calculation` | 10 | 0 | 10 |
-| `09. Ranking & Results` | 7 | 0 | 7 |
-| `10. Reports & Analytics` | 8 | 0 | 8 |
-| `11. Admin Management` | 9 | 0 | 9 |
+| `05. Solution Submissions` | 8 | 8 | 0 |
+| `06. Anti-Cheating Telemetry` | 8 | 8 | 0 |
+| `07. Evaluation Engine` | 8 | 8 | 0 |
+| `08. Score Calculation` | 10 | 10 | 0 |
+| `09. Ranking & Results` | 7 | 7 | 0 |
+| `10. Reports & Analytics` | 8 | 8 | 0 |
+| `11. Admin Management` | 9 | 9 | 0 |
 
 ---
 
@@ -198,3 +207,187 @@ Priority 6: Admin Management Directory Operations
     - [CandidateMyAttempts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-my-attempts.tsx) listens to `searchParams.get("assessmentId")` to preview assessment before attempt.
   - **Error & Forbidden States:** Enhanced 403 / Forbidden alert showing specific backend error messages and guidance for private invitations.
   - **Verification:** Frontend build clean (`npm run build`: 29/29 static pages, zero TypeScript errors). Backend build clean (`npm run build`: zero errors).
+
+- **[2026-10-07] Feature 2: Assessment Problem Assignment Direct Route Integration (Status: COMPLETE):**
+  - **API:** [addProblemsDirectRoute](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/assessment.api.ts) (`POST /assessment/:id/problems`).
+  - **Hook:** [useAddProblemsDirectRoute](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/assessment.hook.ts) pure mutation hook.
+  - **UI / Component:** [AddProblemInAssessment](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/addProblemInAssesment.tsx) wired to `useAddProblemsDirectRoute(selectedAssessmentId)`.
+  - **Cache Management:** Invalidation of `["company-assessments"]`, `["assessments"]`, `["company-questions"]`, `["assessment-single", selectedAssessmentId]`, and `["assessment-single-direct", selectedAssessmentId]` on mutation success.
+  - **Verification:** Frontend build clean (`npm run build`: 29/29 static pages).
+
+- **[2026-10-07] Feature 3: Anti-Cheating Telemetry Live Hooks & Proctor Risk Audit (Module 06) (Status: COMPLETE):**
+  - **API:** [anti-cheating.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/anti-cheating.api.ts):
+    - `recordAntiCheatViolation` (`POST /anti-cheating/attempt/:attemptId/violation`)
+    - `detectTabSwitch` (`POST /anti-cheating/attempt/:attemptId/tab-switch`)
+    - `detectMultipleTabs` (`POST /anti-cheating/attempt/:attemptId/multiple-tabs`)
+    - `detectCopyPaste` (`POST /anti-cheating/attempt/:attemptId/copy-paste`)
+    - `detectFullscreenExit` (`POST /anti-cheating/attempt/:attemptId/fullscreen-exit`)
+    - `detectSuspiciousActivity` (`POST /anti-cheating/attempt/:attemptId/suspicious-activity`)
+    - `getCheatingRisk` (`GET /anti-cheating/attempt/:attemptId/risk`)
+    - `flagAttempt` (`POST /anti-cheating/attempt/:attemptId/flag`)
+  - **Hooks:** [anti-cheating.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/anti-cheating.hook.ts) pure TanStack Query hooks.
+  - **Candidate Workspace Telemetry:** [CandidateAssessmentWorkspace](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-assessment-workspace.tsx):
+    - Live tab switch detection via `document.visibilitychange` with duration calculation and proctor notification.
+    - Mandatory fullscreen departure detection via `document.fullscreenchange` with persistent alert modal & re-entry CTA.
+    - Clipboard copy & paste blocking and telemetry via `copy`/`paste` event interceptors when `preventCopyPaste` policy is active.
+    - Multi-tab concurrent exam session detection via `BroadcastChannel` heartbeat.
+    - Real-time telemetry status banner with live anti-cheat guard indicators.
+  - **Staff / Evaluator Audit Dialog:** [CheatingRiskAuditDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/cheating-risk-dialog.tsx) connected in [DetailedAssessmentReportView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/detailed-assessment-report-view.tsx) allowing Company Staff/Admins/Evaluators to review multi-factor risk scores, breakdown metrics, timeline, and formally flag or disqualify candidate attempts.
+  - **Verification:** Frontend build clean (`npm run build`: 29/29 static pages, zero TypeScript errors).
+
+- **[2026-10-07] Feature 4: Evaluator Manual Grading Queue & Form (Module 07) (Status: COMPLETE):**
+  - **API:** [evaluation.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/evaluation.api.ts):
+    - `getAllEvaluations` (`GET /evaluation`)
+    - `getEvaluationById` (`GET /evaluation/:id`)
+    - `manualEvaluateSubmission` (`POST /evaluation/manual/:submissionId`)
+    - `evaluateCodingSubmission` (`POST /evaluation/coding/:submissionId`)
+    - `evaluateMCQSubmission` (`POST /evaluation/mcq/:submissionId`)
+    - `evaluateWrittenSubmission` (`POST /evaluation/written/:submissionId`)
+    - `calculateAttemptEvaluationScore` (`POST /evaluation/attempt/:attemptId/score`)
+  - **Hooks:** [evaluation.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/evaluation.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [ManualEvaluationDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/evaluator/manual-evaluation-dialog.tsx): Rubric-based manual grading form with max points guard (`0 <= marks <= maxMarks`), feedback tags, candidate code/text preview, and cache invalidation.
+    - [EvaluatorGradingQueue](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/evaluator/evaluator-grading-queue.tsx): Full grading workspace with summary telemetry, filters by status and type, search, manual grading modals, and Judge0/MCQ auto-trigger actions.
+    - Embedded into `/evaluator` dashboard and created static-compatible Server Component route `/evaluator/submissions` ([page.tsx](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/evaluator/submissions/page.tsx)) wrapped in `<Suspense>`.
+- **[2026-10-07] Feature 5: Ranking & Leaderboard Publishing Workflow (Module 09) (Status: COMPLETE):**
+  - **API:** [ranking.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/ranking.api.ts):
+    - `generateAssessmentResult` (`POST /ranking-result/generate/:attemptId`)
+    - `calculateCandidateRank` (`GET /ranking-result/rank/:attemptId`)
+    - `getAssessmentLeaderboard` (`GET /ranking-result/leaderboard/:assessmentId`)
+    - `publishAssessmentResult` (`POST /ranking-result/publish/:assessmentId`)
+    - `getMyAssessmentResults` (`GET /ranking-result/my-results`)
+    - `getCandidateAttemptResult` (`GET /ranking-result/attempt/:attemptId`)
+  - **Hooks:** [ranking.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/ranking.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [CandidateMyResults](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-my-results.tsx): Candidate portfolio of verified assessment results, overall score gauge, pass/fail status badges, competitive rank (`Rank #X / Y`), percentile score, and modal for question-by-question scorecard breakdown.
+    - Connected in `/candidate` overview and added static-compatible Server Component route `/candidate/results` ([page.tsx](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/candidate/results/page.tsx)) wrapped in `<Suspense>`.
+- **[2026-10-07] Feature 6: Admin Management Directory Operations (Module 11) (Status: COMPLETE):**
+  - **API:** [admin.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/admin.api.ts):
+    - `getAdminDashboardStatistics` (`GET /admin-management/dashboard-statistics`)
+    - `getAdminSystemStatistics` (`GET /admin-management/system-statistics`)
+    - `getAdminUsers` (`GET /admin-management/users`)
+    - `getAdminUserDetails` (`GET /admin-management/users/:id`)
+    - `updateAdminUserStatus` (`PATCH /admin-management/users/:id/status`)
+    - `deleteAdminUser` (`DELETE /admin-management/users/:id`)
+    - `getAdminCompanies` (`GET /admin-management/companies`)
+  - **Hooks:** [admin.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/admin.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [AdminOverview](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/admin/admin-overview.tsx): Live platform statistics and infrastructure telemetry (Server uptime, Node version, memory heap, entity counts, security incident metrics).
+    - [AdminUserManagement](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/admin/admin-user-management.tsx): Global user management directory with search, role filters, status toggles (activate/deactivate), delete confirmation dialog, and pagination.
+    - Embedded into `/admin` dashboard and added static-compatible Server Component route `/admin/users` ([page.tsx](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/admin/users/page.tsx)) wrapped in `<Suspense>`.
+  - **Verification:** Frontend build clean (`npm run build`: 32/32 static pages, zero TypeScript errors).
+
+- **[2026-10-07] Feature 7: Score Calculation Endpoints Integration (Module 08) (Status: COMPLETE):**
+  - **API:** [score-calculation.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/score-calculation.api.ts):
+    - `getSubmissionScore` (`GET /score-calculation/submission/:submissionId`)
+    - `getCodingScoreBreakdown` (`GET /score-calculation/coding/:submissionId/score`)
+    - `getMCQScoreBreakdown` (`GET /score-calculation/mcq/:submissionId/score`)
+    - `getWrittenScoreBreakdown` (`GET /score-calculation/written/:submissionId/score`)
+    - `getAttemptScore` (`GET /score-calculation/attempt/:attemptId`)
+    - `recalculateAttemptScore` (`POST /score-calculation/attempt/:attemptId`)
+  - **Hooks:** [score-calculation.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/score-calculation.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [SubmissionScoreBreakdownCard](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/submission-score-breakdown-card.tsx): Granular submission diagnostics (public vs hidden test cases, memory MB, execution time ms, MCQ option comparison, written word limit alerts, examiner feedback).
+    - Integrated into [AttemptResultDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/attempt-result-dialog.tsx) and [CalculateScoreDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/calculate-score-dialog.tsx).
+  - **Verification:** Frontend build clean (`npm run build`: 33/33 static pages, zero TypeScript errors).
+
+- **[2026-10-07] Feature 8: Solution Submissions Monitoring Integration (Module 05) (Status: COMPLETE):**
+  - **API:** [submission.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/submission.api.ts):
+    - `createSubmission` (`POST /submission`)
+    - `createSubmissionByAttempt` (`POST /submission/attempts/:attemptId`)
+    - `submitSubmission` (`POST /submission/submit`)
+    - `submitSubmissionById` (`POST /submission/:id/submit`)
+    - `evaluateCodingSubmissionDirect` (`POST /submission/:id/evaluate`)
+    - `getMySubmissions` (`GET /submission/my-submissions`)
+    - `getAttemptSubmissions` (`GET /submission/attempts/:attemptId`)
+    - `getSubmissionById` (`GET /submission/:id`)
+  - **Hooks:** [submission.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/submission.hook.ts) pure TanStack Query hooks.
+  - **UI / Pages:**
+    - [CandidateMySubmissions](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-my-submissions.tsx): Dedicated solution submissions browser with status tabs, accuracy filters, search, full source code viewer, and score engine breakdown modal.
+    - Static-compatible Server Component route `/candidate/submissions` ([page.tsx](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/candidate/submissions/page.tsx)) wrapped in `<Suspense>`.
+    - Added to `candidateRoutes` sidebar navigation.
+  - **Verification:** Frontend build clean (`npm run build`: 33/33 static pages).
+
+- **[2026-10-07] Feature 9: Reports & Analytics Deep Integration (Module 10) (Status: COMPLETE):**
+  - **API:** [reports-analytics.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/reports-analytics.api.ts):
+    - `getAssessmentReport` (`GET /reports-analytics/assessment/:assessmentId/report`)
+    - `getScoreDistribution` (`GET /reports-analytics/assessment/:assessmentId/score-distribution`)
+    - `getPassFailStatistics` (`GET /reports-analytics/assessment/:assessmentId/pass-fail`)
+    - `getAssessmentStatistics` (`GET /reports-analytics/assessment/:assessmentId/statistics`)
+    - `getCandidatePerformance` (`GET /reports-analytics/attempt/:attemptId/performance`)
+    - `getCandidateReport` (`GET /reports-analytics/candidate/:candidateId/report`)
+    - `getCompanyReport` (`GET /reports-analytics/company/:companyId/report`)
+  - **Hooks:** [reports-analytics.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/reports-analytics.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [AssessmentAnalyticsView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/reports/assessment-analytics-view.tsx): Cohort funnel (invited, started, completed), outcome pass rates, near-miss diagnostic alerts, score variance distribution, problem difficulty & accuracy matrix, and proctor infraction summaries.
+    - [CompanyAnalyticsView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/reports/company-analytics-view.tsx): Executive talent pipeline funnel, hiring conversion rates, drop-off diagnostics, and multi-assessment roster metrics.
+    - [CandidateCareerReportView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/reports/candidate-career-report-view.tsx): Multi-assessment talent portfolio, skill category mastery gauges, and historical rank benchmarks.
+    - [ReportsHub](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/reports/reports-hub.tsx): Tabbed hub wired into `/company-admin/report`, `/admin/report`, `/evaluator/report`, and `/assessment-creator/report`.
+  - **Verification:** Next.js static export build clean (`npm run build`: 33/33 static pages generated).
+
+- **[2026-10-07] Feature 10: Auth Lifecycle & Problem Bank Scope Integration (Module 01, 03) (Status: COMPLETE):**
+  - **API:** [auth.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/auth.api.ts) & [question.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/question.api.ts):
+    - `forgotPassword` (`POST /auth/forgot-password`)
+    - `resetPassword` (`POST /auth/reset-password`)
+    - `verifyLoginOtp` (`POST /auth/verify-login-otp`)
+    - `resendLoginOtp` (`POST /auth/resend-login-otp`)
+    - `googleLogin` (`POST /auth/google`)
+    - `refreshToken` (`POST /auth/refresh-token`)
+    - `getProblemsDirect` (`GET /problem`)
+    - `getMyCompanyProblems` (`GET /problem/my-company-problems`)
+  - **Hooks:** [auth.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/auth.hook.ts) & [question.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/question.hook.ts) pure TanStack Query hooks.
+  - **UI / Components:**
+    - [ForgotPasswordDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/form/forgot-password-dialog.tsx) connected directly into [LoginForm](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/form/login-from.tsx).
+    - Scope toggle filter ("My Company" vs "Platform Bank") integrated into [getallproblem-table.tsx](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/Problem-Bank-Management/getallproblem-table.tsx).
+  - **Verification:** Next.js static export build clean (`npm run build`: 33/33 static pages generated).
+
+- **[2026-10-07] Feature 11: Company Settings & Profile Edit View (Module 02) (Status: COMPLETE):**
+  - **API:** [company.api.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/api/company.api.ts):
+    - `updateCompany` (`PATCH /company/update-company/:companyId`)
+  - **Hooks:** [company.hook.ts](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/hook/company.hook.ts) pure TanStack Query mutation hook `useUpdateCompany`.
+  - **UI / Components:**
+    - [EditCompanyDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/company-dashboard/edit-company-dialog.tsx): Full company settings modal with real-time logo image preview, name validation, website and multi-line mission description inputs, loading state, error alert, and cache invalidation of `["user-company"]`.
+    - Wired into [CompanyProfile](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/company-dashboard/company-profile.tsx) header actions ("Edit Profile" button) and empty description card CTA.
+  - **Verification:**
+    - `npm run build`: 33/33 static pages generated, zero TypeScript errors.
+    - Biome linting: 0 errors, 0 warnings.
+
+- **[2026-10-07] Feature 12: Candidates Roster & Navigation Route Synchronization (Status: COMPLETE):**
+  - **Resolution for 404 on `/company-admin/candidates`:**
+    - Created [CompanyCandidatesPage](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/company-admin/candidates/page.tsx) Server Component with static metadata, `<Suspense>`, and back navigation.
+    - Built [CompanyCandidatesView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/company-dashboard/company-candidates-view.tsx) client component:
+      - Assessment selector toolbar & quick refresh button.
+      - KPI summary metrics: Total Candidates, Completed Tests, Pass Rate %, Average Score %.
+      - Real-time search across candidate names and emails.
+      - Dual filter dropdowns (by attempt status and pass/fail evaluation outcome).
+      - Candidates table with avatars, session duration, status badges, scores, progress bar, and pass/fail tags.
+      - Integrated actions: "Invite Candidate" ([InviteCandidateDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/invite-candidate-dialog.tsx)), "Scorecard Breakdown" ([AttemptResultDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/attempt-result-dialog.tsx)), "Submissions & Details" ([AttemptDetailsDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/attempt-details-dialog.tsx)), and "Proctor Telemetry Audit" ([CheatingRiskAuditDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/cheating-risk-dialog.tsx)).
+  - **Additional Navigation Route Alignment:**
+    - Created [AdminCompaniesPage](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/admin/companies/page.tsx) and [AdminCompanyManagement](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/admin/admin-company-management.tsx) for `/admin/companies`.
+    - Created [AssessmentCreatorProblemsPage](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/assessment-creator/problems/page.tsx) for `/assessment-creator/problems`.
+    - Created [CandidateInvitationsPage](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/candidate/invitations/page.tsx) for `/candidate/invitations`.
+    - Created [CandidateProfilePage](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/candidate/profile/page.tsx) and [CandidateProfileView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-profile-view.tsx) for `/candidate/profile`.
+  - **Verification:**
+    - Next.js static site export clean (`npm run build`: 38/38 static pages generated, zero TypeScript errors).
+    - Biome checks clean (0 errors, 0 warnings).
+
+---
+
+# 7. Final Comprehensive Audit & Verification Summary
+
+| Module | Endpoints | Frontend API | TanStack Query Hook | Primary UI Consumer | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **01. Authentication & Session** | 12 | `auth.api.ts` | `auth.hook.ts` | `LoginForm`, `RegisterForm`, `ForgotPasswordDialog`, `VerifyAccountForm`, `UserMenu` | **COMPLETE** |
+| **02. Company & Workspace** | 9 | `company.api.ts` | `company.hook.ts` | `CompanyProfile`, `EditCompanyDialog`, `CompanyManageTeam`, `MemberInvite` | **COMPLETE** |
+| **03. Problem Bank Management** | 8 | `question.api.ts` | `question.hook.ts` | `GetAllProblemTable`, `CreateCodingProblem`, `CreateMCQQuestion`, `CreateWrittenQuestion`, `EditProblemDialog` | **COMPLETE** |
+| **04. Assessment Lifecycle** | 36 | `assessment.api.ts` | `assessment.hook.ts` | `GetAllAssessment`, `SingleAssessmentDialog`, `CreateAssessment`, `EditAssessmentDialog`, `AddProblemInAssessment`, `AssessmentInvitationView`, `CandidateAssessmentWorkspace` | **COMPLETE** |
+| **05. Solution Submissions** | 8 | `submission.api.ts` | `submission.hook.ts` | `CandidateMySubmissions`, `CreateSubmissionDialog`, `CandidateAssessmentWorkspace` | **COMPLETE** |
+| **06. Anti-Cheating Telemetry** | 8 | `anti-cheating.api.ts` | `anti-cheating.hook.ts` | `CandidateAssessmentWorkspace`, `CheatingRiskAuditDialog`, `DetailedAssessmentReportView` | **COMPLETE** |
+| **07. Evaluation Engine** | 8 | `evaluation.api.ts` | `evaluation.hook.ts` | `EvaluatorGradingQueue`, `ManualEvaluationDialog` | **COMPLETE** |
+| **08. Score Calculation** | 10 | `score-calculation.api.ts` | `score-calculation.hook.ts` | `SubmissionScoreBreakdownCard`, `AttemptResultDialog`, `CalculateScoreDialog` | **COMPLETE** |
+| **09. Ranking & Results** | 7 | `ranking.api.ts` | `ranking.hook.ts` | `CandidateMyResults`, `AssessmentLeaderboardDialog`, `PublishResultsDialog`, `AssessmentResultsDialog` | **COMPLETE** |
+| **10. Reports & Analytics** | 8 | `reports-analytics.api.ts` | `reports-analytics.hook.ts` | `ReportsHub`, `AssessmentAnalyticsView`, `CompanyAnalyticsView`, `CandidateCareerReportView` | **COMPLETE** |
+| **11. Admin Management** | 9 | `admin.api.ts` | `admin.hook.ts` | `AdminOverview`, `AdminUserManagement` | **COMPLETE** |
+
+
+

@@ -22,9 +22,11 @@ import Link from "next/link";
 import { loginSchema } from "@/validation";
 import { useLogin } from "@/hook";
 import { useQueryClient } from "@tanstack/react-query";
+import { ForgotPasswordDialog } from "./forgot-password-dialog";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -120,7 +122,16 @@ export default function LoginForm() {
 
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <button
+                      type="button"
+                      onClick={() => setForgotPasswordOpen(true)}
+                      className="text-xs text-primary hover:underline font-medium transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <div className="relative">
                     <Input
                       id={field.name}
@@ -173,6 +184,11 @@ export default function LoginForm() {
           Register
         </Link>
       </div>
+
+      <ForgotPasswordDialog
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
+      />
     </div>
   );
 }

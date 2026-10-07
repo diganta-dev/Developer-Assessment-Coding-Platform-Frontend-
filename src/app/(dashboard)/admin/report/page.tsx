@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { DetailedAssessmentReportView } from "@/components/dashboard/assessments-components/detailed-assessment-report-view";
+import { ReportsHub } from "@/components/dashboard/reports";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
-  title: "Detailed Assessment Report | Admin Control Center",
-  description: "Candidate submission breakdown, test case telemetry, and anti-cheat audit report.",
+  title: "Reports & Global Analytics | Admin Control Center",
+  description:
+    "Cross-assessment analytics, score variance distributions, candidate submission diagnostics, and organization telemetry.",
 };
 
 export default function AdminAttemptReportPage() {
@@ -24,7 +25,7 @@ export default function AdminAttemptReportPage() {
         </Link>
       </div>
 
-      {/* Main Report View wrapped in Suspense for static site export */}
+      {/* Main Reports Hub wrapped in Suspense for static site export */}
       <Suspense
         fallback={
           <div className="space-y-4">
@@ -34,7 +35,7 @@ export default function AdminAttemptReportPage() {
           </div>
         }
       >
-        <DetailedAssessmentReportView isStandalonePage={true} />
+        <ReportsHub defaultTab="assessment" />
       </Suspense>
     </div>
   );
