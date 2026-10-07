@@ -16,6 +16,8 @@ import type {
   IDetailedAssessmentReportResponse,
   IDeleteAssessmentResponse,
   IGetAssessmentAttemptsResponse,
+  IGetAssessmentResultsResponse,
+  IGetAssessmentLeaderboardResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
   IPublishResultsResponse,
@@ -259,6 +261,20 @@ export function getAssessmentAttempts(
   });
 }
 
+export function getAssessmentResults(
+  assessmentId: string,
+): Promise<IGetAssessmentResultsResponse> {
+  return apiClient(`assessment/${assessmentId}/results`, {
+    method: "GET",
+  });
+}
+export function getAssessmentLeaderBoard(
+  assessmentId: string,
+): Promise<IGetAssessmentLeaderboardResponse> {
+  return apiClient(`assessment/${assessmentId}/leaderboard`, {
+    method: "GET",
+  });
+}
 
 
 

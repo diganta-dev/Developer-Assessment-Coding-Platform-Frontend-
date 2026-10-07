@@ -67,6 +67,8 @@ export interface IAssessment {
   companyId?: string;
   createdById?: string;
   status?: "DRAFT" | "PUBLISHED" | "ACTIVE" | "EXPIRED" | "ARCHIVED" | string;
+  isResultPublished?: boolean;
+  resultsPublishedAt?: string | null;
   settings?: {
     maxAttempts?: number;
     autoSubmitOnExpiry?: boolean;
@@ -855,4 +857,107 @@ export interface IGetAssessmentAttemptsResponse {
     | IAssessmentAttemptListItem[]
     | { attempts: IAssessmentAttemptListItem[]; count?: number };
 }
+
+export interface IAssessmentResultCandidate {
+  id: string;
+  name?: string | null;
+  email: string;
+  profilePictureUrl?: string | null;
+}
+
+export interface IAssessmentResultItem {
+  id: string;
+  assessmentId: string;
+  candidateId?: string;
+  attemptId?: string;
+  totalMarks: number;
+  obtainedMarks: number;
+  percentage: number;
+  passingScore?: number | null;
+  rank?: number | null;
+  status: "PASSED" | "FAILED" | "PENDING" | "EVALUATED" | string;
+  isPublished?: boolean;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  candidate?: IAssessmentResultCandidate | null;
+  attempt?: {
+    id: string;
+    attemptNumber?: number;
+    status?: string;
+    startedAt?: string | null;
+    submittedAt?: string | null;
+    durationMinutes?: number | null;
+  } | null;
+  assessment?: {
+    id: string;
+    title: string;
+    totalMarks: number;
+    passingScore?: number | null;
+  } | null;
+}
+
+export interface IGetAssessmentResultsResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data:
+    | IAssessmentResultItem[]
+    | {
+        results: IAssessmentResultItem[];
+        isPublished?: boolean;
+        totalCandidates?: number;
+        averageScore?: number;
+        highestScore?: number;
+      };
+}
+
+export interface IAssessmentLeaderboardItem {
+  id?: string;
+  rank: number;
+  candidateId?: string;
+  attemptId?: string;
+  obtainedMarks: number;
+  totalMarks: number;
+  percentage: number;
+  durationMinutes?: number | null;
+  submittedAt?: string | null;
+  status?: string;
+  candidate?: {
+    id: string;
+    name?: string | null;
+    email?: string;
+    profilePictureUrl?: string | null;
+  } | null;
+  assessment?: {
+    id: string;
+    title: string;
+    totalMarks: number;
+    passingScore?: number | null;
+  } | null;
+}
+
+export interface IGetAssessmentLeaderboardResponse {
+  statusCode?: number;
+  success: boolean;
+  message: string;
+  data:
+    | IAssessmentLeaderboardItem[]
+    | {
+        leaderboard?: IAssessmentLeaderboardItem[];
+        results?: IAssessmentLeaderboardItem[];
+        assessment?: {
+          id: string;
+          title: string;
+          totalMarks: number;
+          passingScore?: number | null;
+        };
+        totalParticipants?: number;
+        highestScore?: number;
+        averageScore?: number;
+        isPublished?: boolean;
+      };
+}
+
+
 

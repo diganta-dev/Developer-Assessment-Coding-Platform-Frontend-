@@ -23,6 +23,7 @@ import {
   Shield,
   ShieldAlert,
   Trash2,
+  Trophy,
   UserPlus,
   Users,
   X,
@@ -63,6 +64,8 @@ import { SingleAssessmentDialog } from "./single-assessment-dialog";
 import { EditAssessmentDialog } from "./edit-assessment-dialog";
 import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
 import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
+import { AssessmentResultsDialog } from "./assessment-results-dialog";
+import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
 import { Settings2 } from "lucide-react";
 
 
@@ -334,6 +337,10 @@ export function GetAllAssessment({
     useState<IAssessment | null>(null);
   const [attemptsAssessment, setAttemptsAssessment] =
     useState<IAssessment | null>(null);
+  const [assessmentForResults, setAssessmentForResults] =
+    useState<IAssessment | null>(null);
+  const [assessmentForLeaderboard, setAssessmentForLeaderboard] =
+    useState<IAssessment | null>(null);
   const [assessmentToPublishResults, setAssessmentToPublishResults] =
     useState<IAssessment | null>(null);
   const [assessmentToDelete, setAssessmentToDelete] =
@@ -366,6 +373,15 @@ export function GetAllAssessment({
   ]);
 
   const canViewAttempts = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+    CompanyMemberRole.EVALUATOR,
+  ]);
+
+  const canViewResults = isUserAuthorized(currentUser, [
     UserRole.ADMIN,
     UserRole.SUPER_ADMIN,
     CompanyMemberRole.COMPANY_OWNER,
@@ -1099,21 +1115,41 @@ export function GetAllAssessment({
                               </Button>
                             )}
 
-                            {/* Publish Results action */}
-                            {canPublishResults &&
+                            {/* Results & Leaderboard action (Admin / Company Owner / Company Admin / Assessment Creator / Evaluator) */}
+                            {canViewResults &&
                               assessment.status !== "DRAFT" && (
                                 <Button
                                   type="button"
                                   size="sm"
                                   variant="outline"
                                   onClick={() =>
-                                    setAssessmentToPublishResults(assessment)
+                                    setAssessmentForResults(assessment)
                                   }
                                   className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700 cursor-pointer"
-                                  title="Publish Results for Candidates"
+                                  title="View Assessment Results"
+                                  id={`view-results-${assessment.id}-btn`}
                                 >
                                   <Award className="size-3 text-emerald-600 dark:text-emerald-400" />
                                   Results
+                                </Button>
+                              )}
+
+                            {/* Leaderboard Action */}
+                            {canViewResults &&
+                              assessment.status !== "DRAFT" && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setAssessmentForLeaderboard(assessment)
+                                  }
+                                  className="text-xs h-7 px-2 gap-1 font-medium text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-700 cursor-pointer"
+                                  title="View Assessment Leaderboard"
+                                  id={`view-leaderboard-${assessment.id}-btn`}
+                                >
+                                  <Trophy className="size-3 text-amber-600 dark:text-amber-400" />
+                                  Leaderboard
                                 </Button>
                               )}
 
@@ -1283,6 +1319,22 @@ export function GetAllAssessment({
         assessment={attemptsAssessment}
         open={Boolean(attemptsAssessment)}
         onOpenChange={(open) => !open && setAttemptsAssessment(null)}
+      />
+
+      {/* ── Assessment Results Dialog ── */}
+      <AssessmentResultsDialog
+        assessment={assessmentForResults}
+        open={Boolean(assessmentForResults)}
+        onOpenChange={(open) => !open && setAssessmentForResults(null)}
+      />
+
+      {/* ── Assessment Leaderboard Dialog ── */}
+      <AssessmentLeaderboardDialog
+        assessmentId={assessmentForLeaderboard?.id ?? null}
+        assessmentTitle={assessmentForLeaderboard?.title}
+        assessment={assessmentForLeaderboard}
+        open={Boolean(assessmentForLeaderboard)}
+        onOpenChange={(open) => !open && setAssessmentForLeaderboard(null)}
       />
     </div>
   );

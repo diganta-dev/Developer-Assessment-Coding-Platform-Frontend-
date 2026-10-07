@@ -34,6 +34,7 @@ import {
   ShieldAlert,
   Sparkles,
   Trash2,
+  Trophy,
   User,
   UserCheck,
   UserPlus,
@@ -99,6 +100,8 @@ import { PublishResultsDialog } from "./publish-results-dialog";
 import { EditAssessmentDialog } from "./edit-assessment-dialog";
 import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
 import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
+import { AssessmentResultsDialog } from "./assessment-results-dialog";
+import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
 
 export interface SingleAssessmentDialogProps {
   assessmentId: string | null;
@@ -158,6 +161,8 @@ export function SingleAssessmentDialog({
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invitationsModalOpen, setInvitationsModalOpen] = useState(false);
   const [attemptsModalOpen, setAttemptsModalOpen] = useState(false);
+  const [resultsModalOpen, setResultsModalOpen] = useState(false);
+  const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [publishResultsModalOpen, setPublishResultsModalOpen] = useState(false);
 
   // TanStack Query for User Identity & Permissions
@@ -191,6 +196,15 @@ export function SingleAssessmentDialog({
     UserRole.SUPER_ADMIN,
     CompanyMemberRole.COMPANY_OWNER,
     CompanyMemberRole.COMPANY_ADMIN,
+  ]);
+
+  const canViewResults = isUserAuthorized(currentUser, [
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    CompanyMemberRole.COMPANY_OWNER,
+    CompanyMemberRole.COMPANY_ADMIN,
+    CompanyMemberRole.ASSESSMENT_CREATOR,
+    CompanyMemberRole.EVALUATOR,
   ]);
 
   const canPublishResults = canManageAssessments;
@@ -1144,13 +1158,27 @@ export function SingleAssessmentDialog({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setPublishResultsModalOpen(true)}
+                        onClick={() => setResultsModalOpen(true)}
                         disabled={assessment.status === "DRAFT"}
                         className="text-xs h-7 gap-1 cursor-pointer"
-                        title="Publish Results"
+                        title="View Assessment Results & Leaderboard"
+                        id="view-results-telemetry-btn"
                       >
                         <Award className="size-3 text-emerald-600" />
                         Results
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLeaderboardModalOpen(true)}
+                        disabled={assessment.status === "DRAFT"}
+                        className="text-xs h-7 gap-1 cursor-pointer"
+                        title="View Assessment Leaderboard"
+                        id="view-leaderboard-telemetry-btn"
+                      >
+                        <Trophy className="size-3 text-amber-600" />
+                        Leaderboard
                       </Button>
                     </div>
                   </Card>
@@ -1201,18 +1229,33 @@ export function SingleAssessmentDialog({
 
                 {/* Candidate Action: Start or Go to Workspace */}
                 {isCandidate && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      onOpenChange(false);
-                      router.push("/candidate/assessments");
-                    }}
-                    className="text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
-                  >
-                    <Play className="size-3.5 fill-current" />
-                    Take Assessment
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {assessment.status !== "DRAFT" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setLeaderboardModalOpen(true)}
+                        className="text-xs gap-1.5 font-medium text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
+                        id="candidate-view-leaderboard-btn"
+                      >
+                        <Trophy className="size-3.5 text-amber-600 dark:text-amber-400" />
+                        Leaderboard
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        router.push("/candidate/assessments");
+                      }}
+                      className="text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                    >
+                      <Play className="size-3.5 fill-current" />
+                      Take Assessment
+                    </Button>
+                  </div>
                 )}
 
                 {/* Staff / Admin Actions */}
@@ -1278,12 +1321,43 @@ export function SingleAssessmentDialog({
                         size="sm"
                         variant="outline"
                         onClick={() => setPublishResultsModalOpen(true)}
+                        className="text-xs gap-1.5 font-medium text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
+                      >
+                        <Send className="size-3.5 text-indigo-600" />
+                        Publish
+                      </Button>
+                    )}
+
+                    {/* Assessment Results */}
+                    {canViewResults && assessment.status !== "DRAFT" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setResultsModalOpen(true)}
                         className="text-xs gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                        id="view-results-footer-btn"
                       >
                         <Award className="size-3.5 text-emerald-600" />
                         Results
                       </Button>
                     )}
+
+                    {/* Assessment Leaderboard (Staff or Published) */}
+                    {(canViewResults || assessment.isResultPublished) &&
+                      assessment.status !== "DRAFT" && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setLeaderboardModalOpen(true)}
+                          className="text-xs gap-1.5 font-medium text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
+                          id="view-leaderboard-footer-btn"
+                        >
+                          <Trophy className="size-3.5 text-amber-600 dark:text-amber-400" />
+                          Leaderboard
+                        </Button>
+                      )}
 
                     {/* Delete Assessment Action (Admin / Company Owner / Company Admin) */}
                     {canDeleteAssessments && (
@@ -1350,6 +1424,20 @@ export function SingleAssessmentDialog({
             assessment={assessment}
             open={attemptsModalOpen}
             onOpenChange={setAttemptsModalOpen}
+          />
+
+          <AssessmentResultsDialog
+            assessment={assessment}
+            open={resultsModalOpen}
+            onOpenChange={setResultsModalOpen}
+          />
+
+          <AssessmentLeaderboardDialog
+            assessmentId={assessment.id}
+            assessmentTitle={assessment.title}
+            assessment={assessment}
+            open={leaderboardModalOpen}
+            onOpenChange={setLeaderboardModalOpen}
           />
 
           <PublishResultsDialog

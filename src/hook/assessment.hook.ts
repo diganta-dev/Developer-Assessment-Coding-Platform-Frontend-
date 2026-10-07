@@ -8,6 +8,8 @@ import {
   finalizeAndSubmitAttempt,
   getAssessmentAttempts,
   getAssessmentInvitation,
+  getAssessmentResults,
+  getAssessmentLeaderBoard,
   getAttemptDetails,
   getAttemptResult,
   getCandidateMyAttempts,
@@ -302,4 +304,23 @@ export function useGetAssessmentAttempts(assessmentId: string) {
     refetchInterval: false,
   });
 } 
+
+export function useGetAssessmentResults(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-results", assessmentId],
+    queryFn: () => getAssessmentResults(assessmentId),
+    enabled: Boolean(assessmentId),
+    refetchInterval: false,
+  });
+}
+
+export function useGetAssessmentLeaderboard(assessmentId: string) {
+  return useQuery({
+    queryKey: ["assessment-leaderboard", assessmentId],
+    queryFn: () => getAssessmentLeaderBoard(assessmentId),
+    enabled: Boolean(assessmentId),
+    refetchInterval: false,
+  });
+}
+
 

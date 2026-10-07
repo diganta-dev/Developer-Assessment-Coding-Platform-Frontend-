@@ -17,3 +17,5 @@ export * from "./single-assessment-dialog";
 export * from "./edit-assessment-dialog";
 export * from "./delete-assessment-dialog";
 export * from "./assessment-attempts-dialog";
+export * from "./assessment-results-dialog";
+export * from "./assessment-leaderboard-dialog";

@@ -24,6 +24,7 @@ import {
   CreateSubmissionDialog,
   FinalizeSubmitAttemptDialog,
   SingleAssessmentDialog,
+  AssessmentLeaderboardDialog,
 } from "@/components/dashboard/assessments-components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,14 @@ export function CandidateMyAttempts() {
   const [inspectAssessmentId, setInspectAssessmentId] = useState<string | null>(
     null,
   );
+
+  // Assessment Leaderboard dialog state
+  const [leaderboardAssessmentId, setLeaderboardAssessmentId] = useState<
+    string | null
+  >(null);
+  const [leaderboardAssessmentTitle, setLeaderboardAssessmentTitle] =
+    useState<string>("");
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
 
   const pageSize = 10;
 
@@ -664,19 +673,40 @@ export function CandidateMyAttempts() {
                             <>
                               {(status === "SUBMITTED" ||
                                 status === "EVALUATED") && (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setResultAttemptId(item.id);
-                                    setResultOpen(true);
-                                  }}
-                                  className="h-7 text-xs px-2.5 gap-1 font-medium border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
-                                >
-                                  <Trophy className="size-3" />
-                                  <span>Result</span>
-                                </Button>
+                                <>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setResultAttemptId(item.id);
+                                      setResultOpen(true);
+                                    }}
+                                    className="h-7 text-xs px-2.5 gap-1 font-medium border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
+                                  >
+                                    <Trophy className="size-3" />
+                                    <span>Result</span>
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setLeaderboardAssessmentId(
+                                        item.assessmentId,
+                                      );
+                                      setLeaderboardAssessmentTitle(
+                                        item.assessment?.title || "",
+                                      );
+                                      setLeaderboardOpen(true);
+                                    }}
+                                    className="h-7 text-xs px-2 gap-1 font-medium border-amber-500/30 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 cursor-pointer"
+                                    title="View Assessment Leaderboard"
+                                  >
+                                    <Award className="size-3 text-amber-500" />
+                                    <span>Leaderboard</span>
+                                  </Button>
+                                </>
                               )}
                               <Button
                                 type="button"
@@ -787,6 +817,14 @@ export function CandidateMyAttempts() {
         assessmentId={inspectAssessmentId}
         open={Boolean(inspectAssessmentId)}
         onOpenChange={(open) => !open && setInspectAssessmentId(null)}
+      />
+
+      {/* ── Assessment Leaderboard Modal Dialog (Candidate / Cohort View) ── */}
+      <AssessmentLeaderboardDialog
+        assessmentId={leaderboardAssessmentId}
+        assessmentTitle={leaderboardAssessmentTitle}
+        open={leaderboardOpen}
+        onOpenChange={setLeaderboardOpen}
       />
     </div>
   );

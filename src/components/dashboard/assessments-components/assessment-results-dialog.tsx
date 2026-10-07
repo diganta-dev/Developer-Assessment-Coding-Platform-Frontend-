@@ -3,26 +3,26 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  AlertTriangle,
   Award,
   Calculator,
   Calendar,
   Check,
   CheckCircle2,
   Clock,
-  Code2,
   Copy,
   Eye,
   FileCheck2,
   FileText,
   Layers,
-  Loader2,
+  Medal,
   RefreshCw,
   Search,
   Send,
   Shield,
   Sparkles,
   TrendingUp,
-  User,
+  Trophy,
   Users,
   X,
   XCircle,
@@ -30,7 +30,7 @@ import {
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -50,32 +50,27 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
 import { useGetMe } from "@/hook";
-import { useGetAssessmentAttempts } from "@/hook/assessment.hook";
+import { useGetAssessmentResults } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
 import type {
   IAssessment,
-  IAssessmentAttemptListItem,
+  IAssessmentResultItem,
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
 import { isUserAuthorized } from "@/utils";
-import { AttemptDetailsDialog } from "./attempt-details-dialog";
+import { AttemptResultDialog } from "./attempt-result-dialog";
 import { CalculateScoreDialog } from "./calculate-score-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
-import { AssessmentResultsDialog } from "./assessment-results-dialog";
+import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
 
-export interface AssessmentAttemptsDialogProps {
+export interface AssessmentResultsDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type AttemptStatusFilter =
-  | "ALL"
-  | "IN_PROGRESS"
-  | "SUBMITTED"
-  | "EVALUATED"
-  | "EXPIRED";
+type ResultStatusFilter = "ALL" | "PASSED" | "FAILED" | "PENDING";
 
 // ─── Formatting Helpers ───────────────────────────────────────────────────────
 
@@ -96,22 +91,6 @@ function formatDate(dateStr?: string | null, fallback = "N/A"): string {
   }
 }
 
-function formatDuration(
-  startStr?: string | null,
-  endStr?: string | null,
-): string {
-  if (!startStr) return "N/A";
-  const start = new Date(startStr).getTime();
-  const end = endStr ? new Date(endStr).getTime() : Date.now();
-  if (Number.isNaN(start) || Number.isNaN(end) || end < start) return "N/A";
-
-  const diffSecs = Math.floor((end - start) / 100);
-  const minutes = Math.floor(diffSecs / 60);
-  const seconds = diffSecs % 60;
-  if (minutes === 0) return `${seconds}s`;
-  return `${minutes}m ${seconds}s`;
-}
-
 function getInitials(name?: string | null, email?: string): string {
   if (name?.trim()) {
     const parts = name.trim().split(" ");
@@ -126,76 +105,59 @@ function getInitials(name?: string | null, email?: string): string {
   return "CN";
 }
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
+// ─── Rank Badge Component ─────────────────────────────────────────────────────
 
-function AttemptStatusBadge({ status }: { status: string }) {
-  const norm = status?.toUpperCase() || "UNKNOWN";
-
-  if (norm === "IN_PROGRESS") {
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-        </span>
-        In Progress
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+        <Trophy className="size-3.5 fill-current text-amber-500" />
+        #1
       </span>
     );
   }
-
-  if (norm === "SUBMITTED") {
+  if (rank === 2) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20">
-        <span className="size-1.5 rounded-full bg-indigo-500" />
-        Submitted
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-slate-300/20 text-slate-700 dark:text-slate-300 border border-slate-400/30">
+        <Medal className="size-3.5 fill-current text-slate-400" />
+        #2
       </span>
     );
   }
-
-  if (norm === "EVALUATED") {
+  if (rank === 3) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30">
-        <CheckCircle2 className="size-3 text-emerald-500" />
-        Evaluated
-      </span>
-    );
-  }
-
-  if (norm === "EXPIRED") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20">
-        <span className="size-1.5 rounded-full bg-rose-500" />
-        Expired
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-700/15 text-amber-800 dark:text-amber-300 border border-amber-700/30">
+        <Medal className="size-3.5 fill-current text-amber-600" />
+        #3
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-muted text-muted-foreground border-border/70">
-      <span className="size-1.5 rounded-full bg-muted-foreground/50" />
-      {norm}
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-medium text-muted-foreground bg-muted/50 border border-border/50">
+      #{rank}
     </span>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function AssessmentAttemptsDialog({
+export function AssessmentResultsDialog({
   assessment,
   open,
   onOpenChange,
-}: AssessmentAttemptsDialogProps) {
+}: AssessmentResultsDialogProps) {
   const queryClient = useQueryClient();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<AttemptStatusFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<ResultStatusFilter>("ALL");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Sub-dialogs state
   const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(
     null,
   );
-  const [attemptDetailsOpen, setAttemptDetailsOpen] = useState(false);
+  const [attemptResultOpen, setAttemptResultOpen] = useState(false);
 
   const [scoreAttemptId, setScoreAttemptId] = useState<string | null>(null);
   const [scoreDialogOpen, setScoreDialogOpen] = useState(false);
@@ -203,14 +165,15 @@ export function AssessmentAttemptsDialog({
   const [reportAttemptId, setReportAttemptId] = useState<string | null>(null);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
-  const [publishResultsOpen, setPublishResultsOpen] = useState(false);
-  const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
 
   const assessmentId = assessment?.id || "";
 
-  // TanStack Query for Attempts
+  // Query Cohort Results
   const { data, isLoading, isError, error, isRefetching, refetch } =
-    useGetAssessmentAttempts(assessmentId);
+    useGetAssessmentResults(assessmentId);
 
   // Current user permissions
   const { data: meData } = useGetMe();
@@ -246,101 +209,124 @@ export function AssessmentAttemptsDialog({
     CompanyMemberRole.EVALUATOR,
   ]);
 
-  // Safe normalization of attempts response
-  const attempts: IAssessmentAttemptListItem[] = useMemo(() => {
+  // Safe data extraction
+  const rawData = data?.data;
+  const isPublishedGlobal =
+    typeof rawData === "object" && rawData !== null && "isPublished" in rawData
+      ? Boolean(rawData.isPublished)
+      : assessment?.status === "COMPLETED" ||
+        assessment?.status === "PUBLISHED";
+
+  const results: IAssessmentResultItem[] = useMemo(() => {
     if (!data) return [];
     const raw = (data as { data?: unknown })?.data ?? data;
-    if (Array.isArray(raw)) return raw as IAssessmentAttemptListItem[];
-    if (Array.isArray((raw as { attempts?: unknown })?.attempts)) {
-      return (raw as { attempts: IAssessmentAttemptListItem[] }).attempts;
+    if (Array.isArray(raw)) return raw as IAssessmentResultItem[];
+    if (Array.isArray((raw as { results?: unknown })?.results)) {
+      return (raw as { results: IAssessmentResultItem[] }).results;
     }
     return [];
   }, [data]);
 
-  // Client-side search and status filter
-  const filteredAttempts = useMemo(() => {
-    return attempts.filter((att) => {
-      // 1. Status Filter
+  // Sort and assign ranks if not given by backend
+  const sortedResults = useMemo(() => {
+    const list = [...results];
+    return list.sort((a, b) => {
+      if (a.rank != null && b.rank != null) return a.rank - b.rank;
+      return (b.obtainedMarks || 0) - (a.obtainedMarks || 0);
+    });
+  }, [results]);
+
+  // Search & Status filter
+  const filteredResults = useMemo(() => {
+    return sortedResults.filter((item) => {
+      // Status filter
       if (statusFilter !== "ALL") {
-        const attStatus = att.status?.toUpperCase() || "";
-        if (attStatus !== statusFilter) return false;
+        const itemStatus = item.status?.toUpperCase() || "";
+        if (statusFilter === "PASSED" && itemStatus !== "PASSED") return false;
+        if (statusFilter === "FAILED" && itemStatus !== "FAILED") return false;
+        if (statusFilter === "PENDING" && itemStatus === "PASSED") return false;
       }
 
-      // 2. Search Term Filter
+      // Search filter
       if (!searchTerm.trim()) return true;
       const term = searchTerm.toLowerCase();
-      const candName = att.candidate?.name?.toLowerCase() || "";
-      const candEmail = att.candidate?.email?.toLowerCase() || "";
-      const attId = att.id?.toLowerCase() || "";
+      const candName = item.candidate?.name?.toLowerCase() || "";
+      const candEmail = item.candidate?.email?.toLowerCase() || "";
+      const itemId = item.id?.toLowerCase() || "";
+      const rankStr = item.rank ? `#${item.rank}` : "";
 
       return (
         candName.includes(term) ||
         candEmail.includes(term) ||
-        attId.includes(term)
+        itemId.includes(term) ||
+        rankStr.includes(term)
       );
     });
-  }, [attempts, statusFilter, searchTerm]);
+  }, [sortedResults, statusFilter, searchTerm]);
 
-  // Statistics calculation
+  // Cohort statistics
   const stats = useMemo(() => {
-    let inProgress = 0;
-    let submitted = 0;
-    let evaluated = 0;
-    let expired = 0;
+    let passed = 0;
+    let failed = 0;
+    let pending = 0;
     let totalScore = 0;
-    let scoredCount = 0;
+    let highestScore = 0;
+    const passingScore =
+      assessment?.passingScore ??
+      (assessment?.totalMarks ? Math.round(assessment.totalMarks * 0.5) : 0);
 
-    for (const a of attempts) {
-      const st = a.status?.toUpperCase();
-      if (st === "IN_PROGRESS") inProgress++;
-      else if (st === "SUBMITTED") submitted++;
-      else if (st === "EVALUATED") evaluated++;
-      else if (st === "EXPIRED") expired++;
+    for (const r of results) {
+      const score = r.obtainedMarks || 0;
+      totalScore += score;
+      if (score > highestScore) highestScore = score;
 
-      if (a.obtainedMarks !== null && a.obtainedMarks !== undefined) {
-        totalScore += a.obtainedMarks;
-        scoredCount++;
-      } else if (a.result?.obtainedMarks !== null && a.result?.obtainedMarks !== undefined) {
-        totalScore += a.result.obtainedMarks;
-        scoredCount++;
+      const st = r.status?.toUpperCase();
+      if (st === "PASSED" || (passingScore > 0 && score >= passingScore)) {
+        passed++;
+      } else if (st === "FAILED" || (passingScore > 0 && score < passingScore)) {
+        failed++;
+      } else {
+        pending++;
       }
     }
 
-    const avgScore =
-      scoredCount > 0 ? (totalScore / scoredCount).toFixed(1) : null;
+    const total = results.length;
+    const avgScore = total > 0 ? (totalScore / total).toFixed(1) : "0";
+    const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
 
     return {
-      total: attempts.length,
-      inProgress,
-      submitted,
-      evaluated,
-      expired,
+      total,
+      passed,
+      failed,
+      pending,
       avgScore,
+      highestScore,
+      passRate,
     };
-  }, [attempts]);
+  }, [results, assessment]);
 
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
     setCopiedId(id);
     toast.add({
-      title: "Attempt ID Copied",
-      description: "Identifier copied to clipboard.",
+      title: "Identifier Copied",
+      description: "Result identifier copied to clipboard.",
       type: "success",
     });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   const rolePerspectiveLabel = isAdmin
-    ? "Admin Oversight: Candidate Attempts Audit"
+    ? "Admin Oversight: Cohort Leaderboard & Results"
     : isCompanyOwner
-      ? "Company Leadership: Candidate Attempts"
+      ? "Company Leadership: Candidate Results"
       : isCompanyAdmin
-        ? "Company Admin: Candidate Attempts"
+        ? "Company Admin: Candidate Results"
         : isCreator
-          ? "Assessment Creator: Questions Telemetry"
+          ? "Assessment Creator: Question Performance"
           : isEvaluator
-            ? "Evaluator Grading: Candidate Attempts"
-            : "Candidate Attempts";
+            ? "Evaluator Grading: Final Results & Roster"
+            : "Assessment Results";
 
   return (
     <>
@@ -351,31 +337,36 @@ export function AssessmentAttemptsDialog({
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                    <Users className="size-3" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <Award className="size-3" />
                     {rolePerspectiveLabel}
                   </span>
-                  {assessment?.status && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase border bg-muted text-muted-foreground border-border/60">
-                      {assessment.status}
-                    </span>
-                  )}
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase border ${
+                      isPublishedGlobal
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                        : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30"
+                    }`}
+                  >
+                    <span className="size-1.5 rounded-full bg-current" />
+                    {isPublishedGlobal ? "Official Published" : "Unpublished Draft"}
+                  </span>
                 </div>
 
                 <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-                  Assessment Candidate Attempts
+                  Assessment Results & Leaderboard
                 </DialogTitle>
 
                 <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
                   {assessment?.title ? (
                     <span>
-                      Tracking session submissions for{" "}
+                      Official candidate ranking and score distribution for{" "}
                       <strong className="text-foreground">
                         &quot;{assessment.title}&quot;
                       </strong>
                     </span>
                   ) : (
-                    "Inspect individual candidate sessions, submitted answers, and calculated grades."
+                    "Inspect candidate outcomes, scoring distribution, and merit rankings."
                   )}
                 </DialogDescription>
               </div>
@@ -389,7 +380,7 @@ export function AssessmentAttemptsDialog({
                   onClick={() => refetch()}
                   disabled={isRefetching}
                   className="text-xs h-8 px-2.5 gap-1.5 cursor-pointer"
-                  id="refresh-attempts-btn"
+                  id="refresh-results-btn"
                 >
                   <RefreshCw
                     className={`size-3.5 ${
@@ -403,77 +394,104 @@ export function AssessmentAttemptsDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setResultsDialogOpen(true)}
-                  className="text-xs h-8 px-2.5 gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
-                  title="View Assessment Leaderboard & Results"
-                  id="view-results-from-attempts-btn"
+                  onClick={() => setLeaderboardOpen(true)}
+                  className="text-xs h-8 px-2.5 gap-1.5 cursor-pointer text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                  id="results-view-leaderboard-btn"
                 >
-                  <Award className="size-3.5" />
+                  <Trophy className="size-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Leaderboard</span>
                 </Button>
 
-                {canPublishResults && assessment?.status !== "DRAFT" && (
+                {canPublishResults && (
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() => setPublishResultsOpen(true)}
+                    onClick={() => setPublishModalOpen(true)}
                     className="text-xs h-8 px-3 gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
-                    id="publish-results-shortcut-btn"
+                    id="trigger-publish-results-btn"
                   >
                     <Send className="size-3.5" />
-                    Publish Results
+                    <span>Publish Results</span>
                   </Button>
                 )}
               </div>
             </div>
 
-            {/* Metric Overview Cards */}
+            {/* Metric KPI Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
               <Card className="p-3 shadow-2xs border-border/60">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  Total Attempts
+                  Evaluated Cohort
                 </p>
                 <p className="text-xl font-bold text-foreground mt-0.5">
-                  {stats.total}
+                  {stats.total} candidates
                 </p>
               </Card>
 
               <Card className="p-3 shadow-2xs border-border/60">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  In Progress
+                  Pass Rate
                 </p>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  {stats.inProgress}
-                </p>
+                <div className="flex items-baseline gap-1.5 mt-0.5">
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {stats.passRate}%
+                  </p>
+                  <span className="text-[10px] text-muted-foreground">
+                    ({stats.passed} passed)
+                  </span>
+                </div>
               </Card>
 
               <Card className="p-3 shadow-2xs border-border/60">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  Submitted
+                  Average Score
                 </p>
                 <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                  {stats.submitted}
+                  {stats.avgScore} pts
                 </p>
               </Card>
 
               <Card className="p-3 shadow-2xs border-border/60">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  Evaluated
+                  Top Score (#1)
                 </p>
-                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-0.5">
-                  {stats.evaluated}
+                <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                  {stats.highestScore} pts
                 </p>
               </Card>
 
               <Card className="p-3 shadow-2xs border-border/60 col-span-2 sm:col-span-1">
                 <p className="text-[11px] font-medium text-muted-foreground">
-                  Average Score
+                  Passing Score Benchmark
                 </p>
                 <p className="text-xl font-bold text-foreground mt-0.5">
-                  {stats.avgScore ? `${stats.avgScore} pts` : "N/A"}
+                  {assessment?.passingScore ?? 0} /{" "}
+                  {assessment?.totalMarks ?? 100} pts
                 </p>
               </Card>
             </div>
+
+            {/* Publication Caution Banner if Unpublished */}
+            {!isPublishedGlobal && (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <span>
+                    <strong>Results are unpublished:</strong> Candidate scores are currently hidden. Release finalized grades to publish candidate reports.
+                  </span>
+                </div>
+                {canPublishResults && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setPublishModalOpen(true)}
+                    className="text-xs h-7 px-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold cursor-pointer shrink-0"
+                  >
+                    Publish Now
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* ── Toolbar: Search & Filters ── */}
@@ -481,11 +499,11 @@ export function AssessmentAttemptsDialog({
             <div className="relative flex-1 min-w-[220px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search candidate name, email, or attempt ID..."
+                placeholder="Search candidate name, email, or rank..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 h-9 text-xs"
-                id="search-attempts-input"
+                id="search-results-input"
               />
               {searchTerm && (
                 <button
@@ -501,11 +519,9 @@ export function AssessmentAttemptsDialog({
             <div className="flex flex-wrap items-center gap-1.5 shrink-0 [scrollbar-width:none]">
               {(
                 [
-                  { key: "ALL", label: `All (${attempts.length})` },
-                  { key: "IN_PROGRESS", label: `In Progress (${stats.inProgress})` },
-                  { key: "SUBMITTED", label: `Submitted (${stats.submitted})` },
-                  { key: "EVALUATED", label: `Evaluated (${stats.evaluated})` },
-                  { key: "EXPIRED", label: `Expired (${stats.expired})` },
+                  { key: "ALL", label: `All Candidates (${results.length})` },
+                  { key: "PASSED", label: `Passed (${stats.passed})` },
+                  { key: "FAILED", label: `Failed (${stats.failed})` },
                 ] as const
               ).map(({ key, label }) => (
                 <Button
@@ -522,27 +538,27 @@ export function AssessmentAttemptsDialog({
             </div>
           </div>
 
-          {/* ── Attempts Table ── */}
+          {/* ── Results Leaderboard Table ── */}
           <div className="p-4 sm:p-6">
             <Card className="shadow-2xs border-border/70 overflow-hidden min-h-[320px]">
               <div className="overflow-x-auto [scrollbar-width:thin]">
                 <Table>
                   <TableHeader className="bg-muted/40">
                     <TableRow>
+                      <TableHead className="w-16 text-center text-xs font-semibold">
+                        Rank
+                      </TableHead>
                       <TableHead className="min-w-[220px] text-xs font-semibold">
                         Candidate
                       </TableHead>
                       <TableHead className="text-xs font-semibold">
-                        Attempt #
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold">
-                        Status
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold">
                         Score / Marks
                       </TableHead>
-                      <TableHead className="min-w-[160px] text-xs font-semibold">
-                        Session Timing
+                      <TableHead className="text-xs font-semibold">
+                        Outcome
+                      </TableHead>
+                      <TableHead className="min-w-[150px] text-xs font-semibold">
+                        Completed At
                       </TableHead>
                       <TableHead className="text-right text-xs font-semibold">
                         Actions
@@ -554,9 +570,12 @@ export function AssessmentAttemptsDialog({
                     {isLoading ? (
                       [1, 2, 3, 4].map((id) => (
                         <TableRow
-                          key={`attempts-skeleton-${id}`}
+                          key={`results-skeleton-${id}`}
                           className="animate-pulse"
                         >
+                          <TableCell className="text-center">
+                            <Skeleton className="h-5 w-8 mx-auto rounded-full" />
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2.5">
                               <Skeleton className="size-8 rounded-full" />
@@ -567,13 +586,10 @@ export function AssessmentAttemptsDialog({
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Skeleton className="h-4 w-12" />
-                          </TableCell>
-                          <TableCell>
-                            <Skeleton className="h-5 w-20 rounded-full" />
-                          </TableCell>
-                          <TableCell>
                             <Skeleton className="h-4 w-16" />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton className="h-5 w-16 rounded-full" />
                           </TableCell>
                           <TableCell>
                             <Skeleton className="h-4 w-28" />
@@ -590,7 +606,7 @@ export function AssessmentAttemptsDialog({
                           <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                             <AlertCircle className="size-8 text-destructive" />
                             <p className="text-sm font-semibold text-foreground">
-                              Failed to load candidate attempts
+                              Failed to load assessment results
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {(error as Error)?.message ||
@@ -607,23 +623,23 @@ export function AssessmentAttemptsDialog({
                           </div>
                         </TableCell>
                       </TableRow>
-                    ) : filteredAttempts.length === 0 ? (
+                    ) : filteredResults.length === 0 ? (
                       /* Empty State */
                       <TableRow>
                         <TableCell colSpan={6} className="h-48 text-center">
                           <div className="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
                             <div className="p-3 rounded-full bg-muted/60 text-muted-foreground">
-                              <FileCheck2 className="size-6" />
+                              <Trophy className="size-6" />
                             </div>
                             <p className="text-sm font-semibold text-foreground">
                               {searchTerm || statusFilter !== "ALL"
-                                ? "No attempts match the selected criteria"
-                                : "No candidate attempts recorded yet"}
+                                ? "No candidates match the selected criteria"
+                                : "No assessment results recorded yet"}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {searchTerm || statusFilter !== "ALL"
                                 ? "Adjust your search filter or clear status selections."
-                                : "Candidates who start this assessment will appear here with live progress and submission results."}
+                                : "When candidates complete and submit their attempts, their graded marks and merit rankings will appear here."}
                             </p>
                             {(searchTerm || statusFilter !== "ALL") && (
                               <Button
@@ -643,29 +659,33 @@ export function AssessmentAttemptsDialog({
                       </TableRow>
                     ) : (
                       /* Data Rows */
-                      filteredAttempts.map((attempt) => {
-                        const cand = attempt.candidate;
-                        const scoreObtained =
-                          attempt.obtainedMarks ??
-                          attempt.result?.obtainedMarks ??
-                          null;
-                        const scoreTotal =
-                          attempt.totalMarks ||
-                          attempt.result?.totalMarks ||
-                          assessment?.totalMarks ||
-                          0;
-                        const percentage =
-                          attempt.percentage ??
-                          attempt.result?.percentage ??
-                          (scoreObtained !== null && scoreTotal > 0
-                            ? Math.round((scoreObtained / scoreTotal) * 100)
-                            : null);
+                      filteredResults.map((item, idx) => {
+                        const cand = item.candidate;
+                        const rankNum = item.rank ?? idx + 1;
+                        const passingScore =
+                          assessment?.passingScore ??
+                          (assessment?.totalMarks
+                            ? Math.round(assessment.totalMarks * 0.5)
+                            : 0);
+
+                        const isPassed =
+                          item.status?.toUpperCase() === "PASSED" ||
+                          (passingScore > 0 &&
+                            item.obtainedMarks >= passingScore);
+
+                        const targetAttemptId =
+                          item.attemptId || item.attempt?.id || item.id;
 
                         return (
                           <TableRow
-                            key={attempt.id}
+                            key={item.id || `result-row-${idx}`}
                             className="hover:bg-muted/30 transition-colors"
                           >
+                            {/* Rank */}
+                            <TableCell className="text-center font-mono">
+                              <RankBadge rank={rankNum} />
+                            </TableCell>
+
                             {/* Candidate Info */}
                             <TableCell>
                               <div className="flex items-center gap-2.5">
@@ -686,15 +706,15 @@ export function AssessmentAttemptsDialog({
                                   </p>
                                   <div className="flex items-center gap-1">
                                     <span className="text-[10px] font-mono text-muted-foreground/70">
-                                      ID: {attempt.id.slice(0, 8)}...
+                                      ID: {item.id.slice(0, 8)}...
                                     </span>
                                     <button
                                       type="button"
-                                      onClick={() => handleCopyId(attempt.id)}
+                                      onClick={() => handleCopyId(item.id)}
                                       className="text-muted-foreground hover:text-foreground transition-colors"
-                                      title="Copy Attempt ID"
+                                      title="Copy Result ID"
                                     >
-                                      {copiedId === attempt.id ? (
+                                      {copiedId === item.id ? (
                                         <Check className="size-2.5 text-emerald-500" />
                                       ) : (
                                         <Copy className="size-2.5" />
@@ -705,124 +725,104 @@ export function AssessmentAttemptsDialog({
                               </div>
                             </TableCell>
 
-                            {/* Attempt Number */}
-                            <TableCell>
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-muted text-muted-foreground border border-border/60">
-                                #{attempt.attemptNumber || 1}
-                              </span>
-                            </TableCell>
-
-                            {/* Status */}
-                            <TableCell>
-                              <AttemptStatusBadge status={attempt.status} />
-                            </TableCell>
-
-                            {/* Score / Marks */}
+                            {/* Score & Marks */}
                             <TableCell>
                               <div className="space-y-0.5">
-                                {scoreObtained !== null ? (
-                                  <>
-                                    <p className="text-xs font-bold text-foreground">
-                                      {scoreObtained} / {scoreTotal} pts
-                                    </p>
-                                    {percentage !== null && (
-                                      <span
-                                        className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-semibold border ${
-                                          percentage >=
-                                          (assessment?.passingScore ?? 50)
-                                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                            : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                                        }`}
-                                      >
-                                        {percentage}%
-                                      </span>
-                                    )}
-                                  </>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground italic">
-                                    Pending Grade
+                                <p className="text-xs font-bold text-foreground font-mono">
+                                  {item.obtainedMarks} / {item.totalMarks || assessment?.totalMarks || 100} pts
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-semibold border ${
+                                      isPassed
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                                    }`}
+                                  >
+                                    {item.percentage}%
                                   </span>
-                                )}
+                                </div>
                               </div>
                             </TableCell>
 
-                            {/* Session Timing */}
+                            {/* Outcome Badge */}
                             <TableCell>
-                              <div className="space-y-1 text-[11px]">
-                                <div className="flex items-center gap-1 text-muted-foreground">
-                                  <Clock className="size-3 shrink-0" />
-                                  <span>
-                                    Started:{" "}
-                                    <strong className="text-foreground font-normal">
-                                      {formatDate(attempt.startedAt)}
-                                    </strong>
-                                  </span>
-                                </div>
-                                {attempt.submittedAt && (
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <CheckCircle2 className="size-3 shrink-0 text-emerald-500" />
-                                    <span>
-                                      Submitted:{" "}
-                                      <strong className="text-foreground font-normal">
-                                        {formatDate(attempt.submittedAt)}
-                                      </strong>
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="text-[10px] text-muted-foreground font-mono">
-                                  Elapsed:{" "}
-                                  {formatDuration(
-                                    attempt.startedAt,
-                                    attempt.submittedAt,
+                              {isPassed ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30">
+                                  <CheckCircle2 className="size-3 text-emerald-500" />
+                                  Passed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20">
+                                  <XCircle className="size-3 text-rose-500" />
+                                  Failed
+                                </span>
+                              )}
+                            </TableCell>
+
+                            {/* Completion Time */}
+                            <TableCell>
+                              <div className="space-y-0.5 text-[11px]">
+                                <p className="text-foreground">
+                                  {formatDate(
+                                    item.publishedAt ||
+                                      item.attempt?.submittedAt ||
+                                      item.createdAt,
                                   )}
-                                </div>
+                                </p>
+                                {item.attempt?.durationMinutes && (
+                                  <p className="text-[10px] text-muted-foreground flex items-center gap-1 font-mono">
+                                    <Clock className="size-2.5" />
+                                    {item.attempt.durationMinutes} mins taken
+                                  </p>
+                                )}
                               </div>
                             </TableCell>
 
-                            {/* Actions Column */}
+                            {/* Action Buttons */}
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-1.5">
-                                {/* Inspect Full Attempt Details */}
+                                {/* Inspect Full Single Result */}
                                 <Button
                                   type="button"
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setSelectedAttemptId(attempt.id);
-                                    setAttemptDetailsOpen(true);
+                                    setSelectedAttemptId(targetAttemptId);
+                                    setAttemptResultOpen(true);
                                   }}
                                   className="text-xs h-7 px-2 gap-1 cursor-pointer"
-                                  title="Inspect candidate submissions and answers"
+                                  title="Inspect problem breakdown and candidate score breakdown"
                                 >
                                   <Eye className="size-3 text-muted-foreground" />
-                                  Details
+                                  Review
                                 </Button>
 
-                                {/* Calculate / Re-Calculate Score */}
+                                {/* Recalculate Score */}
                                 {canCalculateScores && (
                                   <Button
                                     type="button"
                                     size="sm"
                                     variant="outline"
                                     onClick={() => {
-                                      setScoreAttemptId(attempt.id);
+                                      setScoreAttemptId(targetAttemptId);
                                       setScoreDialogOpen(true);
                                     }}
                                     className="text-xs h-7 px-2 gap-1 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
-                                    title="Calculate score for this attempt"
+                                    title="Recalculate score"
                                   >
                                     <Calculator className="size-3 text-amber-600 dark:text-amber-400" />
                                     Score
                                   </Button>
                                 )}
 
-                                {/* Detailed Analytical Report */}
+                                {/* Analytical Report */}
                                 <Button
                                   type="button"
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setReportAttemptId(attempt.id);
+                                    setReportAttemptId(targetAttemptId);
                                     setReportDialogOpen(true);
                                   }}
                                   className="text-xs h-7 px-2 gap-1 text-primary border-primary/30 hover:bg-primary/10 cursor-pointer"
@@ -845,12 +845,12 @@ export function AssessmentAttemptsDialog({
         </DialogContent>
       </Dialog>
 
-      {/* ── Sub-Dialog: Attempt Details ── */}
+      {/* ── Sub-Dialog: Single Attempt Result Breakdown ── */}
       {selectedAttemptId && (
-        <AttemptDetailsDialog
+        <AttemptResultDialog
           attemptId={selectedAttemptId}
-          open={attemptDetailsOpen}
-          onOpenChange={setAttemptDetailsOpen}
+          open={attemptResultOpen}
+          onOpenChange={setAttemptResultOpen}
           isCandidateView={false}
         />
       )}
@@ -874,26 +874,28 @@ export function AssessmentAttemptsDialog({
         />
       )}
 
+      {/* ── Sub-Dialog: Assessment Leaderboard ── */}
+      {assessment && (
+        <AssessmentLeaderboardDialog
+          assessmentId={assessment.id}
+          assessmentTitle={assessment.title}
+          assessment={assessment}
+          open={leaderboardOpen}
+          onOpenChange={setLeaderboardOpen}
+        />
+      )}
+
       {/* ── Sub-Dialog: Publish Results ── */}
       {assessment && (
         <PublishResultsDialog
           assessment={assessment}
-          open={publishResultsOpen}
-          onOpenChange={setPublishResultsOpen}
+          open={publishModalOpen}
+          onOpenChange={setPublishModalOpen}
           onSuccess={() => refetch()}
-        />
-      )}
-
-      {/* ── Sub-Dialog: Leaderboard & Results ── */}
-      {assessment && (
-        <AssessmentResultsDialog
-          assessment={assessment}
-          open={resultsDialogOpen}
-          onOpenChange={setResultsDialogOpen}
         />
       )}
     </>
   );
 }
 
-export default AssessmentAttemptsDialog;
+export default AssessmentResultsDialog;
