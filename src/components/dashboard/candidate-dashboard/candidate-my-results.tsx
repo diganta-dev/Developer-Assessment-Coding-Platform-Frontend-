@@ -30,6 +30,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetMyResults } from "@/hook/ranking.hook";
@@ -307,32 +315,31 @@ export function CandidateMyResults() {
       )}
 
       {/* ── Scorecard Breakdown Modal ── */}
-      {selectedResult && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in-0"
-        >
-          <div className="relative w-full max-w-xl max-h-[90vh] bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-muted/20">
-              <div className="flex items-center gap-2">
-                <Trophy className="size-5 text-amber-500" />
-                <h3 className="text-base font-bold text-foreground">
-                  Assessment Scorecard Breakdown
-                </h3>
+      <Dialog
+        open={Boolean(selectedResult)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedResult(null);
+        }}
+      >
+        <DialogContent size="xl" className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="p-5 border-b border-border/60 bg-muted/20">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+                <Trophy className="size-5" />
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedResult(null)}
-                className="h-8 w-8 p-0"
-              >
-                <X className="size-4" />
-              </Button>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-base font-bold text-foreground">
+                  Assessment Scorecard Breakdown
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Performance evaluation summary and detailed problem scores
+                </DialogDescription>
+              </div>
             </div>
+          </DialogHeader>
 
-            <div className="p-6 overflow-y-auto space-y-4">
+          {selectedResult && (
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs">
               <div className="space-y-1">
                 <h4 className="text-sm font-bold text-foreground">
                   {selectedResult.assessmentTitle}
@@ -343,7 +350,7 @@ export function CandidateMyResults() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-xl border border-border/60 bg-muted/20 space-y-1">
+                <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 space-y-1">
                   <p className="text-muted-foreground">Result Outcome</p>
                   <p
                     className={`text-base font-bold ${
@@ -356,7 +363,7 @@ export function CandidateMyResults() {
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl border border-border/60 bg-muted/20 space-y-1">
+                <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 space-y-1">
                   <p className="text-muted-foreground">Final Score</p>
                   <p className="text-base font-bold text-foreground">
                     {selectedResult.obtainedMarks} / {selectedResult.totalMarks} ({selectedResult.percentage}%)
@@ -403,21 +410,21 @@ export function CandidateMyResults() {
                 )}
               </div>
             </div>
+          )}
 
-            <div className="p-4 border-t border-border/60 bg-muted/20 text-right">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedResult(null)}
-                className="text-xs"
-              >
-                Close Scorecard
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          <DialogFooter className="p-4 border-t border-border/60 bg-muted/20">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedResult(null)}
+              className="text-xs"
+            >
+              Close Scorecard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

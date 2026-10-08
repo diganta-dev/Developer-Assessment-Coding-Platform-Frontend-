@@ -207,16 +207,16 @@ export function PublishResultsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[90vh] max-h-[92vh] overflow-y-auto p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl space-y-4">
+      <DialogContent size="xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
         {/* Header */}
-        <DialogHeader className="space-y-2">
+        <DialogHeader className="space-y-1.5 pb-0.5">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm shrink-0">
               <Award className="size-5" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <DialogTitle className="text-base font-bold text-foreground">
+                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
                   Publish Assessment Results
                 </DialogTitle>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold">
@@ -486,7 +486,7 @@ export function PublishResultsDialog({
             </div>
 
             {/* Footer Actions */}
-            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-2">
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-3 border-t border-border/60">
               <Button
                 type="button"
                 variant="outline"

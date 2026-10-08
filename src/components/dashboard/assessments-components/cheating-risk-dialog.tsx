@@ -178,9 +178,9 @@ export function CheatingRiskAuditDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="cheating-risk-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in-0"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in-0 duration-200"
     >
-      <div className="relative w-full max-w-3xl max-h-[90vh] bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-3xl max-h-[90vh] bg-popover text-popover-foreground border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-muted/20">
           <div className="flex items-center gap-2.5">

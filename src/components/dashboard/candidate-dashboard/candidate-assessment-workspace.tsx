@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AttemptResultDialog,
   FinalizeSubmitAttemptDialog,
@@ -76,6 +76,9 @@ const LANGUAGE_TEMPLATES: Record<string, string> = {
   go: `// Write your Go solution below\npackage main\n\nimport "fmt"\n\nfunc main() {\n    // Your code here\n}\n`,
 };
 
+const EMPTY_PROBLEMS: ISanitizedAssessmentProblem[] = [];
+const EMPTY_SUBMISSIONS: IAttemptSubmissionItem[] = [];
+
 export function CandidateAssessmentWorkspace() {
   const searchParams = useSearchParams();
   const attemptId = searchParams.get("attemptId");
@@ -117,13 +120,11 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
   const attempt = attemptData?.attempt;
   const assessment = attempt?.assessment || attemptData?.assessment;
 
-  const problems: ISanitizedAssessmentProblem[] = useMemo(() => {
-    return assessment?.problems || [];
-  }, [assessment]);
+  const problems: ISanitizedAssessmentProblem[] =
+    assessment?.problems ?? EMPTY_PROBLEMS;
 
-  const submissions: IAttemptSubmissionItem[] = useMemo(() => {
-    return attempt?.submissions || [];
-  }, [attempt]);
+  const submissions: IAttemptSubmissionItem[] =
+    attempt?.submissions ?? EMPTY_SUBMISSIONS;
 
   const submissionsMap = useMemo(() => {
     const map = new Map<string, IAttemptSubmissionItem>();
@@ -148,12 +149,13 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
 
   const currentProblemWrap = problems[currentProblemIndex];
   const currentProblem = currentProblemWrap?.problem;
+  const currentProblemId = currentProblem?.id;
 
   // Sync draft answer on problem change
   useEffect(() => {
-    if (!currentProblem) return;
+    if (!currentProblemId || !currentProblem) return;
 
-    const existingSub = submissionsMap.get(currentProblem.id);
+    const existingSub = submissionsMap.get(currentProblemId);
 
     if (currentProblem.type === "MCQ") {
       setSelectedOptionId(existingSub?.selectedOptionId || "");
@@ -168,7 +170,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
 
       const initialLang =
         existingSub?.language ||
-        (supportedLangs.includes("typescript") ? "typescript" : supportedLangs[0]) ||
+        (supportedLangs.some((l) => l.toLowerCase() === "typescript")
+          ? "typescript"
+          : supportedLangs[0]?.toLowerCase()) ||
         "javascript";
 
       setLanguage(initialLang);
@@ -178,7 +182,7 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
           `// Solution for ${currentProblem.title}\n`,
       );
     }
-  }, [currentProblemIndex, currentProblem, submissionsMap]);
+  }, [currentProblemIndex, currentProblemId]);
 
   // Word count calculation
   const writtenWordCount = useMemo(() => {
@@ -326,6 +330,32 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
   const detectCopyPasteMutation = useDetectCopyPaste();
   const detectMultipleTabsMutation = useDetectMultipleTabs();
 
+  // Stable references for mutations to avoid triggering infinite re-render loops in useEffect
+  const detectTabSwitchRef = useRef(detectTabSwitchMutation.mutate);
+  detectTabSwitchRef.current = detectTabSwitchMutation.mutate;
+
+  const detectFullscreenExitRef = useRef(detectFullscreenExitMutation.mutate);
+  detectFullscreenExitRef.current = detectFullscreenExitMutation.mutate;
+
+  const detectCopyPasteRef = useRef(detectCopyPasteMutation.mutate);
+  detectCopyPasteRef.current = detectCopyPasteMutation.mutate;
+
+  const detectMultipleTabsRef = useRef(detectMultipleTabsMutation.mutate);
+  detectMultipleTabsRef.current = detectMultipleTabsMutation.mutate;
+
+  // Rate-limiting throttle timestamps to prevent event spamming
+  const lastTabSwitchReportRef = useRef<number>(0);
+  const lastFullscreenExitReportRef = useRef<number>(0);
+  const lastCopyPasteReportRef = useRef<number>(0);
+  const lastMultipleTabsReportRef = useRef<number>(0);
+
+  // Stable unique ID for this browser tab session
+  const tabSessionIdRef = useRef<string>(
+    typeof window !== "undefined"
+      ? (window.name ||= `tab_${Math.random().toString(36).slice(2)}`)
+      : "tab_session",
+  );
+
   const settings = assessment?.settings;
   const isFullscreenRequired = Boolean(settings?.requireFullscreen);
   const isCopyPastePrevented = Boolean(settings?.preventCopyPaste);
@@ -336,38 +366,42 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
   const [copyPasteBlockedCount, setCopyPasteBlockedCount] = useState(0);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
-  // 1. Fullscreen departure telemetry
+  // 1. Fullscreen departure telemetry (with throttle & stable dependencies)
   useEffect(() => {
-    if (!isAttemptActive) return;
+    if (!isAttemptActive || !isFullscreenRequired || !attemptId) return;
 
     const handleFullscreenChange = () => {
       const active = Boolean(document.fullscreenElement);
       setIsFullscreen(active);
 
-      if (isFullscreenRequired && !active) {
+      if (!active) {
         setFullscreenExitCount((c) => c + 1);
         setShowFullscreenModal(true);
 
-        detectFullscreenExitMutation.mutate({
-          attemptId,
-          payload: {
-            durationOutsideSeconds: 0,
-            screenResolution:
-              typeof window !== "undefined"
-                ? `${window.screen.width}x${window.screen.height}`
-                : undefined,
-            reason: "Candidate exited fullscreen exam environment",
-            clientTimestamp: new Date().toISOString(),
-          },
-        });
+        const now = Date.now();
+        if (now - lastFullscreenExitReportRef.current > 5000) {
+          lastFullscreenExitReportRef.current = now;
+          detectFullscreenExitRef.current({
+            attemptId,
+            payload: {
+              durationOutsideSeconds: 0,
+              screenResolution:
+                typeof window !== "undefined"
+                  ? `${window.screen.width}x${window.screen.height}`
+                  : undefined,
+              reason: "Candidate exited fullscreen exam environment",
+              clientTimestamp: new Date().toISOString(),
+            },
+          });
 
-        toast.add({
-          title: "Fullscreen Required",
-          description:
-            "This assessment enforces fullscreen mode. Please return to fullscreen immediately.",
-          type: "error",
-        });
-      } else if (active) {
+          toast.add({
+            title: "Fullscreen Required",
+            description:
+              "This assessment enforces fullscreen mode. Please return to fullscreen immediately.",
+            type: "error",
+          });
+        }
+      } else {
         setShowFullscreenModal(false);
       }
     };
@@ -376,11 +410,11 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-  }, [isAttemptActive, isFullscreenRequired, attemptId, detectFullscreenExitMutation]);
+  }, [isAttemptActive, isFullscreenRequired, attemptId]);
 
-  // 2. Tab switch & visibility loss telemetry
+  // 2. Tab switch & visibility loss telemetry (with throttle & stable dependencies)
   useEffect(() => {
-    if (!isAttemptActive) return;
+    if (!isAttemptActive || !attemptId) return;
 
     let hiddenAt: number | null = null;
 
@@ -395,23 +429,27 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
 
         setTabSwitchCount((c) => c + 1);
 
-        detectTabSwitchMutation.mutate({
-          attemptId,
-          payload: {
-            durationSeconds,
-            count: 1,
-            clientTimestamp: new Date().toISOString(),
-            userAgent:
-              typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-          },
-        });
+        const now = Date.now();
+        if (now - lastTabSwitchReportRef.current > 3000) {
+          lastTabSwitchReportRef.current = now;
+          detectTabSwitchRef.current({
+            attemptId,
+            payload: {
+              durationSeconds,
+              count: 1,
+              clientTimestamp: new Date().toISOString(),
+              userAgent:
+                typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+            },
+          });
 
-        toast.add({
-          title: "Security Telemetry Warning",
-          description:
-            "Tab switch detected. This event has been recorded in the proctoring audit log.",
-          type: "info",
-        });
+          toast.add({
+            title: "Security Telemetry Warning",
+            description:
+              "Tab switch detected. This event has been recorded in the proctoring audit log.",
+            type: "info",
+          });
+        }
       }
     };
 
@@ -419,17 +457,20 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isAttemptActive, attemptId, detectTabSwitchMutation]);
+  }, [isAttemptActive, attemptId]);
 
-  // 3. Copy / Paste blocker & telemetry
+  // 3. Copy / Paste blocker & telemetry (with throttle & stable dependencies)
   useEffect(() => {
-    if (!isAttemptActive) return;
+    if (!isAttemptActive || !isCopyPastePrevented || !attemptId) return;
 
     const handleCopy = (e: ClipboardEvent) => {
-      if (isCopyPastePrevented) {
-        e.preventDefault();
-        setCopyPasteBlockedCount((c) => c + 1);
-        detectCopyPasteMutation.mutate({
+      e.preventDefault();
+      setCopyPasteBlockedCount((c) => c + 1);
+
+      const now = Date.now();
+      if (now - lastCopyPasteReportRef.current > 2000) {
+        lastCopyPasteReportRef.current = now;
+        detectCopyPasteRef.current({
           attemptId,
           payload: {
             operation: "COPY",
@@ -446,10 +487,13 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
     };
 
     const handlePaste = (e: ClipboardEvent) => {
-      if (isCopyPastePrevented) {
-        e.preventDefault();
-        setCopyPasteBlockedCount((c) => c + 1);
-        detectCopyPasteMutation.mutate({
+      e.preventDefault();
+      setCopyPasteBlockedCount((c) => c + 1);
+
+      const now = Date.now();
+      if (now - lastCopyPasteReportRef.current > 2000) {
+        lastCopyPasteReportRef.current = now;
+        detectCopyPasteRef.current({
           attemptId,
           payload: {
             operation: "PASTE",
@@ -471,26 +515,26 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [isAttemptActive, isCopyPastePrevented, attemptId, detectCopyPasteMutation]);
+  }, [isAttemptActive, isCopyPastePrevented, attemptId]);
 
-  // 4. Multi-tab concurrent session guard
+  // 4. Multi-tab concurrent session guard (Clean protocol, StrictMode-safe & 30s cooldown)
   useEffect(() => {
     if (
       !isAttemptActive ||
+      !attemptId ||
       typeof window === "undefined" ||
       !("BroadcastChannel" in window)
     )
       return;
 
-    const tabId = Math.random().toString(36).slice(2);
+    const myTabId = tabSessionIdRef.current;
     const channel = new BroadcastChannel(`assessment-attempt-${attemptId}`);
 
-    channel.postMessage({ type: "EXAM_PING", tabId });
-
-    channel.onmessage = (event) => {
-      if (event.data?.type === "EXAM_PING" && event.data?.tabId !== tabId) {
-        channel.postMessage({ type: "EXAM_PONG", tabId });
-        detectMultipleTabsMutation.mutate({
+    const reportDuplicate = () => {
+      const now = Date.now();
+      if (now - lastMultipleTabsReportRef.current > 30000) {
+        lastMultipleTabsReportRef.current = now;
+        detectMultipleTabsRef.current({
           attemptId,
           payload: {
             activeTabCount: 2,
@@ -502,15 +546,38 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
           title: "Multiple Tabs Detected",
           description:
             "Multiple tabs open for this exam session. Please keep only one tab open.",
-          type: "error",
+          type: "warning",
         });
       }
     };
 
+    // Delay announcement by 500ms to safely bypass React Strict Mode's rapid mount-unmount-remount
+    const announceTimer = setTimeout(() => {
+      channel.postMessage({ type: "EXAM_TAB_ANNOUNCE", tabId: myTabId });
+    }, 500);
+
+    channel.onmessage = (event) => {
+      const msg = event.data;
+      if (!msg || typeof msg !== "object") return;
+
+      // Another tab announced itself
+      if (msg.type === "EXAM_TAB_ANNOUNCE" && msg.tabId !== myTabId) {
+        // Ack presence so the new tab knows an existing tab is active
+        channel.postMessage({ type: "EXAM_TAB_ACK", tabId: myTabId });
+        reportDuplicate();
+      }
+
+      // Received acknowledgment from an already existing tab
+      if (msg.type === "EXAM_TAB_ACK" && msg.tabId !== myTabId) {
+        reportDuplicate();
+      }
+    };
+
     return () => {
+      clearTimeout(announceTimer);
       channel.close();
     };
-  }, [isAttemptActive, attemptId, detectMultipleTabsMutation]);
+  }, [isAttemptActive, attemptId]);
 
   const handleEnterFullscreen = async () => {
     try {
@@ -1062,24 +1129,28 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
       )}
 
       {/* ── Finalize Assessment Dialog ── */}
-      <FinalizeSubmitAttemptDialog
-        attemptId={attemptId}
-        assessmentTitle={assessment?.title}
-        open={finalizeOpen}
-        onOpenChange={setFinalizeOpen}
-        onSuccess={() => {
-          setResultOpen(true);
-          refetch();
-        }}
-      />
+      {finalizeOpen && (
+        <FinalizeSubmitAttemptDialog
+          attemptId={attemptId}
+          assessmentTitle={assessment?.title}
+          open={finalizeOpen}
+          onOpenChange={setFinalizeOpen}
+          onSuccess={() => {
+            setResultOpen(true);
+            refetch();
+          }}
+        />
+      )}
 
       {/* ── Official Attempt Result Modal Dialog ── */}
-      <AttemptResultDialog
-        attemptId={attemptId}
-        open={resultOpen}
-        onOpenChange={setResultOpen}
-        isCandidateView={true}
-      />
+      {resultOpen && (
+        <AttemptResultDialog
+          attemptId={attemptId}
+          open={resultOpen}
+          onOpenChange={setResultOpen}
+          isCandidateView={true}
+        />
+      )}
     </div>
   );
 }

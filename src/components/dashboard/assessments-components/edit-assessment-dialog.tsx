@@ -1,8 +1,8 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  AlertCircle,
   Clock,
   Loader2,
   Save,
@@ -11,7 +11,6 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,13 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useUpdateAssessmentDirectRoute } from "@/hook/assessment.hook";
@@ -65,80 +59,6 @@ function formatForInput(d?: string | null): string {
   }
 }
 
-// ─── Zod Schema for Validation ───────────────────────────────────────────────
-
-const updateAssessmentSchema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(3, "Title must be at least 3 characters")
-      .max(200, "Title cannot exceed 200 characters"),
-    description: z
-      .string()
-      .max(2000, "Description cannot exceed 2000 characters")
-      .optional()
-      .nullable(),
-    durationMinutes: z
-      .number()
-      .int("Duration must be an integer")
-      .min(5, "Duration must be at least 5 minutes")
-      .max(1440, "Duration cannot exceed 24 hours"),
-    totalMarks: z
-      .number()
-      .positive("Total marks must be positive")
-      .optional()
-      .nullable(),
-    passingScore: z
-      .number()
-      .positive("Passing score must be positive")
-      .optional()
-      .nullable(),
-    startDate: z.string().optional().nullable(),
-    endDate: z.string().optional().nullable(),
-    status: z.enum(["DRAFT", "PUBLISHED", "ACTIVE", "COMPLETED", "ARCHIVED"]),
-    settings: z.object({
-      maxAttempts: z.number().int().min(1, "Max attempts must be at least 1"),
-      allowMultipleAttempts: z.boolean(),
-      autoSubmitOnExpiry: z.boolean(),
-      preventCopyPaste: z.boolean(),
-      requireFullscreen: z.boolean(),
-      shuffleQuestions: z.boolean(),
-      shuffleMCQOptions: z.boolean(),
-    }),
-  })
-  .refine(
-    (data) => {
-      if (data.startDate && data.endDate) {
-        return new Date(data.endDate) > new Date(data.startDate);
-      }
-      return true;
-    },
-    {
-      message: "End date must be after start date",
-      path: ["endDate"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (
-        data.passingScore !== null &&
-        data.passingScore !== undefined &&
-        data.totalMarks !== null &&
-        data.totalMarks !== undefined
-      ) {
-        return data.passingScore <= data.totalMarks;
-      }
-      return true;
-    },
-    {
-      message: "Passing score cannot exceed total marks",
-      path: ["passingScore"],
-    },
-  );
-
-type UpdateAssessmentValues = z.infer<typeof updateAssessmentSchema>;
-
 interface EditAssessmentDialogProps {
   assessment: ISingleAssessmentDetail | null;
   open: boolean;
@@ -155,139 +75,60 @@ export function EditAssessmentDialog({
   const queryClient = useQueryClient();
   const { mutate: updateAssessment, isPending } =
     useUpdateAssessmentDirectRoute();
+
   const [activeTab, setActiveTab] = useState<"general" | "settings">("general");
 
-  const form = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      durationMinutes: 60,
-      totalMarks: 100,
-      passingScore: null as number | null,
-      startDate: null as string | null,
-      endDate: null as string | null,
-      status: "DRAFT" as
-        | "DRAFT"
-        | "PUBLISHED"
-        | "ACTIVE"
-        | "COMPLETED"
-        | "ARCHIVED",
-      settings: {
-        maxAttempts: 1,
-        allowMultipleAttempts: false,
-        autoSubmitOnExpiry: true,
-        preventCopyPaste: false,
-        requireFullscreen: false,
-        shuffleQuestions: false,
-        shuffleMCQOptions: false,
-      },
-    } as UpdateAssessmentValues,
-    validators: {
-      onChange: updateAssessmentSchema,
-      onSubmit: updateAssessmentSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!assessment?.id) return;
+  // General Details State
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(60);
+  const [status, setStatus] = useState<
+    "DRAFT" | "PUBLISHED" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
+  >("DRAFT");
+  const [totalMarks, setTotalMarks] = useState<number | string>(100);
+  const [passingScore, setPassingScore] = useState<number | string>("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-      const formattedStartDate = formatIso(value.startDate);
-      const formattedEndDate = formatIso(value.endDate);
+  // Settings & Proctoring State
+  const [autoSubmitOnExpiry, setAutoSubmitOnExpiry] = useState(true);
+  const [preventCopyPaste, setPreventCopyPaste] = useState(false);
+  const [requireFullscreen, setRequireFullscreen] = useState(false);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
+  const [shuffleMCQOptions, setShuffleMCQOptions] = useState(false);
+  const [allowMultipleAttempts, setAllowMultipleAttempts] = useState(false);
+  const [maxAttempts, setMaxAttempts] = useState(1);
 
-      const payload: IUpdateAssessmentPayload = {
-        title: value.title.trim(),
-        description: value.description?.trim() || null,
-        durationMinutes: Number(value.durationMinutes),
-        status: value.status,
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-        settings: {
-          maxAttempts: Number(value.settings.maxAttempts) || 1,
-          allowMultipleAttempts: Boolean(value.settings.allowMultipleAttempts),
-          autoSubmitOnExpiry: Boolean(value.settings.autoSubmitOnExpiry),
-          preventCopyPaste: Boolean(value.settings.preventCopyPaste),
-          requireFullscreen: Boolean(value.settings.requireFullscreen),
-          shuffleQuestions: Boolean(value.settings.shuffleQuestions),
-          shuffleMCQOptions: Boolean(value.settings.shuffleMCQOptions),
-        },
-      };
+  // Form error message
+  const [formError, setFormError] = useState<string | null>(null);
 
-      if (value.totalMarks !== null && value.totalMarks !== undefined) {
-        payload.totalMarks = Number(value.totalMarks);
-      }
-      if (value.passingScore !== null && value.passingScore !== undefined) {
-        payload.passingScore = Number(value.passingScore);
-      } else {
-        payload.passingScore = null;
-      }
-
-      updateAssessment(
-        {
-          assessmentId: assessment.id,
-          payload,
-        },
-        {
-          onSuccess: (res: IUpdateAssessmentResponse) => {
-            if (res?.success === false) {
-              toast.add({
-                title: "Failed to Update Assessment",
-                description: res.message || "An error occurred.",
-                type: "error",
-              });
-              return;
-            }
-
-            toast.add({
-              title: "Assessment Updated",
-              description: `"${value.title}" settings have been successfully updated.`,
-              type: "success",
-            });
-
-            // Invalidate all related caches
-            queryClient.invalidateQueries({
-              queryKey: ["assessment-single", assessment.id],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["assessment-single-direct", assessment.id],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["my-assessments"],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["company-assessments"],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["assessments"],
-            });
-
-            onSuccess?.();
-            onOpenChange(false);
-          },
-          onError: (err: unknown) => {
-            const apiErr = err as {
-              response?: { data?: { message?: string } };
-              data?: { message?: string };
-              message?: string;
-            };
-
-            const errMsg =
-              apiErr?.response?.data?.message ||
-              apiErr?.data?.message ||
-              apiErr?.message ||
-              "An error occurred while updating the assessment.";
-
-            toast.add({
-              title: "Update Failed",
-              description: errMsg,
-              type: "error",
-            });
-          },
-        },
-      );
-    },
-  });
-
+  // Initialize form state once when modal opens or assessment changes
   useEffect(() => {
-    if (assessment && open) {
-      const assessmentSettings = (assessment.settings || {}) as {
+    if (open && assessment) {
+      setTitle(assessment.title || "");
+      setDescription(assessment.description || "");
+      setDurationMinutes(assessment.durationMinutes || 60);
+      setStatus(
+        (assessment.status as
+          | "DRAFT"
+          | "PUBLISHED"
+          | "ACTIVE"
+          | "COMPLETED"
+          | "ARCHIVED") || "DRAFT",
+      );
+      setTotalMarks(
+        assessment.totalMarks !== undefined ? assessment.totalMarks : 100,
+      );
+      setPassingScore(
+        assessment.passingScore !== undefined &&
+          assessment.passingScore !== null
+          ? assessment.passingScore
+          : "",
+      );
+      setStartDate(formatForInput(assessment.startDate));
+      setEndDate(formatForInput(assessment.endDate));
+
+      const settings = (assessment.settings || {}) as {
         maxAttempts?: number;
         allowMultipleAttempts?: boolean;
         autoSubmitOnExpiry?: boolean;
@@ -297,48 +138,173 @@ export function EditAssessmentDialog({
         shuffleMCQOptions?: boolean;
       };
 
-      form.reset({
-        title: assessment.title || "",
-        description: assessment.description || "",
-        durationMinutes: assessment.durationMinutes || 60,
-        totalMarks: assessment.totalMarks ? Number(assessment.totalMarks) : 100,
-        passingScore: assessment.passingScore
-          ? Number(assessment.passingScore)
-          : null,
-        startDate: formatForInput(assessment.startDate),
-        endDate: formatForInput(assessment.endDate),
-        status:
-          (assessment.status as UpdateAssessmentValues["status"]) || "DRAFT",
-        settings: {
-          maxAttempts: assessmentSettings.maxAttempts ?? 1,
-          allowMultipleAttempts:
-            assessmentSettings.allowMultipleAttempts ?? false,
-          autoSubmitOnExpiry: assessmentSettings.autoSubmitOnExpiry ?? true,
-          preventCopyPaste: assessmentSettings.preventCopyPaste ?? false,
-          requireFullscreen: assessmentSettings.requireFullscreen ?? false,
-          shuffleQuestions: assessmentSettings.shuffleQuestions ?? false,
-          shuffleMCQOptions: assessmentSettings.shuffleMCQOptions ?? false,
-        },
-      });
+      setAutoSubmitOnExpiry(settings.autoSubmitOnExpiry ?? true);
+      setPreventCopyPaste(settings.preventCopyPaste ?? false);
+      setRequireFullscreen(settings.requireFullscreen ?? false);
+      setShuffleQuestions(settings.shuffleQuestions ?? false);
+      setShuffleMCQOptions(settings.shuffleMCQOptions ?? false);
+      setAllowMultipleAttempts(settings.allowMultipleAttempts ?? false);
+      setMaxAttempts(settings.maxAttempts ?? 1);
+
+      setFormError(null);
       setActiveTab("general");
     }
-  }, [assessment, open, form.reset]);
+  }, [open, assessment]);
 
   if (!assessment) return null;
 
   const isPublished =
     assessment.status === "PUBLISHED" || assessment.status === "ACTIVE";
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    // Client-side validation
+    if (!title.trim() || title.trim().length < 3) {
+      setFormError("Assessment title must be at least 3 characters.");
+      setActiveTab("general");
+      return;
+    }
+
+    if (durationMinutes < 5 || durationMinutes > 1440) {
+      setFormError("Duration must be between 5 and 1440 minutes.");
+      setActiveTab("general");
+      return;
+    }
+
+    if (startDate && endDate) {
+      const s = new Date(startDate).getTime();
+      const eDate = new Date(endDate).getTime();
+      if (eDate <= s) {
+        setFormError("End date must be strictly after the start date.");
+        setActiveTab("general");
+        return;
+      }
+    }
+
+    const totalMarksNum = totalMarks !== "" ? Number(totalMarks) : undefined;
+    const passingScoreNum = passingScore !== "" ? Number(passingScore) : null;
+
+    if (
+      passingScoreNum !== null &&
+      totalMarksNum !== undefined &&
+      passingScoreNum > totalMarksNum
+    ) {
+      setFormError(
+        `Passing score (${passingScoreNum}) cannot exceed total marks (${totalMarksNum}).`,
+      );
+      setActiveTab("general");
+      return;
+    }
+
+    const payload: IUpdateAssessmentPayload = {
+      title: title.trim(),
+      description: description.trim() || null,
+      durationMinutes: Number(durationMinutes),
+      status,
+      startDate: formatIso(startDate),
+      endDate: formatIso(endDate),
+      settings: {
+        maxAttempts: Number(maxAttempts) || 1,
+        allowMultipleAttempts: Boolean(allowMultipleAttempts),
+        autoSubmitOnExpiry: Boolean(autoSubmitOnExpiry),
+        preventCopyPaste: Boolean(preventCopyPaste),
+        requireFullscreen: Boolean(requireFullscreen),
+        shuffleQuestions: Boolean(shuffleQuestions),
+        shuffleMCQOptions: Boolean(shuffleMCQOptions),
+      },
+    };
+
+    if (totalMarksNum !== undefined) {
+      payload.totalMarks = totalMarksNum;
+    }
+    if (passingScoreNum !== null) {
+      payload.passingScore = passingScoreNum;
+    } else {
+      payload.passingScore = null;
+    }
+
+    updateAssessment(
+      {
+        assessmentId: assessment.id,
+        payload,
+      },
+      {
+        onSuccess: (res: IUpdateAssessmentResponse) => {
+          if (res?.success === false) {
+            setFormError(res.message || "Failed to update assessment.");
+            toast.add({
+              title: "Update Failed",
+              description: res.message || "An error occurred.",
+              type: "error",
+            });
+            return;
+          }
+
+          toast.add({
+            title: "Assessment Updated",
+            description:
+              res?.message ||
+              `"${title.trim()}" settings have been successfully updated.`,
+            type: "success",
+          });
+
+          // Invalidate all related caches
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-single", assessment.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["assessment-single-direct", assessment.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["my-assessments"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["company-assessments"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["assessments"],
+          });
+
+          onOpenChange(false);
+          onSuccess?.();
+        },
+        onError: (err: unknown) => {
+          const apiErr = err as {
+            response?: { data?: { message?: string } };
+            data?: { message?: string };
+            message?: string;
+          };
+
+          const errMsg =
+            apiErr?.response?.data?.message ||
+            apiErr?.data?.message ||
+            apiErr?.message ||
+            "An error occurred while updating the assessment.";
+
+          setFormError(errMsg);
+          toast.add({
+            title: "Update Failed",
+            description: errMsg,
+            type: "error",
+          });
+        },
+      },
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-[96vw] sm:max-w-3xl max-h-[92vh] p-0 overflow-hidden flex flex-col shadow-2xl">
-        <DialogHeader className="p-5 pb-3 border-b border-border/40 bg-muted/20">
+      <DialogContent size="3xl" className="max-h-[90vh] p-0 overflow-hidden flex flex-col shadow-2xl">
+        {/* Dialog Header */}
+        <DialogHeader className="p-5 pb-3 border-b border-border/60 bg-muted/20">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
               <Settings2 className="size-5" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-bold tracking-tight">
+              <DialogTitle className="text-lg font-bold tracking-tight">
                 Edit Assessment
               </DialogTitle>
               <DialogDescription
@@ -355,7 +321,7 @@ export function EditAssessmentDialog({
             <ShieldAlert className="size-5 shrink-0 mt-0.5" />
             <div className="text-xs">
               <p className="font-semibold">
-                This assessment is currently active or published.
+                This assessment is live or published.
               </p>
               <p className="opacity-90 mt-0.5">
                 Modifying schedule, duration, or exam policies while candidates
@@ -365,12 +331,15 @@ export function EditAssessmentDialog({
           </div>
         )}
 
+        {formError && (
+          <div className="mx-6 mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex gap-2 text-destructive text-xs items-center">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>{formError}</span>
+          </div>
+        )}
+
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            form.handleSubmit();
-          }}
+          onSubmit={handleSubmit}
           className="flex flex-col flex-1 overflow-hidden"
         >
           {/* Navigation Tabs */}
@@ -403,387 +372,330 @@ export function EditAssessmentDialog({
           </div>
 
           <div className="p-6 overflow-y-auto flex-1 space-y-5 [scrollbar-width:thin]">
-            {activeTab === "general" ? (
-              <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* ── Tab 1: General Details ── */}
+            <div className={activeTab === "general" ? "space-y-4" : "hidden"}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Title */}
-                <form.Field name="title">
-                  {(field) => (
-                    <Field className="col-span-1 sm:col-span-2">
-                      <FieldLabel className="text-xs font-medium">
-                        Assessment Title
-                      </FieldLabel>
-                      <Input
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g. Senior Frontend Benchmark 2026"
-                        className="text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="col-span-1 sm:col-span-2 space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-title"
+                    className="text-xs font-medium"
+                  >
+                    Assessment Title <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-assessment-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Senior Frontend Benchmark 2026"
+                    className="text-xs"
+                    required
+                  />
+                </div>
 
                 {/* Description */}
-                <form.Field name="description">
-                  {(field) => (
-                    <Field className="col-span-1 sm:col-span-2">
-                      <FieldLabel className="text-xs font-medium">
-                        Description
-                      </FieldLabel>
-                      <Textarea
-                        value={field.state.value || ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Provide test instructions, candidate rules, and expectations..."
-                        className="min-h-[90px] resize-y text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="col-span-1 sm:col-span-2 space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-desc"
+                    className="text-xs font-medium"
+                  >
+                    Description & Guidelines
+                  </Label>
+                  <Textarea
+                    id="edit-assessment-desc"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Provide test instructions, candidate rules, and expectations..."
+                    className="min-h-[90px] resize-y text-xs"
+                  />
+                </div>
 
                 {/* Duration */}
-                <form.Field name="durationMinutes">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        Duration (Minutes)
-                      </FieldLabel>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          min={5}
-                          max={1440}
-                          value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(Number(e.target.value) || 0)
-                          }
-                          className="text-xs pl-8"
-                        />
-                        <Clock className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                      </div>
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-duration"
+                    className="text-xs font-medium"
+                  >
+                    Duration (Minutes){" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="edit-assessment-duration"
+                      type="number"
+                      min={5}
+                      max={1440}
+                      value={durationMinutes}
+                      onChange={(e) =>
+                        setDurationMinutes(Number(e.target.value) || 0)
+                      }
+                      className="text-xs pl-8"
+                      required
+                    />
+                    <Clock className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
 
                 {/* Status */}
-                <form.Field name="status">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        Lifecycle Status
-                      </FieldLabel>
-                      <select
-                        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={field.state.value}
-                        onChange={(e) =>
-                          field.handleChange(
-                            e.target.value as UpdateAssessmentValues["status"],
-                          )
-                        }
-                      >
-                        <option value="DRAFT">DRAFT</option>
-                        <option value="PUBLISHED">PUBLISHED</option>
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="COMPLETED">COMPLETED</option>
-                        <option value="ARCHIVED">ARCHIVED</option>
-                      </select>
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-status"
+                    className="text-xs font-medium"
+                  >
+                    Lifecycle Status
+                  </Label>
+                  <select
+                    id="edit-assessment-status"
+                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={status}
+                    onChange={(e) =>
+                      setStatus(
+                        e.target.value as
+                          | "DRAFT"
+                          | "PUBLISHED"
+                          | "ACTIVE"
+                          | "COMPLETED"
+                          | "ARCHIVED",
+                      )
+                    }
+                  >
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </div>
 
                 {/* Total Marks */}
-                <form.Field name="totalMarks">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        Total Marks (Points)
-                      </FieldLabel>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={field.state.value ?? ""}
-                        onChange={(e) =>
-                          field.handleChange(
-                            e.target.value ? Number(e.target.value) : null,
-                          )
-                        }
-                        placeholder="e.g. 100"
-                        className="text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-total-marks"
+                    className="text-xs font-medium"
+                  >
+                    Total Marks (Points)
+                  </Label>
+                  <Input
+                    id="edit-assessment-total-marks"
+                    type="number"
+                    min={1}
+                    value={totalMarks}
+                    onChange={(e) =>
+                      setTotalMarks(
+                        e.target.value !== "" ? Number(e.target.value) : "",
+                      )
+                    }
+                    placeholder="e.g. 100"
+                    className="text-xs"
+                  />
+                </div>
 
                 {/* Passing Score */}
-                <form.Field name="passingScore">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        Passing Score (Points)
-                      </FieldLabel>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={field.state.value ?? ""}
-                        onChange={(e) =>
-                          field.handleChange(
-                            e.target.value ? Number(e.target.value) : null,
-                          )
-                        }
-                        placeholder="e.g. 60 (Optional)"
-                        className="text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-passing-score"
+                    className="text-xs font-medium"
+                  >
+                    Passing Score (Points)
+                  </Label>
+                  <Input
+                    id="edit-assessment-passing-score"
+                    type="number"
+                    min={0}
+                    value={passingScore}
+                    onChange={(e) =>
+                      setPassingScore(
+                        e.target.value !== "" ? Number(e.target.value) : "",
+                      )
+                    }
+                    placeholder="e.g. 60 (Optional)"
+                    className="text-xs"
+                  />
+                </div>
 
                 {/* Start Date */}
-                <form.Field name="startDate">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        Start Date & Time (Schedule Window)
-                      </FieldLabel>
-                      <Input
-                        type="datetime-local"
-                        value={field.state.value || ""}
-                        onChange={(e) =>
-                          field.handleChange(e.target.value || null)
-                        }
-                        className="text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-start"
+                    className="text-xs font-medium"
+                  >
+                    Start Date & Time (Schedule Window)
+                  </Label>
+                  <Input
+                    id="edit-assessment-start"
+                    type="datetime-local"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
 
                 {/* End Date */}
-                <form.Field name="endDate">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel className="text-xs font-medium">
-                        End Date & Time (Expiry Window)
-                      </FieldLabel>
-                      <Input
-                        type="datetime-local"
-                        value={field.state.value || ""}
-                        onChange={(e) =>
-                          field.handleChange(e.target.value || null)
-                        }
-                        className="text-xs"
-                      />
-                      {field.state.meta.errors ? (
-                        <FieldError className="text-[11px] text-destructive">
-                          {field.state.meta.errors.join(", ")}
-                        </FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                </form.Field>
-              </FieldGroup>
-            ) : (
-              <FieldGroup className="grid grid-cols-1 gap-4">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="edit-assessment-end"
+                    className="text-xs font-medium"
+                  >
+                    End Date & Time (Expiry Window)
+                  </Label>
+                  <Input
+                    id="edit-assessment-end"
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Tab 2: Settings & Proctoring ── */}
+            <div className={activeTab === "settings" ? "space-y-4" : "hidden"}>
+              <div className="grid grid-cols-1 gap-4">
                 {/* Auto Submit on Expiry */}
-                <form.Field name="settings.autoSubmitOnExpiry">
-                  {(field) => (
-                    <Field className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <FieldLabel className="text-xs font-semibold cursor-pointer">
-                          Strict Time Limit (Auto-Submit on Expiry)
-                        </FieldLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Automatically submit and grade the candidate attempt
-                          the moment duration expires.
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary cursor-pointer"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
+                <label className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors cursor-pointer">
+                  <div className="space-y-0.5 pr-4">
+                    <p className="text-xs font-semibold text-foreground">
+                      Strict Time Limit (Auto-Submit on Expiry)
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Automatically submit and finalize candidate submissions
+                      the exact moment exam duration expires.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary cursor-pointer shrink-0"
+                    checked={autoSubmitOnExpiry}
+                    onChange={(e) => setAutoSubmitOnExpiry(e.target.checked)}
+                  />
+                </label>
 
                 {/* Prevent Copy Paste */}
-                <form.Field name="settings.preventCopyPaste">
-                  {(field) => (
-                    <Field className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <FieldLabel className="text-xs font-semibold cursor-pointer">
-                          Prevent Copy & Paste
-                        </FieldLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Block clipboard copying of test questions and pasting
-                          external code into solution boxes.
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary cursor-pointer"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
+                <label className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors cursor-pointer">
+                  <div className="space-y-0.5 pr-4">
+                    <p className="text-xs font-semibold text-foreground">
+                      Prevent Copy & Paste
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Block candidate clipboard copy actions and disable
+                      external pasting into coding & written solutions.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary cursor-pointer shrink-0"
+                    checked={preventCopyPaste}
+                    onChange={(e) => setPreventCopyPaste(e.target.checked)}
+                  />
+                </label>
 
                 {/* Require Fullscreen */}
-                <form.Field name="settings.requireFullscreen">
-                  {(field) => (
-                    <Field className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <FieldLabel className="text-xs font-semibold cursor-pointer">
-                          Require Fullscreen Mode
-                        </FieldLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Enforce browser fullscreen mode and trigger real-time
-                          violation logs on screen departure.
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary cursor-pointer"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
+                <label className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors cursor-pointer">
+                  <div className="space-y-0.5 pr-4">
+                    <p className="text-xs font-semibold text-foreground">
+                      Require Fullscreen Mode
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Mandate full-screen browser viewport and log live
+                      anti-cheat violations whenever candidate leaves
+                      fullscreen.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary cursor-pointer shrink-0"
+                    checked={requireFullscreen}
+                    onChange={(e) => setRequireFullscreen(e.target.checked)}
+                  />
+                </label>
 
                 {/* Shuffle Questions */}
-                <form.Field name="settings.shuffleQuestions">
-                  {(field) => (
-                    <Field className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <FieldLabel className="text-xs font-semibold cursor-pointer">
-                          Shuffle Questions Order
-                        </FieldLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Randomize problem question sequence for each candidate
-                          taking the assessment.
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary cursor-pointer"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
+                <label className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors cursor-pointer">
+                  <div className="space-y-0.5 pr-4">
+                    <p className="text-xs font-semibold text-foreground">
+                      Shuffle Questions Order
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Randomize problem sequence for each candidate session to
+                      prevent peer collaboration.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary cursor-pointer shrink-0"
+                    checked={shuffleQuestions}
+                    onChange={(e) => setShuffleQuestions(e.target.checked)}
+                  />
+                </label>
 
                 {/* Shuffle MCQ Options */}
-                <form.Field name="settings.shuffleMCQOptions">
-                  {(field) => (
-                    <Field className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <FieldLabel className="text-xs font-semibold cursor-pointer">
-                          Shuffle MCQ Options
-                        </FieldLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Randomize multiple choice options sequence across
-                          different candidate sessions.
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary cursor-pointer"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
+                <label className="flex flex-row items-center justify-between rounded-lg border border-border/70 p-3.5 bg-card hover:bg-muted/10 transition-colors cursor-pointer">
+                  <div className="space-y-0.5 pr-4">
+                    <p className="text-xs font-semibold text-foreground">
+                      Shuffle MCQ Options
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Randomize multiple-choice choices order for each question
+                      across candidates.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary cursor-pointer shrink-0"
+                    checked={shuffleMCQOptions}
+                    onChange={(e) => setShuffleMCQOptions(e.target.checked)}
+                  />
+                </label>
 
                 {/* Multiple Attempts Policy */}
                 <div className="rounded-lg border border-border/70 p-3.5 bg-card space-y-3">
-                  <form.Field name="settings.allowMultipleAttempts">
-                    {(field) => (
-                      <Field className="flex flex-row items-center justify-between">
-                        <div className="space-y-0.5">
-                          <FieldLabel className="text-xs font-semibold cursor-pointer">
-                            Allow Multiple Attempts
-                          </FieldLabel>
-                          <p className="text-[11px] text-muted-foreground">
-                            Permit candidates to re-attempt the assessment if
-                            they encounter issues.
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          className="size-4 accent-primary cursor-pointer"
-                          checked={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.checked)}
-                        />
-                      </Field>
-                    )}
-                  </form.Field>
+                  <label className="flex flex-row items-center justify-between cursor-pointer">
+                    <div className="space-y-0.5 pr-4">
+                      <p className="text-xs font-semibold text-foreground">
+                        Allow Multiple Attempts
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Permit candidates to re-attempt the assessment if they
+                        encounter technical issues.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary cursor-pointer shrink-0"
+                      checked={allowMultipleAttempts}
+                      onChange={(e) =>
+                        setAllowMultipleAttempts(e.target.checked)
+                      }
+                    />
+                  </label>
 
                   {/* Max Attempts Input */}
-                  <form.Field name="settings.maxAttempts">
-                    {(field) => (
-                      <Field className="pt-2 border-t border-border/40">
-                        <FieldLabel className="text-xs font-medium">
-                          Max Attempts Allowed
-                        </FieldLabel>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={10}
-                          value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(Number(e.target.value) || 1)
-                          }
-                          className="text-xs max-w-xs mt-1"
-                        />
-                        {field.state.meta.errors ? (
-                          <FieldError className="text-[11px] text-destructive">
-                            {field.state.meta.errors.join(", ")}
-                          </FieldError>
-                        ) : null}
-                      </Field>
-                    )}
-                  </form.Field>
+                  <div className="pt-2 border-t border-border/40 space-y-1">
+                    <Label
+                      htmlFor="edit-assessment-max-attempts"
+                      className="text-xs font-medium"
+                    >
+                      Max Attempts Allowed
+                    </Label>
+                    <Input
+                      id="edit-assessment-max-attempts"
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={maxAttempts}
+                      onChange={(e) =>
+                        setMaxAttempts(Math.max(1, Number(e.target.value) || 1))
+                      }
+                      className="text-xs max-w-xs mt-1"
+                    />
+                  </div>
                 </div>
-              </FieldGroup>
-            )}
+              </div>
+            </div>
           </div>
 
+          {/* Dialog Footer */}
           <DialogFooter className="p-4 px-6 border-t border-border/40 bg-muted/20 flex items-center justify-end gap-2">
             <Button
               type="button"

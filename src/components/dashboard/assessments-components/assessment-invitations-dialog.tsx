@@ -227,7 +227,7 @@ export function AssessmentInvitationsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+      <DialogContent size="4xl" className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
         {/* ── Dialog Header ── */}
         <div className="p-5 border-b border-border/60 bg-muted/20 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

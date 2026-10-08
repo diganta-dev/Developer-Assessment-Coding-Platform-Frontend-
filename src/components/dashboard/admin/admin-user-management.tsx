@@ -26,6 +26,14 @@ import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
@@ -378,58 +386,81 @@ export function AdminUserManagement() {
       </Card>
 
       {/* ── Delete Confirmation Dialog ── */}
-      {deleteTargetUser && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in-0"
-        >
-          <Card className="max-w-md w-full border-destructive/40 shadow-2xl p-5 space-y-4 bg-card">
-            <div className="flex items-center gap-2 text-destructive">
-              <ShieldAlert className="size-5" />
-              <h3 className="text-base font-bold text-foreground">
-                Confirm Permanent User Deletion
-              </h3>
+      <Dialog
+        open={Boolean(deleteTargetUser)}
+        onOpenChange={(open) => {
+          if (!open && !deleteUserMutation.isPending) {
+            setDeleteTargetUser(null);
+          }
+        }}
+      >
+        <DialogContent size="md" className="p-5 sm:p-6 gap-4">
+          <DialogHeader className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shrink-0">
+                <ShieldAlert className="size-5" />
+              </div>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
+                  Confirm User Deletion
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  This action is permanent and cannot be undone.
+                </DialogDescription>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to delete user{" "}
-              <strong className="text-foreground">{deleteTargetUser.name}</strong> (
-              {deleteTargetUser.email})? This action cannot be undone and will cascade to associated assessments or invitations.
-            </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setDeleteTargetUser(null)}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                disabled={deleteUserMutation.isPending}
-                onClick={handleConfirmDelete}
-                className="text-xs font-semibold gap-1.5"
-              >
-                {deleteUserMutation.isPending ? (
-                  <>
-                    <Loader2 className="size-3 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="size-3" />
-                    Delete User
-                  </>
-                )}
-              </Button>
+          </DialogHeader>
+
+          {deleteTargetUser && (
+            <div className="rounded-xl border border-border/70 bg-muted/40 p-3 space-y-1 my-1">
+              <p className="text-xs font-semibold text-foreground">
+                {deleteTargetUser.name}
+              </p>
+              <p className="text-[11px] font-mono text-muted-foreground">
+                {deleteTargetUser.email}
+              </p>
             </div>
-          </Card>
-        </div>
-      )}
+          )}
+
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Are you sure you want to delete this user? Associated records, active
+            sessions, and invitations will be permanently removed.
+          </p>
+
+          <DialogFooter className="gap-2 sm:gap-2 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteTargetUser(null)}
+              disabled={deleteUserMutation.isPending}
+              className="text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deleteUserMutation.isPending}
+              onClick={handleConfirmDelete}
+              className="text-xs font-semibold gap-1.5"
+            >
+              {deleteUserMutation.isPending ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Deleting User...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-3.5" />
+                  Confirm & Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

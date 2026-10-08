@@ -221,7 +221,7 @@ function ProblemDetailDialog({
       open={Boolean(problemId)}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto shadow-2xl">
+      <DialogContent size="3xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="size-6 animate-spin text-primary" />
@@ -1073,15 +1073,15 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
           }
         }}
       >
-        <DialogContent className="w-[96vw] max-w-lg p-6 gap-5 shadow-2xl">
-          <DialogHeader>
+        <DialogContent size="md" className="p-5 sm:p-6 gap-4">
+          <DialogHeader className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-full bg-destructive/10 text-destructive shrink-0">
+              <div className="p-2.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shrink-0">
                 <Trash2 className="size-5" />
               </div>
-              <div className="space-y-1">
-                <DialogTitle>Delete Problem</DialogTitle>
-                <DialogDescription>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">Delete Problem</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
                   Are you sure you want to permanently delete this problem from
                   the Problem Bank? This action cannot be undone.
                 </DialogDescription>

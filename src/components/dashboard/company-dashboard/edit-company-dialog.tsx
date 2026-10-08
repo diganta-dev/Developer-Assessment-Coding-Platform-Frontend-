@@ -111,14 +111,14 @@ export function EditCompanyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[90vh] max-h-[92vh] overflow-y-auto shadow-2xl">
+      <DialogContent size="lg" className="p-5 sm:p-6 max-h-[88vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
-          <DialogHeader className="space-y-1">
-            <div className="flex items-center gap-2 text-primary font-medium text-xs">
+          <DialogHeader className="space-y-1 pb-1">
+            <div className="flex items-center gap-1.5 text-primary font-medium text-xs">
               <Sparkles className="size-3.5" />
               <span>Workspace Administration</span>
             </div>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
               <Building2 className="size-5 text-primary" />
               Edit Company Profile
             </DialogTitle>
@@ -235,7 +235,7 @@ export function EditCompanyDialog({
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-2 pt-3 border-t border-border/60">
             <Button
               type="button"
               variant="outline"

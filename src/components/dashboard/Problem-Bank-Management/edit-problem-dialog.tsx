@@ -484,7 +484,7 @@ export function EditProblemDialog({
         !open && !updateProblemMutation.isPending && onClose()
       }
     >
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto shadow-2xl">
+      <DialogContent size="3xl" className="max-h-[90vh] overflow-y-auto p-5 sm:p-6 gap-4">
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="size-6 animate-spin text-primary" />

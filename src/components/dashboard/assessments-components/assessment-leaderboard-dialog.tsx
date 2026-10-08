@@ -388,7 +388,7 @@ export function AssessmentLeaderboardDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-amber-500/10 via-background to-primary/5 border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -919,7 +919,7 @@ export function AssessmentLeaderboardDialog({
       </Dialog>
 
       {/* ── Sub-Dialog: Attempt Details (Staff) ── */}
-      {selectedAttemptId && (
+      {selectedAttemptId && attemptDetailsOpen && (
         <AttemptDetailsDialog
           attemptId={selectedAttemptId}
           open={attemptDetailsOpen}
@@ -929,7 +929,7 @@ export function AssessmentLeaderboardDialog({
       )}
 
       {/* ── Sub-Dialog: Detailed Assessment Report (Staff) ── */}
-      {reportAttemptId && (
+      {reportAttemptId && reportDialogOpen && (
         <DetailedAssessmentReportDialog
           attemptId={reportAttemptId}
           open={reportDialogOpen}
@@ -938,7 +938,7 @@ export function AssessmentLeaderboardDialog({
       )}
 
       {/* ── Sub-Dialog: Publish Results (Staff) ── */}
-      {assessment && (
+      {assessment && publishModalOpen && (
         <PublishResultsDialog
           assessment={assessment}
           open={publishModalOpen}

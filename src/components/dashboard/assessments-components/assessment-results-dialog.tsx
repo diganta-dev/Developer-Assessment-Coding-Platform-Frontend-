@@ -331,7 +331,7 @@ export function AssessmentResultsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/30 to-background border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -846,7 +846,7 @@ export function AssessmentResultsDialog({
       </Dialog>
 
       {/* ── Sub-Dialog: Single Attempt Result Breakdown ── */}
-      {selectedAttemptId && (
+      {selectedAttemptId && attemptResultOpen && (
         <AttemptResultDialog
           attemptId={selectedAttemptId}
           open={attemptResultOpen}
@@ -856,7 +856,7 @@ export function AssessmentResultsDialog({
       )}
 
       {/* ── Sub-Dialog: Calculate Score ── */}
-      {scoreAttemptId && (
+      {scoreAttemptId && scoreDialogOpen && (
         <CalculateScoreDialog
           attemptId={scoreAttemptId}
           open={scoreDialogOpen}
@@ -866,7 +866,7 @@ export function AssessmentResultsDialog({
       )}
 
       {/* ── Sub-Dialog: Detailed Assessment Report ── */}
-      {reportAttemptId && (
+      {reportAttemptId && reportDialogOpen && (
         <DetailedAssessmentReportDialog
           attemptId={reportAttemptId}
           open={reportDialogOpen}
@@ -875,7 +875,7 @@ export function AssessmentResultsDialog({
       )}
 
       {/* ── Sub-Dialog: Assessment Leaderboard ── */}
-      {assessment && (
+      {assessment && leaderboardOpen && (
         <AssessmentLeaderboardDialog
           assessmentId={assessment.id}
           assessmentTitle={assessment.title}
@@ -886,7 +886,7 @@ export function AssessmentResultsDialog({
       )}
 
       {/* ── Sub-Dialog: Publish Results ── */}
-      {assessment && (
+      {assessment && publishModalOpen && (
         <PublishResultsDialog
           assessment={assessment}
           open={publishModalOpen}

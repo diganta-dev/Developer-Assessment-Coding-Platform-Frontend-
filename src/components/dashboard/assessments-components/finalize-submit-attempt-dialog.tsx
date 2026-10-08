@@ -1,4 +1,4 @@
-"useclient";
+"use client";
 
 import { AlertTriangle, CheckCircle2, Loader2, Send } from "lucide-react";
 import { useState } from "react";
@@ -77,18 +77,18 @@ export function FinalizeSubmitAttemptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-xl max-h-[90vh] overflow-y-auto border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
-        <DialogHeader className="space-y-3">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-inner">
-            <AlertTriangle className="h-7 w-7" />
+      <DialogContent size="md" className="p-5 sm:p-6 gap-4">
+        <DialogHeader className="space-y-2 text-center items-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-inner">
+            <AlertTriangle className="h-6 w-6" />
           </div>
-          <DialogTitle className="text-center text-xl font-bold tracking-tight text-foreground">
+          <DialogTitle className="text-center text-lg font-bold tracking-tight text-foreground">
             Finalize & Submit Assessment?
           </DialogTitle>
-          <DialogDescription className="text-center text-sm text-muted-foreground leading-relaxed">
+          <DialogDescription className="text-center text-xs text-muted-foreground leading-relaxed">
             {assessmentTitle ? (
               <span className="block font-medium text-foreground mb-1">
-                "{assessmentTitle}"
+                &quot;{assessmentTitle}&quot;
               </span>
             ) : null}
             Once submitted, your test will be officially locked. You will not be
@@ -103,7 +103,7 @@ export function FinalizeSubmitAttemptDialog({
           </div>
         )}
 
-        <div className="rounded-xl border border-border/60 bg-muted/40 p-3.5 space-y-2 text-xs text-muted-foreground">
+        <div className="rounded-xl border border-border/60 bg-muted/40 p-3.5 space-y-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 text-foreground font-medium">
             <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
             <span>Automatic Instant Evaluation</span>
@@ -115,10 +115,11 @@ export function FinalizeSubmitAttemptDialog({
           </p>
         </div>
 
-        <DialogFooter className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-0">
+        <DialogFooter className="mt-2 flex flex-col-reverse sm:flex-row gap-2 sm:gap-2">
           <Button
             type="button"
             variant="outline"
+            size="sm"
             className="w-full sm:w-auto text-xs"
             disabled={finalizeMutation.isPending}
             onClick={() => onOpenChange(false)}
@@ -127,18 +128,19 @@ export function FinalizeSubmitAttemptDialog({
           </Button>
           <Button
             type="button"
-            className="w-full sm:w-auto text-xs font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-500/20"
+            size="sm"
+            className="w-full sm:w-auto text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
             disabled={finalizeMutation.isPending}
             onClick={handleConfirmSubmit}
           >
             {finalizeMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting & Evaluating...
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                Submitting...
               </>
             ) : (
               <>
-                <Send className="mr-2 h-3.5 w-3.5" />
+                <Send className="mr-1.5 h-3.5 w-3.5" />
                 Confirm & Submit
               </>
             )}

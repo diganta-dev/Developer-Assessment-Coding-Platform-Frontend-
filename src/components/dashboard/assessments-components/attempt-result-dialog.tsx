@@ -114,7 +114,7 @@ export function AttemptResultDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto p-0 gap-0 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
+      <DialogContent size="3xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 shadow-2xl">
         {/* Header Bar */}
         <div className="sticky top-0 z-20 border-b border-border/60 bg-background/90 px-6 py-4 backdrop-blur-md">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -720,16 +720,18 @@ export function AttemptResultDialog({
       </DialogContent>
 
       {/* Recalculate Score Sub-Dialog */}
-      <CalculateScoreDialog
-        attemptId={attemptId}
-        assessmentTitle={assessment?.title}
-        candidateName={candidate?.name}
-        open={calculateScoreOpen}
-        onOpenChange={setCalculateScoreOpen}
-        onSuccess={() => {
-          refetch();
-        }}
-      />
+      {!isCandidateView && calculateScoreOpen && Boolean(attemptId) && (
+        <CalculateScoreDialog
+          attemptId={attemptId}
+          assessmentTitle={assessment?.title}
+          candidateName={candidate?.name}
+          open={calculateScoreOpen}
+          onOpenChange={setCalculateScoreOpen}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      )}
     </Dialog>
   );
 }
