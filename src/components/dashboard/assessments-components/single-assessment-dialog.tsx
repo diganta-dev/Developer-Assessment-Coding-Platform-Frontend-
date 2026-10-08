@@ -1532,6 +1532,7 @@ export function SingleAssessmentDialog({
           assessment={assessment as ISingleAssessmentDetail}
           open={isEditModalOpen}
           onOpenChange={(open) => setIsEditModalOpen(open)}
+          onSuccess={() => refetch()}
         />
       )}
 
