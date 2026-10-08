@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CandidateAssessmentWorkspace } from "@/components/dashboard/candidate-dashboard";
+import { CandidateAssessmentWorkspace } from "@/components/dashboard/candidate-dashboard/candidate-assessment-workspace";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 

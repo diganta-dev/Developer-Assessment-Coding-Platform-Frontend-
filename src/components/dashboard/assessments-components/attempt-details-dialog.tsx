@@ -747,49 +747,59 @@ export function AttemptDetailsDialog({
       </DialogContent>
 
       {/* ── Sub Dialogs ── */}
-      <CalculateScoreDialog
-        attemptId={attemptId}
-        assessmentTitle={assessment?.title}
-        candidateName={candidate?.name}
-        open={calculateScoreOpen}
-        onOpenChange={setCalculateScoreOpen}
-        onSuccess={() => {
-          refetch();
-        }}
-      />
-      <CreateSubmissionDialog
-        attemptId={attemptId}
-        initialProblemId={selectedProblemIdForSubmission}
-        open={submissionDialogOpen}
-        onOpenChange={setSubmissionDialogOpen}
-        onSubmissionSuccess={() => {
-          refetch();
-        }}
-        onAllCompleted={() => {
-          refetch();
-        }}
-      />
-      <AttemptResultDialog
-        attemptId={attemptId}
-        open={resultOpen}
-        onOpenChange={setResultOpen}
-        isCandidateView={isCandidateView}
-      />
-      <FinalizeSubmitAttemptDialog
-        attemptId={attemptId}
-        assessmentTitle={assessment?.title}
-        open={submitOpen}
-        onOpenChange={setSubmitOpen}
-        onSuccess={() => {
-          setResultOpen(true);
-          refetch();
-        }}
-      />
-      <DetailedAssessmentReportDialog
-        attemptId={attemptId}
-        open={detailedReportOpen}
-        onOpenChange={setDetailedReportOpen}
-      />
+      {calculateScoreOpen && attemptId && (
+        <CalculateScoreDialog
+          attemptId={attemptId}
+          assessmentTitle={assessment?.title}
+          candidateName={candidate?.name}
+          open={calculateScoreOpen}
+          onOpenChange={setCalculateScoreOpen}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      )}
+      {submissionDialogOpen && attemptId && (
+        <CreateSubmissionDialog
+          attemptId={attemptId}
+          initialProblemId={selectedProblemIdForSubmission}
+          open={submissionDialogOpen}
+          onOpenChange={setSubmissionDialogOpen}
+          onSubmissionSuccess={() => {
+            refetch();
+          }}
+          onAllCompleted={() => {
+            refetch();
+          }}
+        />
+      )}
+      {resultOpen && attemptId && (
+        <AttemptResultDialog
+          attemptId={attemptId}
+          open={resultOpen}
+          onOpenChange={setResultOpen}
+          isCandidateView={isCandidateView}
+        />
+      )}
+      {submitOpen && attemptId && (
+        <FinalizeSubmitAttemptDialog
+          attemptId={attemptId}
+          assessmentTitle={assessment?.title}
+          open={submitOpen}
+          onOpenChange={setSubmitOpen}
+          onSuccess={() => {
+            setResultOpen(true);
+            refetch();
+          }}
+        />
+      )}
+      {detailedReportOpen && attemptId && (
+        <DetailedAssessmentReportDialog
+          attemptId={attemptId}
+          open={detailedReportOpen}
+          onOpenChange={setDetailedReportOpen}
+        />
+      )}
     </Dialog>
   );
 }

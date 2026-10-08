@@ -94,11 +94,14 @@ export function useInviteCandidate() {
   });
 }
 
-export function useGetAssessmentInvitation(assessmentId: string) {
+export function useGetAssessmentInvitation(
+  assessmentId: string,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["assessment-invitation", assessmentId],
     queryFn: () => getAssessmentInvitation(assessmentId),
-    enabled: Boolean(assessmentId),
+    enabled: Boolean(assessmentId) && enabled,
   });
 }
 

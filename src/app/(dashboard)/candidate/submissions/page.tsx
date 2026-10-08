@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CandidateMySubmissions } from "@/components/dashboard/candidate-dashboard";
+import { CandidateMySubmissions } from "@/components/dashboard/candidate-dashboard/candidate-my-submissions";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 

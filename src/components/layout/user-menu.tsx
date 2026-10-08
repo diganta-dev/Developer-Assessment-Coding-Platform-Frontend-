@@ -38,8 +38,14 @@ export function UserMenu({ user }: UserMenuProps) {
   const dashboardUrl = getRoleDashboardRoute(user);
 
   const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+    }
     logout(undefined, {
       onSuccess: async () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         toast.add({
           title: "Logged out successfully",
           description: "You have been logged out of your account",
@@ -53,6 +59,9 @@ export function UserMenu({ user }: UserMenuProps) {
         router.refresh();
       },
       onError: (error: any) => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         toast.add({
           title: "Logged out",
           description: error?.message || "Session ended",

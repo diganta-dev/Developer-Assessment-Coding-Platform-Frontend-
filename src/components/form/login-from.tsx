@@ -23,6 +23,7 @@ import { loginSchema } from "@/validation";
 import { useLogin } from "@/hook";
 import { useQueryClient } from "@tanstack/react-query";
 import { ForgotPasswordDialog } from "./forgot-password-dialog";
+import { getRoleDashboardRoute } from "@/utils/role-routes";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,15 +51,40 @@ export default function LoginForm() {
         password: value.password,
       };
       login(loginData, {
-        onSuccess: async () => {
+        onSuccess: async (res: any) => {
+          if (res?.data?.requiresVerification) {
+            toast.add({
+              title: "Verification Required",
+              description: "Please verify your account OTP to continue.",
+              type: "warning",
+            });
+            router.push(`/register/verify-account?email=${encodeURIComponent(res.data.email || value.email)}`);
+            return;
+          }
+
+          if (res?.data?.accessToken && typeof window !== "undefined") {
+            localStorage.setItem("accessToken", res.data.accessToken);
+          }
+
           toast.add({
             title: "Login successful",
             description: "You have been logged in successfully",
             type: "success",
           });
+
+          if (res?.data?.user) {
+            queryClient.setQueryData(["user"], { data: res.data.user });
+            queryClient.setQueryData(["auth", "me"], { data: res.data.user });
+          }
+
           await queryClient.invalidateQueries({ queryKey: ["user"] });
           await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-          router.push("/dashboard");
+
+          const destination = res?.data?.user
+            ? getRoleDashboardRoute(res.data.user)
+            : "/dashboard";
+
+          router.push(destination);
         },
         onError: (error) => {
           toast.add({

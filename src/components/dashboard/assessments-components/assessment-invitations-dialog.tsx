@@ -132,7 +132,7 @@ export function AssessmentInvitationsDialog({
 
   // Hook to fetch candidate invitations
   const { data, isLoading, isError, error, isRefetching, refetch } =
-    useGetAssessmentInvitation(assessmentId);
+    useGetAssessmentInvitation(assessmentId, open);
 
   // Normalize API response safely
   const invitations: IAssessmentInvitation[] = useMemo(() => {

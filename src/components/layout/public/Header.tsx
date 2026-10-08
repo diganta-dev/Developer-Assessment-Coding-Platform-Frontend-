@@ -30,8 +30,14 @@ export function Header() {
 
   const handleMobileLogout = () => {
     setMobileMenuOpen(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+    }
     logout(undefined, {
       onSuccess: async () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         toast.add({
           title: "Logged out successfully",
           description: "You have been logged out of your account",
@@ -45,6 +51,9 @@ export function Header() {
         router.refresh();
       },
       onError: (error: any) => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         toast.add({
           title: "Logged out",
           description: error?.message || "Session ended",

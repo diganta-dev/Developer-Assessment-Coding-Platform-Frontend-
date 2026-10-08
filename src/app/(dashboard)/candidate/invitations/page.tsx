@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CandidateMyAttempts } from "@/components/dashboard/candidate-dashboard";
+import { CandidateMyAttempts } from "@/components/dashboard/candidate-dashboard/candidate-my-attempts";
 
 export const metadata: Metadata = {
   title: "My Invitations & Assessments | Candidate Portal",

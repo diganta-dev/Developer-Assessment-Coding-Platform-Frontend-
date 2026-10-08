@@ -775,66 +775,78 @@ export function CandidateMyAttempts() {
       </Card>
 
       {/* ── Attempt Details Modal Dialog ── */}
-      <AttemptDetailsDialog
-        attemptId={selectedAttemptId}
-        open={detailsOpen}
-        onOpenChange={setDetailsOpen}
-        isCandidateView={true}
-      />
+      {detailsOpen && selectedAttemptId && (
+        <AttemptDetailsDialog
+          attemptId={selectedAttemptId}
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          isCandidateView={true}
+        />
+      )}
 
       {/* ── Finalize & Submit Dialog ── */}
-      <FinalizeSubmitAttemptDialog
-        attemptId={submitAttemptId}
-        assessmentTitle={submitAssessmentTitle}
-        open={submitOpen}
-        onOpenChange={setSubmitOpen}
-        onSuccess={(id) => {
-          setResultAttemptId(id);
-          setResultOpen(true);
-        }}
-      />
+      {submitOpen && submitAttemptId && (
+        <FinalizeSubmitAttemptDialog
+          attemptId={submitAttemptId}
+          assessmentTitle={submitAssessmentTitle}
+          open={submitOpen}
+          onOpenChange={setSubmitOpen}
+          onSuccess={(id) => {
+            setResultAttemptId(id);
+            setResultOpen(true);
+          }}
+        />
+      )}
 
       {/* ── Candidate Submission Workspace Modal Dialog ── */}
-      <CreateSubmissionDialog
-        attemptId={workspaceAttemptId}
-        open={workspaceOpen}
-        onOpenChange={setWorkspaceOpen}
-        onSubmissionSuccess={() => {
-          refetch();
-          queryClient.invalidateQueries({
-            queryKey: ["candidate-my-attempts"],
-          });
-        }}
-        onAllCompleted={() => {
-          refetch();
-          queryClient.invalidateQueries({
-            queryKey: ["candidate-my-attempts"],
-          });
-        }}
-      />
+      {workspaceOpen && workspaceAttemptId && (
+        <CreateSubmissionDialog
+          attemptId={workspaceAttemptId}
+          open={workspaceOpen}
+          onOpenChange={setWorkspaceOpen}
+          onSubmissionSuccess={() => {
+            refetch();
+            queryClient.invalidateQueries({
+              queryKey: ["candidate-my-attempts"],
+            });
+          }}
+          onAllCompleted={() => {
+            refetch();
+            queryClient.invalidateQueries({
+              queryKey: ["candidate-my-attempts"],
+            });
+          }}
+        />
+      )}
 
       {/* ── Official Attempt Result Modal Dialog ── */}
-      <AttemptResultDialog
-        attemptId={resultAttemptId}
-        open={resultOpen}
-        onOpenChange={setResultOpen}
-        isCandidateView={true}
-      />
+      {resultOpen && resultAttemptId && (
+        <AttemptResultDialog
+          attemptId={resultAttemptId}
+          open={resultOpen}
+          onOpenChange={setResultOpen}
+          isCandidateView={true}
+        />
+      )}
 
       {/* ── Single Assessment Details Briefing Dialog (Candidate View) ── */}
-      <SingleAssessmentDialog
-        assessmentId={inspectAssessmentId}
-        open={Boolean(inspectAssessmentId)}
-        onOpenChange={(open) => !open && setInspectAssessmentId(null)}
-      />
+      {Boolean(inspectAssessmentId) && (
+        <SingleAssessmentDialog
+          assessmentId={inspectAssessmentId}
+          open={Boolean(inspectAssessmentId)}
+          onOpenChange={(open) => !open && setInspectAssessmentId(null)}
+        />
+      )}
 
       {/* ── Assessment Leaderboard Modal Dialog (Candidate / Cohort View) ── */}
-      <AssessmentLeaderboardDialog
-        assessmentId={leaderboardAssessmentId}
-        assessmentTitle={leaderboardAssessmentTitle}
-        open={leaderboardOpen}
-        onOpenChange={setLeaderboardOpen}
-      />
+      {leaderboardOpen && leaderboardAssessmentId && (
+        <AssessmentLeaderboardDialog
+          assessmentId={leaderboardAssessmentId}
+          assessmentTitle={leaderboardAssessmentTitle}
+          open={leaderboardOpen}
+          onOpenChange={setLeaderboardOpen}
+        />
+      )}
     </div>
   );
 }

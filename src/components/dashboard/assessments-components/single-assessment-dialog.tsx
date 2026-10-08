@@ -1463,78 +1463,98 @@ export function SingleAssessmentDialog({
       {/* ── Sub-dialogs (Staff / Admin) ── */}
       {assessment && (
         <>
-          <InviteCandidateDialog
-            assessment={assessment}
-            open={inviteModalOpen}
-            onOpenChange={setInviteModalOpen}
-          />
+          {inviteModalOpen && (
+            <InviteCandidateDialog
+              assessment={assessment}
+              open={inviteModalOpen}
+              onOpenChange={setInviteModalOpen}
+            />
+          )}
 
-          <AssessmentInvitationsDialog
-            assessment={assessment}
-            open={invitationsModalOpen}
-            onOpenChange={setInvitationsModalOpen}
-            onInviteMore={() => setInviteModalOpen(true)}
-          />
+          {invitationsModalOpen && (
+            <AssessmentInvitationsDialog
+              assessment={assessment}
+              open={invitationsModalOpen}
+              onOpenChange={setInvitationsModalOpen}
+              onInviteMore={() => setInviteModalOpen(true)}
+            />
+          )}
 
-          <AssessmentAttemptsDialog
-            assessment={assessment}
-            open={attemptsModalOpen}
-            onOpenChange={setAttemptsModalOpen}
-          />
+          {attemptsModalOpen && (
+            <AssessmentAttemptsDialog
+              assessment={assessment}
+              open={attemptsModalOpen}
+              onOpenChange={setAttemptsModalOpen}
+            />
+          )}
 
-          <AssessmentResultsDialog
-            assessment={assessment}
-            open={resultsModalOpen}
-            onOpenChange={setResultsModalOpen}
-          />
+          {resultsModalOpen && (
+            <AssessmentResultsDialog
+              assessment={assessment}
+              open={resultsModalOpen}
+              onOpenChange={setResultsModalOpen}
+            />
+          )}
 
-          <AssessmentLeaderboardDialog
-            assessmentId={assessment.id}
-            assessmentTitle={assessment.title}
-            assessment={assessment}
-            open={leaderboardModalOpen}
-            onOpenChange={setLeaderboardModalOpen}
-          />
+          {leaderboardModalOpen && (
+            <AssessmentLeaderboardDialog
+              assessmentId={assessment.id}
+              assessmentTitle={assessment.title}
+              assessment={assessment}
+              open={leaderboardModalOpen}
+              onOpenChange={setLeaderboardModalOpen}
+            />
+          )}
 
-          <PublishResultsDialog
-            assessment={assessment}
-            open={publishResultsModalOpen}
-            onOpenChange={setPublishResultsModalOpen}
-            onSuccess={() => refetch()}
-          />
+          {publishResultsModalOpen && (
+            <PublishResultsDialog
+              assessment={assessment}
+              open={publishResultsModalOpen}
+              onOpenChange={setPublishResultsModalOpen}
+              onSuccess={() => refetch()}
+            />
+          )}
 
-          <StartAttemptDialog
-            assessment={assessment}
-            open={startAttemptModalOpen}
-            onOpenChange={setStartAttemptModalOpen}
-          />
+          {startAttemptModalOpen && (
+            <StartAttemptDialog
+              assessment={assessment}
+              open={startAttemptModalOpen}
+              onOpenChange={setStartAttemptModalOpen}
+            />
+          )}
 
-          <PublishAssessmentDialog
-            assessment={assessment}
-            open={publishAssessmentModalOpen}
-            onOpenChange={setPublishAssessmentModalOpen}
-            onSuccess={() => refetch()}
-          />
+          {publishAssessmentModalOpen && (
+            <PublishAssessmentDialog
+              assessment={assessment}
+              open={publishAssessmentModalOpen}
+              onOpenChange={setPublishAssessmentModalOpen}
+              onSuccess={() => refetch()}
+            />
+          )}
         </>
       )}
 
       {/* ── Edit Assessment Dialog ── */}
-      <EditAssessmentDialog
-        assessment={assessment as ISingleAssessmentDetail}
-        open={isEditModalOpen}
-        onOpenChange={(open) => setIsEditModalOpen(open)}
-      />
+      {isEditModalOpen && assessment && (
+        <EditAssessmentDialog
+          assessment={assessment as ISingleAssessmentDetail}
+          open={isEditModalOpen}
+          onOpenChange={(open) => setIsEditModalOpen(open)}
+        />
+      )}
 
       {/* ── Delete Assessment Dialog ── */}
-      <DeleteAssessmentDialog
-        assessment={assessment}
-        open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        onSuccess={() => {
-          setIsDeleteModalOpen(false);
-          onOpenChange(false);
-        }}
-      />
+      {isDeleteModalOpen && assessment && (
+        <DeleteAssessmentDialog
+          assessment={assessment}
+          open={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
+          onSuccess={() => {
+            setIsDeleteModalOpen(false);
+            onOpenChange(false);
+          }}
+        />
+      )}
     </>
   );
 }
