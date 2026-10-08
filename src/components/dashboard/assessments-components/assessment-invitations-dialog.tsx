@@ -227,7 +227,7 @@ export function AssessmentInvitationsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
         {/* ── Dialog Header ── */}
         <div className="p-5 border-b border-border/60 bg-muted/20 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -260,11 +260,10 @@ export function AssessmentInvitationsDialog({
                 title="Refresh invitations"
               >
                 <RefreshCw
-                  className={`size-3.5 ${
-                    isRefetching
+                  className={`size-3.5 ${isRefetching
                       ? "animate-spin text-primary"
                       : "text-muted-foreground"
-                  }`}
+                    }`}
                 />
                 <span>Refresh</span>
               </Button>
@@ -400,11 +399,10 @@ export function AssessmentInvitationsDialog({
                 key={key}
                 type="button"
                 onClick={() => setStatusFilter(key)}
-                className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                  statusFilter === key
+                className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${statusFilter === key
                     ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
+                  }`}
               >
                 {label}
               </button>
@@ -538,43 +536,41 @@ export function AssessmentInvitationsDialog({
                               </p>
                               {invitation.candidate
                                 ?.assessmentAttempts?.[0] && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const attId =
-                                      invitation.candidate
-                                        ?.assessmentAttempts?.[0]?.id;
-                                    if (attId) {
-                                      setSelectedAttemptId(attId);
-                                      setAttemptDetailsOpen(true);
-                                    }
-                                  }}
-                                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-sm border hover:opacity-80 transition-opacity cursor-pointer ${
-                                    invitation.candidate.assessmentAttempts[0]
-                                      .status === "COMPLETED"
-                                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                      : invitation.candidate
-                                            .assessmentAttempts[0].status ===
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const attId =
+                                        invitation.candidate
+                                          ?.assessmentAttempts?.[0]?.id;
+                                      if (attId) {
+                                        setSelectedAttemptId(attId);
+                                        setAttemptDetailsOpen(true);
+                                      }
+                                    }}
+                                    className={`text-[10px] font-medium px-1.5 py-0.5 rounded-sm border hover:opacity-80 transition-opacity cursor-pointer ${invitation.candidate.assessmentAttempts[0]
+                                        .status === "COMPLETED"
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                        : invitation.candidate
+                                          .assessmentAttempts[0].status ===
                                           "IN_PROGRESS"
-                                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-                                        : "bg-muted text-muted-foreground border-border"
-                                  }`}
-                                  title="Click to view candidate attempt details & answers"
-                                >
-                                  {invitation.candidate.assessmentAttempts[0]
-                                    .status === "COMPLETED"
-                                    ? `Score: ${
-                                        invitation.candidate
-                                          .assessmentAttempts[0].percentage ??
-                                        invitation.candidate
-                                          .assessmentAttempts[0]
-                                          .obtainedMarks ??
-                                        0
+                                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                                          : "bg-muted text-muted-foreground border-border"
+                                      }`}
+                                    title="Click to view candidate attempt details & answers"
+                                  >
+                                    {invitation.candidate.assessmentAttempts[0]
+                                      .status === "COMPLETED"
+                                      ? `Score: ${invitation.candidate
+                                        .assessmentAttempts[0].percentage ??
+                                      invitation.candidate
+                                        .assessmentAttempts[0]
+                                        .obtainedMarks ??
+                                      0
                                       }%`
-                                    : invitation.candidate.assessmentAttempts[0]
+                                      : invitation.candidate.assessmentAttempts[0]
                                         .status}
-                                </button>
-                              )}
+                                  </button>
+                                )}
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-tight">
                               {candidateEmail}

@@ -522,7 +522,7 @@ export function ManageTeam() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[96vw] max-w-lg p-6 gap-5 shadow-2xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-full bg-destructive/10 text-destructive shrink-0">

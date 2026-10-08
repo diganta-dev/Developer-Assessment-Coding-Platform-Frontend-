@@ -348,7 +348,7 @@ export function CreateSubmissionDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl max-h-[94vh] flex flex-col p-0 gap-0 overflow-hidden border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl">
+        <DialogContent className="w-[96vw] max-w-[96vw] h-[94vh] max-h-[96vh] flex flex-col p-0 gap-0 overflow-hidden border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl">
           {/* ── Dialog Header ── */}
           <DialogHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

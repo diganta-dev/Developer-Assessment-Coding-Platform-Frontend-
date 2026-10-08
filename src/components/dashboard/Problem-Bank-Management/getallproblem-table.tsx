@@ -221,7 +221,7 @@ function ProblemDetailDialog({
       open={Boolean(problemId)}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto shadow-2xl">
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="size-6 animate-spin text-primary" />
@@ -1073,7 +1073,7 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[96vw] max-w-lg p-6 gap-5 shadow-2xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-full bg-destructive/10 text-destructive shrink-0">

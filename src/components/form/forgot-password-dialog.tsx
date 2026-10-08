@@ -139,7 +139,7 @@ export function ForgotPasswordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-6 gap-5 border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl rounded-2xl">
+      <DialogContent className="w-[96vw] max-w-lg p-6 gap-5 border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl rounded-2xl">
         <DialogHeader className="space-y-1.5 text-left">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">

@@ -77,7 +77,7 @@ export function FinalizeSubmitAttemptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
+      <DialogContent className="w-[96vw] max-w-xl max-h-[90vh] overflow-y-auto border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
         <DialogHeader className="space-y-3">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-inner">
             <AlertTriangle className="h-7 w-7" />

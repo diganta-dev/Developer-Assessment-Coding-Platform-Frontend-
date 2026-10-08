@@ -218,7 +218,7 @@ export function PublishAssessmentDialog({
         }
       }}
     >
-      <DialogContent className="max-w-xl p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl space-y-4">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[90vh] max-h-[92vh] overflow-y-auto p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl space-y-4">
         {/* Header */}
         <DialogHeader className="space-y-2">
           <div className="flex items-center gap-3">

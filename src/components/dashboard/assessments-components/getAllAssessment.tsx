@@ -1,46 +1,30 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
-  Award,
   Calendar,
   Check,
+  ChevronRight,
   Clock,
   Copy,
   CopyX,
   Eye,
   FileCheck2,
   FileEdit,
-  FileText,
   Layers,
-  Loader2,
   Maximize2,
-  Megaphone,
   Plus,
   RefreshCw,
   Search,
   Send,
-  Shield,
   ShieldAlert,
-  Trash2,
-  Trophy,
-  UserPlus,
   Users,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -51,26 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
-import {
-  useGetMyAssessments,
-  usePublishAssessment,
-} from "@/hook/assessment.hook";
-import type { IAssessment } from "@/types/assessment.type";
 import { useGetMe } from "@/hook";
-import { isUserAuthorized } from "@/utils";
+import { useGetMyAssessments } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
-import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
-import { InviteCandidateDialog } from "./invite-candidate-dialog";
-import { PublishResultsDialog } from "./publish-results-dialog";
-import { PublishAssessmentDialog } from "./publish-assessment-dialog";
+import type { IAssessment } from "@/types/assessment.type";
+import { isUserAuthorized } from "@/utils";
 import { SingleAssessmentDialog } from "./single-assessment-dialog";
-import { EditAssessmentDialog } from "./edit-assessment-dialog";
-import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
-import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
-import { AssessmentResultsDialog } from "./assessment-results-dialog";
-import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
-import { Settings2 } from "lucide-react";
-
 
 interface GetAllAssessmentProps {
   onCreateClick?: () => void;
@@ -323,9 +293,6 @@ export function GetAllAssessment({
   onCreateClick,
   onAddProblemsClick,
 }: GetAllAssessmentProps) {
-  const queryClient = useQueryClient();
-  const publishMutation = usePublishAssessment();
-
   const searchParams = useSearchParams();
   const urlAssessmentId = searchParams?.get("assessmentId") || null;
   const [directAssessmentId, setDirectAssessmentId] = useState<string | null>(
@@ -342,35 +309,10 @@ export function GetAllAssessment({
   const [statusFilter, setStatusFilter] = useState<StatusFilterType>("ALL");
   const [selectedAssessment, setSelectedAssessment] =
     useState<IAssessment | null>(null);
-  const [assessmentToEdit, setAssessmentToEdit] =
-    useState<IAssessment | null>(null);
-  const [assessmentToPublish, setAssessmentToPublish] =
-    useState<IAssessment | null>(null);
-  const [candidateInviteAssessment, setCandidateInviteAssessment] =
-    useState<IAssessment | null>(null);
-  const [invitationsAssessment, setInvitationsAssessment] =
-    useState<IAssessment | null>(null);
-  const [attemptsAssessment, setAttemptsAssessment] =
-    useState<IAssessment | null>(null);
-  const [assessmentForResults, setAssessmentForResults] =
-    useState<IAssessment | null>(null);
-  const [assessmentForLeaderboard, setAssessmentForLeaderboard] =
-    useState<IAssessment | null>(null);
-  const [assessmentToPublishResults, setAssessmentToPublishResults] =
-    useState<IAssessment | null>(null);
-  const [assessmentToDelete, setAssessmentToDelete] =
-    useState<IAssessment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: meData } = useGetMe();
   const currentUser = meData?.data;
-  const canPublishResults = isUserAuthorized(currentUser, [
-    UserRole.ADMIN,
-    UserRole.SUPER_ADMIN,
-    CompanyMemberRole.COMPANY_OWNER,
-    CompanyMemberRole.COMPANY_ADMIN,
-    CompanyMemberRole.ASSESSMENT_CREATOR,
-  ]);
 
   const canManageAssessments = isUserAuthorized(currentUser, [
     UserRole.ADMIN,
@@ -380,44 +322,14 @@ export function GetAllAssessment({
     CompanyMemberRole.ASSESSMENT_CREATOR,
   ]);
 
-  const canDeleteAssessments = isUserAuthorized(currentUser, [
-    UserRole.ADMIN,
-    UserRole.SUPER_ADMIN,
-    CompanyMemberRole.COMPANY_OWNER,
-    CompanyMemberRole.COMPANY_ADMIN,
-  ]);
-
-  const canInviteCandidates = canDeleteAssessments;
-
-  const canViewAttempts = isUserAuthorized(currentUser, [
-    UserRole.ADMIN,
-    UserRole.SUPER_ADMIN,
-    CompanyMemberRole.COMPANY_OWNER,
-    CompanyMemberRole.COMPANY_ADMIN,
-    CompanyMemberRole.ASSESSMENT_CREATOR,
-    CompanyMemberRole.EVALUATOR,
-  ]);
-
-  const canViewResults = isUserAuthorized(currentUser, [
-    UserRole.ADMIN,
-    UserRole.SUPER_ADMIN,
-    CompanyMemberRole.COMPANY_OWNER,
-    CompanyMemberRole.COMPANY_ADMIN,
-    CompanyMemberRole.ASSESSMENT_CREATOR,
-    CompanyMemberRole.EVALUATOR,
-  ]);
-
   const userRole = currentUser?.role;
   const memberRole = currentUser?.memberRole;
 
   const isAdmin =
     userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN;
-  const isCompanyOwner =
-    memberRole === CompanyMemberRole.COMPANY_OWNER;
-  const isCompanyAdmin =
-    memberRole === CompanyMemberRole.COMPANY_ADMIN;
-  const isCreator =
-    memberRole === CompanyMemberRole.ASSESSMENT_CREATOR;
+  const isCompanyOwner = memberRole === CompanyMemberRole.COMPANY_OWNER;
+  const isCompanyAdmin = memberRole === CompanyMemberRole.COMPANY_ADMIN;
+  const isCreator = memberRole === CompanyMemberRole.ASSESSMENT_CREATOR;
   const isEvaluator =
     memberRole === CompanyMemberRole.EVALUATOR ||
     userRole === (CompanyMemberRole.EVALUATOR as string);
@@ -525,48 +437,6 @@ export function GetAllAssessment({
       type: "success",
     });
     setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  // Publish assessment action handler
-  const handleConfirmPublish = (assessment: IAssessment) => {
-    publishMutation.mutate(assessment.id, {
-      onSuccess: () => {
-        // Query invalidation in component (senior rule)
-        queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
-        queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
-        queryClient.invalidateQueries({ queryKey: ["assessments"] });
-
-        toast.add({
-          title: "Assessment Published Successfully",
-          description: `"${assessment.title}" is now published and ready for candidate evaluation.`,
-          type: "success",
-        });
-
-        setAssessmentToPublish(null);
-
-        // Update active modal view if currently open
-        if (selectedAssessment?.id === assessment.id) {
-          setSelectedAssessment((prev) =>
-            prev ? { ...prev, status: "PUBLISHED" } : null,
-          );
-        }
-      },
-      onError: (err: unknown) => {
-        const apiErr = err as {
-          data?: { message?: string };
-          message?: string;
-        };
-
-        toast.add({
-          title: "Failed to Publish Assessment",
-          description:
-            apiErr?.data?.message ||
-            apiErr?.message ||
-            "An error occurred while publishing the assessment.",
-          type: "error",
-        });
-      },
-    });
   };
 
   return (
@@ -890,13 +760,15 @@ export function GetAllAssessment({
                 filteredAssessments.map((assessment) => (
                   <TableRow
                     key={assessment.id}
-                    className="hover:bg-muted/30 transition-colors"
+                    onClick={() => setSelectedAssessment(assessment)}
+                    className="hover:bg-muted/40 cursor-pointer transition-colors group"
+                    title="Click row to view assessment details & manage actions"
                   >
                     {/* Assessment Info */}
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="text-xs font-semibold text-foreground leading-snug">
+                          <p className="text-xs font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
                             {assessment.title}
                           </p>
                           {assessment.company?.name && (
@@ -916,8 +788,11 @@ export function GetAllAssessment({
                               </span>
                               <button
                                 type="button"
-                                onClick={() => handleCopyId(assessment.id)}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyId(assessment.id);
+                                }}
+                                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                                 title="Copy Assessment ID"
                               >
                                 {copiedId === assessment.id ? (
@@ -1027,222 +902,22 @@ export function GetAllAssessment({
 
                     {/* Actions */}
                     <TableCell className="text-right">
-                      {(() => {
-                        const isExpired =
-                          resolveAssessmentStatus(assessment).key === "EXPIRED";
-
-                        return (
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* Publish action for DRAFT assessments */}
-                            {canManageAssessments &&
-                              assessment.status === "DRAFT" &&
-                              !isExpired && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setAssessmentToPublish(assessment)
-                                  }
-                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700"
-                                  title="Publish this Assessment"
-                                >
-                                  <Send className="size-3 text-emerald-600" />
-                                  Publish
-                                </Button>
-                              )}
-
-                            {canManageAssessments &&
-                              onAddProblemsClick &&
-                              !isExpired && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => onAddProblemsClick(assessment)}
-                                  className="text-xs h-7 px-2 gap-1 font-medium"
-                                  title="Add Questions to this Assessment"
-                                >
-                                  <Plus className="size-3 text-primary" />
-                                  Questions
-                                </Button>
-                              )}
-
-                            {canInviteCandidates && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                disabled={isExpired}
-                                onClick={() =>
-                                  !isExpired &&
-                                  setCandidateInviteAssessment(assessment)
-                                }
-                                className={`text-xs h-7 px-2 gap-1 font-medium ${
-                                  isExpired
-                                    ? "opacity-50 cursor-not-allowed text-muted-foreground border-border/40"
-                                    : "text-sky-600 border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-700 cursor-pointer"
-                                }`}
-                                title={
-                                  isExpired
-                                    ? "Assessment deadline has passed"
-                                    : "Invite Candidates (Direct Route)"
-                                }
-                                id={`invite-candidates-${assessment.id}-btn`}
-                              >
-                                <UserPlus
-                                  className={`size-3 ${
-                                    isExpired
-                                      ? "text-muted-foreground"
-                                      : "text-sky-600"
-                                  }`}
-                                />
-                                Invite
-                              </Button>
-                            )}
-
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                setInvitationsAssessment(assessment)
-                              }
-                              className="text-xs h-7 px-2 gap-1 font-medium text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-700 cursor-pointer"
-                              title="View Invited Candidates & Status"
-                            >
-                              <Users className="size-3 text-indigo-600" />
-                              Invitations
-                            </Button>
-
-                            {/* Candidate Attempts action (Admin, Owner, Admin, Creator, Evaluator) */}
-                            {canViewAttempts && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  setAttemptsAssessment(assessment)
-                                }
-                                className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
-                                title="View candidate test sessions and submitted attempts"
-                                id={`view-attempts-${assessment.id}-btn`}
-                              >
-                                <FileCheck2 className="size-3 text-emerald-600 dark:text-emerald-400" />
-                                Attempts
-                              </Button>
-                            )}
-
-                            {/* Results & Leaderboard action (Admin / Company Owner / Company Admin / Assessment Creator / Evaluator) */}
-                            {canViewResults &&
-                              assessment.status !== "DRAFT" && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setAssessmentForResults(assessment)
-                                  }
-                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700 cursor-pointer"
-                                  title="View Assessment Results"
-                                  id={`view-results-${assessment.id}-btn`}
-                                >
-                                  <Award className="size-3 text-emerald-600 dark:text-emerald-400" />
-                                  Results
-                                </Button>
-                              )}
-
-                            {/* Leaderboard Action */}
-                            {canViewResults &&
-                              assessment.status !== "DRAFT" && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setAssessmentForLeaderboard(assessment)
-                                  }
-                                  className="text-xs h-7 px-2 gap-1 font-medium text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-700 cursor-pointer"
-                                  title="View Assessment Leaderboard"
-                                  id={`view-leaderboard-${assessment.id}-btn`}
-                                >
-                                  <Trophy className="size-3 text-amber-600 dark:text-amber-400" />
-                                  Leaderboard
-                                </Button>
-                              )}
-
-                            {/* Publish Results (Direct Route) Action (Admin / Company Owner / Company Admin / Assessment Creator) */}
-                            {canPublishResults &&
-                              assessment.status !== "DRAFT" && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setAssessmentToPublishResults(assessment)
-                                  }
-                                  className="text-xs h-7 px-2 gap-1 font-medium text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-700 cursor-pointer"
-                                  title="Publish Assessment Results (Direct Route)"
-                                  id={`publish-results-${assessment.id}-btn`}
-                                >
-                                  <Megaphone className="size-3 text-emerald-600 dark:text-emerald-400" />
-                                  Publish Results
-                                </Button>
-                              )}
-
-                              {/* Evaluator Report shortcut */}
-                              {isEvaluator && (
-                                <Link
-                                  href="/evaluator/report"
-                                  className="inline-flex items-center text-xs h-7 px-2 gap-1 font-medium text-primary border border-primary/30 rounded-md hover:bg-primary/10 transition-colors"
-                                  title="Candidate Reports"
-                                >
-                                  <FileText className="size-3" />
-                                  Reports
-                                </Link>
-                              )}
-
-                            {canManageAssessments && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setAssessmentToEdit(assessment)}
-                                className="text-xs h-7 px-2.5 gap-1 cursor-pointer"
-                              >
-                                <Settings2 className="size-3 text-muted-foreground" />
-                                Edit
-                              </Button>
-                            )}
-
-                            {canDeleteAssessments && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setAssessmentToDelete(assessment)}
-                                className="text-xs h-7 px-2.5 gap-1 cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                                title="Delete Assessment"
-                                id={`delete-assessment-${assessment.id}-btn`}
-                              >
-                                <Trash2 className="size-3 text-destructive" />
-                                Delete
-                              </Button>
-                            )}
-
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedAssessment(assessment)}
-                              className="text-xs h-7 px-2.5 gap-1 cursor-pointer"
-                            >
-                              <Eye className="size-3 text-muted-foreground" />
-                              Details
-                            </Button>
-                          </div>
-                        );
-                      })()}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedAssessment(assessment);
+                        }}
+                        className="text-xs h-7.5 px-3 gap-1.5 cursor-pointer shadow-2xs hover:bg-primary/10 hover:text-primary hover:border-primary/40 font-medium transition-all group-hover:border-primary/40 group-hover:text-primary"
+                        title="View Assessment Details & Actions"
+                        id={`view-details-${assessment.id}-btn`}
+                      >
+                        <Eye className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span>Details</span>
+                        <ChevronRight className="size-3 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -1252,21 +927,7 @@ export function GetAllAssessment({
         </div>
       </Card>
 
-      {/* ── Publish Assessment Dialog (Direct Route) ── */}
-      <PublishAssessmentDialog
-        assessment={assessmentToPublish}
-        open={Boolean(assessmentToPublish)}
-        onOpenChange={(open) => !open && setAssessmentToPublish(null)}
-        onSuccess={() => {
-          if (selectedAssessment?.id === assessmentToPublish?.id) {
-            setSelectedAssessment((prev) =>
-              prev ? { ...prev, status: "PUBLISHED" } : null,
-            );
-          }
-        }}
-      />
-
-      {/* ── Single Assessment Details Dialog (Role-Aware) ── */}
+      {/* ── Single Assessment Details Dialog (Role-Aware & All Actions Included) ── */}
       <SingleAssessmentDialog
         assessmentId={selectedAssessment?.id || directAssessmentId || null}
         open={Boolean(selectedAssessment || directAssessmentId)}
@@ -1274,70 +935,10 @@ export function GetAllAssessment({
           if (!open) {
             setSelectedAssessment(null);
             setDirectAssessmentId(null);
+            refetch();
           }
         }}
         onAddProblemsClick={onAddProblemsClick}
-      />
-
-      {/* ── Candidate Invite Modal ── */}
-      <InviteCandidateDialog
-        assessment={candidateInviteAssessment}
-        open={Boolean(candidateInviteAssessment)}
-        onOpenChange={(open) => !open && setCandidateInviteAssessment(null)}
-      />
-
-      {/* ── Candidate Invitations Modal ── */}
-      <AssessmentInvitationsDialog
-        assessment={invitationsAssessment}
-        open={Boolean(invitationsAssessment)}
-        onOpenChange={(open) => !open && setInvitationsAssessment(null)}
-        onInviteMore={(a) => setCandidateInviteAssessment(a)}
-      />
-
-      {/* ── Publish Results Modal ── */}
-      <PublishResultsDialog
-        assessment={assessmentToPublishResults}
-        open={Boolean(assessmentToPublishResults)}
-        onOpenChange={(open) => !open && setAssessmentToPublishResults(null)}
-        onSuccess={() => refetch()}
-      />
-
-      {/* ── Edit Assessment Dialog ── */}
-      <EditAssessmentDialog
-        // @ts-ignore
-        assessment={assessmentToEdit}
-        open={Boolean(assessmentToEdit)}
-        onOpenChange={(open) => !open && setAssessmentToEdit(null)}
-      />
-
-      {/* ── Delete Assessment Dialog ── */}
-      <DeleteAssessmentDialog
-        assessment={assessmentToDelete}
-        open={Boolean(assessmentToDelete)}
-        onOpenChange={(open) => !open && setAssessmentToDelete(null)}
-      />
-
-      {/* ── Assessment Attempts Dialog ── */}
-      <AssessmentAttemptsDialog
-        assessment={attemptsAssessment}
-        open={Boolean(attemptsAssessment)}
-        onOpenChange={(open) => !open && setAttemptsAssessment(null)}
-      />
-
-      {/* ── Assessment Results Dialog ── */}
-      <AssessmentResultsDialog
-        assessment={assessmentForResults}
-        open={Boolean(assessmentForResults)}
-        onOpenChange={(open) => !open && setAssessmentForResults(null)}
-      />
-
-      {/* ── Assessment Leaderboard Dialog ── */}
-      <AssessmentLeaderboardDialog
-        assessmentId={assessmentForLeaderboard?.id ?? null}
-        assessmentTitle={assessmentForLeaderboard?.title}
-        assessment={assessmentForLeaderboard}
-        open={Boolean(assessmentForLeaderboard)}
-        onOpenChange={(open) => !open && setAssessmentForLeaderboard(null)}
       />
     </div>
   );

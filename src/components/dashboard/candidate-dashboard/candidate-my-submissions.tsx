@@ -417,7 +417,7 @@ export function CandidateMySubmissions() {
           open={Boolean(selectedSubmission)}
           onOpenChange={(open) => !open && setSelectedSubmission(null)}
         >
-          <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl">
+          <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] flex flex-col p-0 gap-0 overflow-hidden border-border/80 bg-background/98 shadow-2xl backdrop-blur-xl">
             <DialogHeader className="p-5 border-b border-border/60 bg-muted/20 space-y-1.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="space-y-1">

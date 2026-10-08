@@ -114,7 +114,7 @@ export function DeleteAssessmentDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md p-6 gap-5">
+      <DialogContent className="w-[96vw] max-w-lg p-6 gap-5 shadow-2xl">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shrink-0">

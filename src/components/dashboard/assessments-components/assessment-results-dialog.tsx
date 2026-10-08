@@ -331,7 +331,7 @@ export function AssessmentResultsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin]">
+        <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/30 to-background border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

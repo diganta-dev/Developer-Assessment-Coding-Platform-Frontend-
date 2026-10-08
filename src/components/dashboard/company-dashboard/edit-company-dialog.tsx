@@ -111,7 +111,7 @@ export function EditCompanyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[90vh] max-h-[92vh] overflow-y-auto shadow-2xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader className="space-y-1">
             <div className="flex items-center gap-2 text-primary font-medium text-xs">

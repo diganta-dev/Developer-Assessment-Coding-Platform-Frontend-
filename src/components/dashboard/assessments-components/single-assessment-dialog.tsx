@@ -3,27 +3,20 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
-  AlertTriangle,
   Award,
   BookOpen,
   Calendar,
   Check,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
   Code2,
   Copy,
   CopyX,
-  ExternalLink,
-  Eye,
   FileCheck2,
   FileQuestion,
   FileText,
   Globe,
-  Layers,
-  Lock,
-  Mail,
   Maximize2,
   Megaphone,
   Play,
@@ -37,18 +30,14 @@ import {
   Trash2,
   Trophy,
   User,
-  UserCheck,
   UserPlus,
   Users,
-  X,
-  XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 function Badge({
   children,
@@ -74,38 +63,33 @@ function Badge({
     </span>
   );
 }
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { useGetMe } from "@/hook";
-import {
-  useGetSingleAssessment,
-  useGetSingleAssessmentDirectRoute,
-  usePublishAssessment,
-} from "@/hook/assessment.hook";
+import { useGetSingleAssessmentDirectRoute } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
 import type {
   IAssessment,
   ISingleAssessmentDetail,
-  ISingleAssessmentProblemItem,
 } from "@/types/assessment.type";
 import { isUserAuthorized } from "@/utils";
-import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
-import { InviteCandidateDialog } from "./invite-candidate-dialog";
-import { PublishResultsDialog } from "./publish-results-dialog";
-import { EditAssessmentDialog } from "./edit-assessment-dialog";
-import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
 import { AssessmentAttemptsDialog } from "./assessment-attempts-dialog";
-import { AssessmentResultsDialog } from "./assessment-results-dialog";
+import { AssessmentInvitationsDialog } from "./assessment-invitations-dialog";
 import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
-import { StartAttemptDialog } from "./start-attempt-dialog";
+import { AssessmentResultsDialog } from "./assessment-results-dialog";
+import { DeleteAssessmentDialog } from "./delete-assessment-dialog";
+import { EditAssessmentDialog } from "./edit-assessment-dialog";
+import { InviteCandidateDialog } from "./invite-candidate-dialog";
 import { PublishAssessmentDialog } from "./publish-assessment-dialog";
+import { PublishResultsDialog } from "./publish-results-dialog";
+import { StartAttemptDialog } from "./start-attempt-dialog";
 
 export interface SingleAssessmentDialogProps {
   assessmentId: string | null;
@@ -148,8 +132,7 @@ export function SingleAssessmentDialog({
   onOpenChange,
   onAddProblemsClick,
 }: SingleAssessmentDialogProps) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<
     "OVERVIEW" | "PROBLEMS" | "TELEMETRY"
@@ -169,7 +152,8 @@ export function SingleAssessmentDialog({
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [publishResultsModalOpen, setPublishResultsModalOpen] = useState(false);
   const [startAttemptModalOpen, setStartAttemptModalOpen] = useState(false);
-  const [publishAssessmentModalOpen, setPublishAssessmentModalOpen] = useState(false);
+  const [publishAssessmentModalOpen, setPublishAssessmentModalOpen] =
+    useState(false);
 
   // TanStack Query for User Identity & Permissions
   const { data: meData } = useGetMe();
@@ -183,8 +167,6 @@ export function SingleAssessmentDialog({
     currentUser?.memberRole === CompanyMemberRole.COMPANY_OWNER;
   const isCompanyAdmin =
     currentUser?.memberRole === CompanyMemberRole.COMPANY_ADMIN;
-  const isCreator =
-    currentUser?.memberRole === CompanyMemberRole.ASSESSMENT_CREATOR;
   const isEvaluator =
     currentUser?.memberRole === CompanyMemberRole.EVALUATOR ||
     currentUser?.role === (CompanyMemberRole.EVALUATOR as string);
@@ -253,9 +235,6 @@ export function SingleAssessmentDialog({
     return raw as ISingleAssessmentDetail;
   }, [apiResponse]);
 
-  // Publish Mutation (pure hook per AGENTS.md)
-  const publishMutation = usePublishAssessment();
-
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
     setCopiedId(true);
@@ -265,36 +244,6 @@ export function SingleAssessmentDialog({
       type: "success",
     });
     setTimeout(() => setCopiedId(false), 2000);
-  };
-
-  const handlePublish = (a: ISingleAssessmentDetail) => {
-    publishMutation.mutate(a.id, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["assessment-single", a.id],
-        });
-        queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
-        queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
-        queryClient.invalidateQueries({ queryKey: ["assessments"] });
-
-        toast.add({
-          title: "Assessment Published",
-          description: `"${a.title}" is now published and ready for candidate evaluations.`,
-          type: "success",
-        });
-      },
-      onError: (err: unknown) => {
-        const apiErr = err as { data?: { message?: string }; message?: string };
-        toast.add({
-          title: "Failed to Publish",
-          description:
-            apiErr?.data?.message ||
-            apiErr?.message ||
-            "Could not publish assessment.",
-          type: "error",
-        });
-      },
-    });
   };
 
   // Status computation
@@ -358,7 +307,7 @@ export function SingleAssessmentDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin]">
+        <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
           {/* ── Dialog Header Banner ── */}
           <div className="relative p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/40 to-background border-b border-border/60">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -398,15 +347,19 @@ export function SingleAssessmentDialog({
 
                 <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                   {isLoading ? (
-                    <Skeleton className="h-7 w-64" />
+                    <span className="inline-block h-7 w-64 animate-pulse rounded-md bg-muted" />
                   ) : (
                     assessment?.title || "Assessment Details"
                   )}
                 </DialogTitle>
 
-                <DialogDescription className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                <DialogDescription
+                  render={
+                    <div className="text-xs sm:text-sm text-muted-foreground line-clamp-2" />
+                  }
+                >
                   {isLoading ? (
-                    <Skeleton className="h-4 w-96 mt-1" />
+                    <span className="inline-block h-4 w-96 mt-1 animate-pulse rounded-md bg-muted" />
                   ) : (
                     assessment?.description || "No description provided."
                   )}
@@ -570,7 +523,8 @@ export function SingleAssessmentDialog({
                 </p>
                 {isForbiddenError && isCandidate && (
                   <p className="text-[11px] text-amber-600 dark:text-amber-400 max-w-sm mx-auto">
-                    If this is a private company assessment, please ensure you have received an invitation from the hiring organization.
+                    If this is a private company assessment, please ensure you
+                    have received an invitation from the hiring organization.
                   </p>
                 )}
                 <div className="flex items-center justify-center gap-2 pt-1">
@@ -679,7 +633,9 @@ export function SingleAssessmentDialog({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 border border-border/50">
-                      <span className="text-muted-foreground">Window Opens</span>
+                      <span className="text-muted-foreground">
+                        Window Opens
+                      </span>
                       <span className="font-semibold text-foreground">
                         {formatDate(
                           assessment.startDate || assessment.createdAt,
@@ -688,7 +644,9 @@ export function SingleAssessmentDialog({
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 border border-border/50">
-                      <span className="text-muted-foreground">Window Closes</span>
+                      <span className="text-muted-foreground">
+                        Window Closes
+                      </span>
                       <span className="font-semibold text-foreground">
                         {formatDate(
                           assessment.endDate,
@@ -941,13 +899,12 @@ export function SingleAssessmentDialog({
                           key={pItem.id || `prob-${idx}`}
                           className="border-border/70 transition-all overflow-hidden"
                         >
-                          <div
+                          <button
+                            type="button"
                             onClick={() =>
-                              setExpandedProblemId(
-                                isExpanded ? null : pItem.id,
-                              )
+                              setExpandedProblemId(isExpanded ? null : pItem.id)
                             }
-                            className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
+                            className="w-full text-left p-3.5 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <span className="flex items-center justify-center size-6 rounded-md bg-muted text-muted-foreground font-mono text-xs font-bold">
@@ -986,7 +943,7 @@ export function SingleAssessmentDialog({
                                 <ChevronDown className="size-4 text-muted-foreground" />
                               )}
                             </div>
-                          </div>
+                          </button>
 
                           {/* Expanded Problem View */}
                           {isExpanded && (
@@ -1054,63 +1011,64 @@ export function SingleAssessmentDialog({
                               )}
 
                               {/* Coding Details */}
-                              {prob.type === "CODING" && prob.codingQuestion && (
-                                <div className="space-y-2 pt-2 border-t border-border/40">
-                                  <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                      Test Cases
-                                    </p>
-                                    <span className="text-[10px] font-mono text-muted-foreground">
-                                      {prob.codingQuestion.testCases?.length ??
-                                        0}{" "}
-                                      test cases visible
-                                    </span>
-                                  </div>
+                              {prob.type === "CODING" &&
+                                prob.codingQuestion && (
+                                  <div className="space-y-2 pt-2 border-t border-border/40">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Test Cases
+                                      </p>
+                                      <span className="text-[10px] font-mono text-muted-foreground">
+                                        {prob.codingQuestion.testCases
+                                          ?.length ?? 0}{" "}
+                                        test cases visible
+                                      </span>
+                                    </div>
 
-                                  <div className="space-y-2">
-                                    {prob.codingQuestion.testCases?.map(
-                                      (tc, tcIdx) => (
-                                        <div
-                                          key={tc.id || tcIdx}
-                                          className="p-2.5 rounded-lg bg-background border border-border/60 space-y-1.5 font-mono text-[11px]"
-                                        >
-                                          <div className="flex items-center justify-between text-[10px]">
-                                            <span className="font-bold text-muted-foreground">
-                                              Case #{tcIdx + 1}
-                                            </span>
-                                            <Badge
-                                              variant={
-                                                tc.type === "PUBLIC"
-                                                  ? "outline"
-                                                  : "secondary"
-                                              }
-                                              className="text-[9px]"
-                                            >
-                                              {tc.type || "PUBLIC"}
-                                            </Badge>
+                                    <div className="space-y-2">
+                                      {prob.codingQuestion.testCases?.map(
+                                        (tc, tcIdx) => (
+                                          <div
+                                            key={tc.id || tcIdx}
+                                            className="p-2.5 rounded-lg bg-background border border-border/60 space-y-1.5 font-mono text-[11px]"
+                                          >
+                                            <div className="flex items-center justify-between text-[10px]">
+                                              <span className="font-bold text-muted-foreground">
+                                                Case #{tcIdx + 1}
+                                              </span>
+                                              <Badge
+                                                variant={
+                                                  tc.type === "PUBLIC"
+                                                    ? "outline"
+                                                    : "secondary"
+                                                }
+                                                className="text-[9px]"
+                                              >
+                                                {tc.type || "PUBLIC"}
+                                              </Badge>
+                                            </div>
+                                            <div>
+                                              <span className="text-muted-foreground">
+                                                Input:{" "}
+                                              </span>
+                                              <span className="text-foreground">
+                                                {tc.input}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-muted-foreground">
+                                                Expected Output:{" "}
+                                              </span>
+                                              <span className="text-emerald-600 dark:text-emerald-400">
+                                                {tc.expectedOutput}
+                                              </span>
+                                            </div>
                                           </div>
-                                          <div>
-                                            <span className="text-muted-foreground">
-                                              Input:{" "}
-                                            </span>
-                                            <span className="text-foreground">
-                                              {tc.input}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-muted-foreground">
-                                              Expected Output:{" "}
-                                            </span>
-                                            <span className="text-emerald-600 dark:text-emerald-400">
-                                              {tc.expectedOutput}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      ),
-                                    )}
+                                        ),
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
 
                               {/* Written Details */}
                               {prob.type === "WRITTEN" &&
@@ -1324,6 +1282,40 @@ export function SingleAssessmentDialog({
                       >
                         <Send className="size-3.5" />
                         Publish Assessment
+                      </Button>
+                    )}
+
+                    {/* Add Questions Action */}
+                    {canManageAssessments && onAddProblemsClick && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          onOpenChange(false);
+                          onAddProblemsClick(assessment);
+                        }}
+                        className="text-xs gap-1.5 font-medium cursor-pointer"
+                        title="Add Questions to this Assessment"
+                        id="add-questions-dialog-btn"
+                      >
+                        <Plus className="size-3.5 text-primary" />+ Questions
+                      </Button>
+                    )}
+
+                    {/* Edit Assessment Action */}
+                    {canManageAssessments && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="text-xs gap-1.5 font-medium cursor-pointer"
+                        title="Edit Assessment Settings"
+                        id="edit-assessment-dialog-btn"
+                      >
+                        <Settings2 className="size-3.5 text-muted-foreground" />
+                        Edit
                       </Button>
                     )}
 

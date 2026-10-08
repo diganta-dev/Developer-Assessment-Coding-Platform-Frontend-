@@ -24,7 +24,7 @@ export function DetailedAssessmentReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[94vh] max-h-[95vh] overflow-y-auto p-5 sm:p-6 border-border/80 bg-background/95 backdrop-blur-xl shadow-2xl">
         <DialogHeader className="sr-only">
           <DialogTitle>Detailed Assessment Report</DialogTitle>
           <DialogDescription>

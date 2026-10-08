@@ -218,7 +218,7 @@ export function EditAssessmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="w-[96vw] max-w-[96vw] h-[92vh] max-h-[94vh] p-0 overflow-hidden flex flex-col shadow-2xl">
         <DialogHeader className="p-6 pb-4 border-b border-border/40 bg-muted/20">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
