@@ -100,7 +100,8 @@ export function CompanyAnalyticsView() {
           No Company Organization Data
         </h3>
         <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-          Create assessments and invite candidates to generate executive hiring analytics.
+          Create assessments and invite candidates to generate executive hiring
+          analytics.
         </p>
       </Card>
     );

@@ -69,7 +69,13 @@ export function CandidateMyResults() {
   const metrics = useMemo(() => {
     const total = results.length;
     if (total === 0) {
-      return { total: 0, passed: 0, passRate: 0, avgPercentage: 0, bestScore: 0 };
+      return {
+        total: 0,
+        passed: 0,
+        passRate: 0,
+        avgPercentage: 0,
+        bestScore: 0,
+      };
     }
     const passed = results.filter((r) => r.status === "PASSED").length;
     const passRate = Math.round((passed / total) * 100);
@@ -93,7 +99,8 @@ export function CandidateMyResults() {
             My Official Assessment Results & Rankings
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            View verified evaluation outcomes, competitive percentile ranks, and question breakdown scores.
+            View verified evaluation outcomes, competitive percentile ranks, and
+            question breakdown scores.
           </p>
         </div>
 
@@ -105,7 +112,9 @@ export function CandidateMyResults() {
           disabled={isRefetching}
           className="text-xs font-semibold gap-1.5 h-8 shrink-0 cursor-pointer"
         >
-          <RefreshCw className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`} />
+          <RefreshCw
+            className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`}
+          />
           Refresh Results
         </Button>
       </div>
@@ -113,15 +122,21 @@ export function CandidateMyResults() {
       {/* ── Summary KPI Tiles ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Tests Taken</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Tests Taken
+          </p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-foreground">{metrics.total}</span>
+            <span className="text-2xl font-bold text-foreground">
+              {metrics.total}
+            </span>
             <span className="text-xs text-muted-foreground">Assessments</span>
           </div>
         </Card>
 
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Passed Assessments</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Passed Assessments
+          </p>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {metrics.passed}
@@ -133,12 +148,16 @@ export function CandidateMyResults() {
         </Card>
 
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Average Score</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Average Score
+          </p>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold text-primary">
               {metrics.avgPercentage}%
             </span>
-            <span className="text-xs text-muted-foreground">Mean Performance</span>
+            <span className="text-xs text-muted-foreground">
+              Mean Performance
+            </span>
           </div>
         </Card>
 
@@ -148,7 +167,9 @@ export function CandidateMyResults() {
             <span className="text-2xl font-bold text-amber-500">
               {metrics.bestScore}%
             </span>
-            <span className="text-xs text-amber-500 font-medium">Personal Best</span>
+            <span className="text-xs text-amber-500 font-medium">
+              Personal Best
+            </span>
           </div>
         </Card>
       </div>
@@ -186,7 +207,12 @@ export function CandidateMyResults() {
               ? error.message
               : "Could not load candidate portfolio results. Please try again."}
           </p>
-          <Button size="sm" variant="outline" onClick={() => refetch()} className="text-xs">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => refetch()}
+            className="text-xs"
+          >
             Retry
           </Button>
         </div>
@@ -197,7 +223,8 @@ export function CandidateMyResults() {
             No published results yet
           </h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Once your assessment attempts are evaluated and officially published by the company, your scores and rankings will appear here.
+            Once your assessment attempts are evaluated and officially published
+            by the company, your scores and rankings will appear here.
           </p>
           <div className="pt-2">
             <Link
@@ -258,9 +285,12 @@ export function CandidateMyResults() {
                   {/* Score Progress Bar */}
                   <div className="space-y-1.5 p-3 rounded-xl bg-muted/30 border border-border/50">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground font-medium">Final Score</span>
+                      <span className="text-muted-foreground font-medium">
+                        Final Score
+                      </span>
                       <span className="font-bold text-foreground">
-                        {result.obtainedMarks} / {result.totalMarks} pts ({result.percentage}%)
+                        {result.obtainedMarks} / {result.totalMarks} pts (
+                        {result.percentage}%)
                       </span>
                     </div>
                     <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
@@ -268,7 +298,9 @@ export function CandidateMyResults() {
                         className={`h-full transition-all ${
                           isPassed ? "bg-emerald-500" : "bg-rose-500"
                         }`}
-                        style={{ width: `${Math.min(100, result.percentage)}%` }}
+                        style={{
+                          width: `${Math.min(100, result.percentage)}%`,
+                        }}
                       />
                     </div>
                     {result.passingScore != null && (
@@ -321,7 +353,10 @@ export function CandidateMyResults() {
           if (!open) setSelectedResult(null);
         }}
       >
-        <DialogContent size="xl" className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+        <DialogContent
+          size="xl"
+          className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl"
+        >
           <DialogHeader className="p-5 border-b border-border/60 bg-muted/20">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
@@ -345,7 +380,8 @@ export function CandidateMyResults() {
                   {selectedResult.assessmentTitle}
                 </h4>
                 <p className="text-xs text-muted-foreground">
-                  Candidate: {selectedResult.candidateName} ({selectedResult.candidateEmail})
+                  Candidate: {selectedResult.candidateName} (
+                  {selectedResult.candidateEmail})
                 </p>
               </div>
 
@@ -366,7 +402,8 @@ export function CandidateMyResults() {
                 <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 space-y-1">
                   <p className="text-muted-foreground">Final Score</p>
                   <p className="text-base font-bold text-foreground">
-                    {selectedResult.obtainedMarks} / {selectedResult.totalMarks} ({selectedResult.percentage}%)
+                    {selectedResult.obtainedMarks} / {selectedResult.totalMarks}{" "}
+                    ({selectedResult.percentage}%)
                   </p>
                 </div>
               </div>
@@ -377,9 +414,11 @@ export function CandidateMyResults() {
                   Problems Breakdown ({selectedResult.breakdown?.length || 0})
                 </h5>
 
-                {!selectedResult.breakdown || selectedResult.breakdown.length === 0 ? (
+                {!selectedResult.breakdown ||
+                selectedResult.breakdown.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic py-3 text-center border border-dashed rounded-lg">
-                    Detailed per-problem breakdown is unavailable for this attempt.
+                    Detailed per-problem breakdown is unavailable for this
+                    attempt.
                   </p>
                 ) : (
                   <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -389,7 +428,9 @@ export function CandidateMyResults() {
                         className="p-3 rounded-xl border border-border/50 bg-card text-xs flex items-center justify-between"
                       >
                         <div className="space-y-0.5">
-                          <p className="font-semibold text-foreground">{prob.title}</p>
+                          <p className="font-semibold text-foreground">
+                            {prob.title}
+                          </p>
                           <span className="text-[10px] text-muted-foreground uppercase font-bold">
                             {prob.type}
                           </span>
@@ -398,7 +439,9 @@ export function CandidateMyResults() {
                         <div className="text-right">
                           <span
                             className={`font-bold ${
-                              prob.isCorrect ? "text-emerald-600" : "text-foreground"
+                              prob.isCorrect
+                                ? "text-emerald-600"
+                                : "text-foreground"
                             }`}
                           >
                             {prob.obtainedMarks} / {prob.maxMarks} pts

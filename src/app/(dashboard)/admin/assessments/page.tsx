@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AssessmentManagement } from "@/components/dashboard/assessments-components/assessment-management";
 
 export const metadata: Metadata = {
   title: "Assessments Management | Admin Control Center",
-  description: "Monitor and manage platform coding assessments, candidate invitations, and published results.",
+  description:
+    "Monitor and manage platform coding assessments, candidate invitations, and published results.",
 };
 
 export default function AdminAssessmentsPage() {
@@ -24,9 +25,12 @@ export default function AdminAssessmentsPage() {
 
       {/* Page Heading */}
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">Assessments Oversight</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Assessments Oversight
+        </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Review, publish, manage question banks, and release candidate results across all platform assessments.
+          Review, publish, manage question banks, and release candidate results
+          across all platform assessments.
         </p>
       </div>
 

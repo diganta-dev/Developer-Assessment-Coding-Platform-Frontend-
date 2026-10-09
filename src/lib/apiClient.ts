@@ -29,4 +29,3 @@ const apiClient = ofetch.create({
 });
 
 export default apiClient;
-

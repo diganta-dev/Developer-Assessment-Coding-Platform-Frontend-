@@ -17,7 +17,8 @@ export default function AdminUsersPage() {
           Platform User Management Directory
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-          View all registered candidates, recruiters, and platform administrators. Toggle access status or remove accounts.
+          View all registered candidates, recruiters, and platform
+          administrators. Toggle access status or remove accounts.
         </p>
       </div>
 

@@ -1,3 +1,4 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   companyRegistration,
   companyVerification,
@@ -21,7 +22,6 @@ import type {
   ResetPasswordPayload,
   VerifyLoginOtpPayload,
 } from "@/types/auth.type";
-import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useLogin() {
   return useMutation({

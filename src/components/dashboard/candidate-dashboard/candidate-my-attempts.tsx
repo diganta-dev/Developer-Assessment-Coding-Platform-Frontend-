@@ -19,12 +19,12 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  AssessmentLeaderboardDialog,
   AttemptDetailsDialog,
   AttemptResultDialog,
   CreateSubmissionDialog,
   FinalizeSubmitAttemptDialog,
   SingleAssessmentDialog,
-  AssessmentLeaderboardDialog,
 } from "@/components/dashboard/assessments-components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -520,14 +520,17 @@ export function CandidateMyAttempts() {
                               type="button"
                               onClick={() =>
                                 setInspectAssessmentId(
-                                  item.assessmentId || item.assessment?.id || null,
+                                  item.assessmentId ||
+                                    item.assessment?.id ||
+                                    null,
                                 )
                               }
                               className="text-xs font-semibold text-foreground leading-tight hover:text-primary transition-colors cursor-pointer text-left flex items-center gap-1 group"
                               title="Inspect Assessment Syllabus & Guidelines"
                             >
                               <span>
-                                {item.assessment?.title || "Technical Assessment"}
+                                {item.assessment?.title ||
+                                  "Technical Assessment"}
                               </span>
                               <Eye className="size-3 text-muted-foreground group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100" />
                             </button>

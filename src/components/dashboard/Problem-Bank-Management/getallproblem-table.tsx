@@ -5,8 +5,8 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronDown,
-  ChevronUp,
   ChevronsUpDown,
+  ChevronUp,
   Code2,
   Eye,
   FileQuestion,
@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { EditProblemDialog } from "./edit-problem-dialog";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +53,7 @@ import type {
   ProblemType,
   SortOrder,
 } from "@/types";
+import { EditProblemDialog } from "./edit-problem-dialog";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -221,7 +221,10 @@ function ProblemDetailDialog({
       open={Boolean(problemId)}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent size="3xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="3xl"
+        className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="size-6 animate-spin text-primary" />
@@ -1080,7 +1083,9 @@ export function GetAllProblemTable({ companyId }: GetAllProblemTableProps) {
                 <Trash2 className="size-5" />
               </div>
               <div className="space-y-0.5">
-                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">Delete Problem</DialogTitle>
+                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
+                  Delete Problem
+                </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
                   Are you sure you want to permanently delete this problem from
                   the Problem Bank? This action cannot be undone.

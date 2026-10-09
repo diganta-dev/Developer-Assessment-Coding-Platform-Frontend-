@@ -77,9 +77,7 @@ export function CandidateMySubmissions() {
       limit: pageSize,
       searchTerm: searchTerm.trim() || undefined,
       status:
-        statusFilter !== "ALL"
-          ? (statusFilter as SubmissionStatus)
-          : undefined,
+        statusFilter !== "ALL" ? (statusFilter as SubmissionStatus) : undefined,
       isCorrect:
         correctFilter === "CORRECT"
           ? true
@@ -113,7 +111,8 @@ export function CandidateMySubmissions() {
                 My Submissions
               </h1>
               <p className="text-xs text-muted-foreground">
-                Track code executions, test case passes, MCQ picks, and written answers across all assessments.
+                Track code executions, test case passes, MCQ picks, and written
+                answers across all assessments.
               </p>
             </div>
           </div>
@@ -156,25 +155,25 @@ export function CandidateMySubmissions() {
             {/* Status Tabs */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1 rounded-xl border border-border/70 bg-muted/30 p-1 text-xs">
-                {(["ALL", "PASSED", "FAILED", "EVALUATED", "PENDING"] as const).map(
-                  (status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => {
-                        setStatusFilter(status);
-                        setCurrentPage(1);
-                      }}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
-                        statusFilter === status
-                          ? "bg-background text-foreground shadow-xs font-semibold"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ),
-                )}
+                {(
+                  ["ALL", "PASSED", "FAILED", "EVALUATED", "PENDING"] as const
+                ).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setCurrentPage(1);
+                    }}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+                      statusFilter === status
+                        ? "bg-background text-foreground shadow-xs font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
               </div>
 
               {/* Accuracy Tabs */}
@@ -193,7 +192,11 @@ export function CandidateMySubmissions() {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {corr === "ALL" ? "All Results" : corr === "CORRECT" ? "Correct" : "Incorrect"}
+                    {corr === "ALL"
+                      ? "All Results"
+                      : corr === "CORRECT"
+                        ? "Correct"
+                        : "Incorrect"}
                   </button>
                 ))}
               </div>
@@ -275,7 +278,10 @@ export function CandidateMySubmissions() {
                       {/* Problem and Assessment Title */}
                       <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold text-foreground hover:underline cursor-pointer truncate" onClick={() => setSelectedSubmission(sub)}>
+                          <span
+                            className="text-sm font-bold text-foreground hover:underline cursor-pointer truncate"
+                            onClick={() => setSelectedSubmission(sub)}
+                          >
                             {problem?.title || "Problem Solution"}
                           </span>
 
@@ -302,7 +308,8 @@ export function CandidateMySubmissions() {
                           {/* Status Badge */}
                           <span
                             className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                              sub.status === "PASSED" || sub.status === "EVALUATED"
+                              sub.status === "PASSED" ||
+                              sub.status === "EVALUATED"
                                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                                 : sub.status === "FAILED"
                                   ? "bg-rose-500/15 text-rose-600 dark:text-rose-400"
@@ -356,11 +363,13 @@ export function CandidateMySubmissions() {
                             </span>
                           </div>
 
-                          {sub.passedTests !== undefined && sub.passedTests > 0 && (
-                            <span className="text-[11px] text-muted-foreground block">
-                              {sub.passedTests} passed · {sub.failedTests} failed
-                            </span>
-                          )}
+                          {sub.passedTests !== undefined &&
+                            sub.passedTests > 0 && (
+                              <span className="text-[11px] text-muted-foreground block">
+                                {sub.passedTests} passed · {sub.failedTests}{" "}
+                                failed
+                              </span>
+                            )}
                         </div>
 
                         <Button
@@ -400,7 +409,9 @@ export function CandidateMySubmissions() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage >= totalPages}
                 className="text-xs h-8"
               >
@@ -417,18 +428,23 @@ export function CandidateMySubmissions() {
           open={Boolean(selectedSubmission)}
           onOpenChange={(open) => !open && setSelectedSubmission(null)}
         >
-          <DialogContent size="3xl" className="max-h-[88vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+          <DialogContent
+            size="3xl"
+            className="max-h-[88vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl"
+          >
             <DialogHeader className="p-5 border-b border-border/60 bg-muted/20 space-y-1.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="space-y-1">
                   <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Code2 className="h-5 w-5 text-primary" />
                     <span>
-                      {selectedSubmission.problem?.title || "Submission Breakdown"}
+                      {selectedSubmission.problem?.title ||
+                        "Submission Breakdown"}
                     </span>
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
-                    Submitted on {formatDate(selectedSubmission.submittedAt)} · Attempt ID: {selectedSubmission.attemptId}
+                    Submitted on {formatDate(selectedSubmission.submittedAt)} ·
+                    Attempt ID: {selectedSubmission.attemptId}
                   </DialogDescription>
                 </div>
               </div>
@@ -447,7 +463,8 @@ export function CandidateMySubmissions() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-foreground flex items-center gap-1.5">
                       <Code2 className="h-4 w-4 text-primary" />
-                      Submitted Code ({selectedSubmission.language || "Plain Text"})
+                      Submitted Code (
+                      {selectedSubmission.language || "Plain Text"})
                     </span>
                   </div>
                   <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs text-zinc-100 overflow-x-auto max-h-72">

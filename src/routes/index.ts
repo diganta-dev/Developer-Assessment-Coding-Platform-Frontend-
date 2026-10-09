@@ -1,4 +1,4 @@
-import { SidebarItems } from "@/types";
+import type { SidebarItems } from "@/types";
 
 export const adminRoutes: SidebarItems = [
   {
@@ -8,7 +8,6 @@ export const adminRoutes: SidebarItems = [
         title: "Dashboard",
         url: "/admin",
       },
-     
     ],
   },
   {
@@ -95,10 +94,11 @@ export const companyAdminRoutes: SidebarItems = [
       },
       {
         title: "Invite Members",
-        url: "/company-admin/invitation",  
-      },{
+        url: "/company-admin/invitation",
+      },
+      {
         title: "Problems Bank Management",
-        url: "/company-admin/create-problems-bank",   
+        url: "/company-admin/create-problems-bank",
       },
       {
         title: "Assessments",

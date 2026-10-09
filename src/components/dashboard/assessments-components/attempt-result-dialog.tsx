@@ -114,7 +114,10 @@ export function AttemptResultDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="3xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 shadow-2xl">
+      <DialogContent
+        size="3xl"
+        className="max-h-[90vh] overflow-y-auto p-0 gap-0 shadow-2xl"
+      >
         {/* Header Bar */}
         <div className="sticky top-0 z-20 border-b border-border/60 bg-background/90 px-6 py-4 backdrop-blur-md">
           <div className="flex flex-wrap items-center justify-between gap-3">

@@ -10,23 +10,23 @@ import {
   CheckCircle2,
   Clock,
   Code2,
+  Eye,
   FileCheck2,
   FileText,
   ListChecks,
   Loader2,
+  Maximize2,
+  Minimize2,
   Play,
   RotateCcw,
   Save,
   Send,
-  Sparkles,
-  Terminal,
-  Trophy,
-  Eye,
-  Maximize2,
-  Minimize2,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
+  Terminal,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -41,16 +41,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import {
-  useCreateSubmissionFromAttempt,
-  useGetAttemptDetails,
-  useGetCandidateMyAttempts,
-} from "@/hook/assessment.hook";
-import {
   useDetectCopyPaste,
   useDetectFullscreenExit,
   useDetectMultipleTabs,
   useDetectTabSwitch,
 } from "@/hook/anti-cheating.hook";
+import {
+  useCreateSubmissionFromAttempt,
+  useGetAttemptDetails,
+  useGetCandidateMyAttempts,
+} from "@/hook/assessment.hook";
 import type {
   IAttemptSubmissionItem,
   ICreateSubmissionPayload,
@@ -95,7 +95,8 @@ export function CandidateAssessmentWorkspace() {
               <span>Assessment Workspace</span>
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Select an active assessment below to solve coding challenges, answer MCQs, and submit solutions.
+              Select an active assessment below to solve coding challenges,
+              answer MCQs, and submit solutions.
             </p>
           </div>
         </div>
@@ -191,8 +192,11 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
   }, [answerText]);
 
   const wordLimit =
-    (currentProblem?.writtenQuestion as { wordLimit?: number | null })?.wordLimit ?? null;
-  const isWordLimitExceeded = Boolean(wordLimit && writtenWordCount > wordLimit);
+    (currentProblem?.writtenQuestion as { wordLimit?: number | null })
+      ?.wordLimit ?? null;
+  const isWordLimitExceeded = Boolean(
+    wordLimit && writtenWordCount > wordLimit,
+  );
 
   const supportedLanguages = useMemo(() => {
     if (
@@ -213,10 +217,19 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
       return Boolean(answerText.trim().length > 0) && !isWordLimitExceeded;
     }
     if (currentProblem.type === "CODING") {
-      return Boolean(sourceCode.trim().length > 0 && language.trim().length > 0);
+      return Boolean(
+        sourceCode.trim().length > 0 && language.trim().length > 0,
+      );
     }
     return false;
-  }, [currentProblem, selectedOptionId, answerText, isWordLimitExceeded, sourceCode, language]);
+  }, [
+    currentProblem,
+    selectedOptionId,
+    answerText,
+    isWordLimitExceeded,
+    sourceCode,
+    language,
+  ]);
 
   const handleLanguageChange = (newLang: string) => {
     setLanguage(newLang);
@@ -258,12 +271,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
     const payload: ICreateSubmissionPayload = {
       attemptId,
       problemId: currentProblem.id,
-      selectedOptionId:
-        currentProblem.type === "MCQ" ? selectedOptionId : null,
-      answerText:
-        currentProblem.type === "WRITTEN" ? answerText.trim() : null,
-      sourceCode:
-        currentProblem.type === "CODING" ? sourceCode : null,
+      selectedOptionId: currentProblem.type === "MCQ" ? selectedOptionId : null,
+      answerText: currentProblem.type === "WRITTEN" ? answerText.trim() : null,
+      sourceCode: currentProblem.type === "CODING" ? sourceCode : null,
       language:
         currentProblem.type === "CODING" ? language.trim().toLowerCase() : null,
     };
@@ -439,7 +449,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
               count: 1,
               clientTimestamp: new Date().toISOString(),
               userAgent:
-                typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+                typeof navigator !== "undefined"
+                  ? navigator.userAgent
+                  : undefined,
             },
           });
 
@@ -622,7 +634,8 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
             </h1>
           </div>
           <p className="text-xs text-muted-foreground">
-            Attempt ID: <code className="font-mono">{attemptId}</code> • Attempt #{attempt?.attemptNumber || 1}
+            Attempt ID: <code className="font-mono">{attemptId}</code> • Attempt
+            #{attempt?.attemptNumber || 1}
           </p>
         </div>
 
@@ -691,7 +704,8 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
           <div className="flex items-center gap-2">
             {tabSwitchCount > 0 && (
               <span className="text-[11px] font-mono text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border border-border/50">
-                Tab Switches: <strong className="text-foreground">{tabSwitchCount}</strong>
+                Tab Switches:{" "}
+                <strong className="text-foreground">{tabSwitchCount}</strong>
               </span>
             )}
 
@@ -729,7 +743,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                 Fullscreen Mode Required
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Exam security policies require you to remain in fullscreen mode throughout this assessment. Fullscreen departure events have been recorded.
+                Exam security policies require you to remain in fullscreen mode
+                throughout this assessment. Fullscreen departure events have
+                been recorded.
               </p>
             </div>
             <div className="pt-2">
@@ -865,7 +881,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {currentProblem.mcqQuestion?.options?.map((opt, optIdx) => {
                     const isSelected = selectedOptionId === opt.id;
-                    const optionLetter = String.fromCharCode(65 + (opt.optionOrder ?? optIdx));
+                    const optionLetter = String.fromCharCode(
+                      65 + (opt.optionOrder ?? optIdx),
+                    );
 
                     return (
                       <div
@@ -874,7 +892,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                           if (isAttemptActive) setSelectedOptionId(opt.id);
                         }}
                         className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-all ${
-                          isAttemptActive ? "cursor-pointer" : "cursor-not-allowed opacity-80"
+                          isAttemptActive
+                            ? "cursor-pointer"
+                            : "cursor-not-allowed opacity-80"
                         } ${
                           isSelected
                             ? "bg-primary/10 border-primary text-foreground font-medium shadow-sm ring-1 ring-primary/40"
@@ -913,7 +933,9 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                   </h3>
                   <span
                     className={`text-xs font-semibold ${
-                      isWordLimitExceeded ? "text-destructive" : "text-muted-foreground"
+                      isWordLimitExceeded
+                        ? "text-destructive"
+                        : "text-muted-foreground"
                     }`}
                   >
                     Words: {writtenWordCount}
@@ -925,7 +947,8 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                   <div className="p-2.5 rounded-lg border border-destructive/20 bg-destructive/10 text-xs text-destructive flex items-center gap-2">
                     <AlertTriangle className="size-3.5 shrink-0" />
                     <span>
-                      Word limit exceeded! Please shorten your answer to {wordLimit} words.
+                      Word limit exceeded! Please shorten your answer to{" "}
+                      {wordLimit} words.
                     </span>
                   </div>
                 )}
@@ -981,7 +1004,16 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                   <div className="px-3.5 py-1.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
                     <span className="font-mono flex items-center gap-1.5">
                       <Code2 className="size-3 text-emerald-400" />
-                      solution.{language === "python" ? "py" : language === "cpp" ? "cpp" : language === "java" ? "java" : language === "go" ? "go" : "ts"}
+                      solution.
+                      {language === "python"
+                        ? "py"
+                        : language === "cpp"
+                          ? "cpp"
+                          : language === "java"
+                            ? "java"
+                            : language === "go"
+                              ? "go"
+                              : "ts"}
                     </span>
                     <span>Press Tab to indent</span>
                   </div>
@@ -998,7 +1030,8 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                         const nextVal = `${sourceCode.substring(0, start)}  ${sourceCode.substring(end)}`;
                         setSourceCode(nextVal);
                         setTimeout(() => {
-                          target.selectionStart = target.selectionEnd = start + 2;
+                          target.selectionStart = target.selectionEnd =
+                            start + 2;
                         }, 0);
                       }
                     }}
@@ -1014,35 +1047,38 @@ function ActiveAttemptWorkspace({ attemptId }: { attemptId: string }) {
                   currentProblem.codingQuestion.testCases.length > 0 && (
                     <div className="space-y-2 pt-1">
                       <h4 className="text-xs font-semibold text-muted-foreground">
-                        Public Test Cases ({currentProblem.codingQuestion.testCases.length})
+                        Public Test Cases (
+                        {currentProblem.codingQuestion.testCases.length})
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {currentProblem.codingQuestion.testCases.map((tc, tcIdx) => (
-                          <div
-                            key={tc.id || tcIdx}
-                            className="p-3 rounded-lg border border-border/60 bg-muted/30 text-xs font-mono space-y-1.5"
-                          >
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                              Test Case #{tcIdx + 1}
-                            </span>
-                            <div>
-                              <span className="text-[10px] text-muted-foreground block">
-                                Input:
+                        {currentProblem.codingQuestion.testCases.map(
+                          (tc, tcIdx) => (
+                            <div
+                              key={tc.id || tcIdx}
+                              className="p-3 rounded-lg border border-border/60 bg-muted/30 text-xs font-mono space-y-1.5"
+                            >
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                                Test Case #{tcIdx + 1}
                               </span>
-                              <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto">
-                                {tc.input}
-                              </pre>
+                              <div>
+                                <span className="text-[10px] text-muted-foreground block">
+                                  Input:
+                                </span>
+                                <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto">
+                                  {tc.input}
+                                </pre>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-muted-foreground block">
+                                  Expected Output:
+                                </span>
+                                <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto text-emerald-600 dark:text-emerald-400">
+                                  {tc.expectedOutput}
+                                </pre>
+                              </div>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-muted-foreground block">
-                                Expected Output:
-                              </span>
-                              <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto text-emerald-600 dark:text-emerald-400">
-                                {tc.expectedOutput}
-                              </pre>
-                            </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     </div>
                   )}

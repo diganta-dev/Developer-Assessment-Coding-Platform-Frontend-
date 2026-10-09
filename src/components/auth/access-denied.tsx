@@ -1,4 +1,4 @@
-import { ShieldAlert, ArrowLeft, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -12,7 +12,8 @@ export default function AccessDenied() {
         Access Denied
       </h1>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        You do not have permission to access this page with your current account role.
+        You do not have permission to access this page with your current account
+        role.
       </p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <Link

@@ -50,27 +50,18 @@ export const candidateRegistrationSchema = z
     path: ["confirmPassword"],
   });
 
-
-
-
-
 export const companyRegistrationSchema = z.object({
   name: z
     .string("Name must be a string")
     .min(3, "Company name must be at least 3 characters long")
     .max(100, "Company name must not exceed 100 characters"),
 
-  email: z
-    .email("Please provide a valid email address"),
+  email: z.email("Please provide a valid email address"),
 
   description: z
     .string()
     .max(500, "Description must not exceed 500 characters")
     .optional(),
 
-  website: z
-    .string()
-    .optional(),
+  website: z.string().optional(),
 });
-
-

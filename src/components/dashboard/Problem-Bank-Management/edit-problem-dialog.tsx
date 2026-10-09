@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   Check,
@@ -17,7 +18,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -484,7 +484,10 @@ export function EditProblemDialog({
         !open && !updateProblemMutation.isPending && onClose()
       }
     >
-      <DialogContent size="3xl" className="max-h-[90vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="3xl"
+        className="max-h-[90vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="size-6 animate-spin text-primary" />

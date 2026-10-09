@@ -42,9 +42,7 @@ export function ManualEvaluationDialog({
 
   const maxMarks = evaluation?.submission?.problem?.marks ?? 10;
   const [marks, setMarks] = useState<number>(evaluation?.marks ?? 0);
-  const [feedback, setFeedback] = useState<string>(
-    evaluation?.feedback ?? "",
-  );
+  const [feedback, setFeedback] = useState<string>(evaluation?.feedback ?? "");
 
   useEffect(() => {
     if (evaluation) {
@@ -143,7 +141,10 @@ export function ManualEvaluationDialog({
                 Manual Evaluation & Grading Rubric
               </h2>
               <p className="text-xs text-muted-foreground">
-                Submission ID: <code className="font-mono">{submission.id.slice(0, 8)}...</code>
+                Submission ID:{" "}
+                <code className="font-mono">
+                  {submission.id.slice(0, 8)}...
+                </code>
               </p>
             </div>
           </div>
@@ -160,7 +161,10 @@ export function ManualEvaluationDialog({
         </div>
 
         {/* Scrollable Content */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
           <div className="p-6 overflow-y-auto space-y-5 flex-1">
             {/* Problem Overview Card */}
             <Card className="p-4 border-border/70 bg-muted/20 space-y-2 shadow-xs">
@@ -174,11 +178,14 @@ export function ManualEvaluationDialog({
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-muted-foreground">
-                  Max Points: <strong className="text-foreground">{maxMarks} pts</strong>
+                  Max Points:{" "}
+                  <strong className="text-foreground">{maxMarks} pts</strong>
                 </span>
               </div>
 
-              <h3 className="text-sm font-bold text-foreground">{problem.title}</h3>
+              <h3 className="text-sm font-bold text-foreground">
+                {problem.title}
+              </h3>
             </Card>
 
             {/* Candidate Submitted Response Preview */}
@@ -191,7 +198,9 @@ export function ManualEvaluationDialog({
               {problem.type === "WRITTEN" && (
                 <div className="p-3.5 rounded-xl border border-border/60 bg-background text-xs font-normal leading-relaxed text-foreground whitespace-pre-wrap max-h-52 overflow-y-auto">
                   {submission.answerText || (
-                    <span className="italic text-muted-foreground">No written response provided.</span>
+                    <span className="italic text-muted-foreground">
+                      No written response provided.
+                    </span>
                   )}
                 </div>
               )}
@@ -215,7 +224,8 @@ export function ManualEvaluationDialog({
                     </code>
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    Auto-Evaluated: {submission.isCorrect ? "Correct" : "Incorrect"}
+                    Auto-Evaluated:{" "}
+                    {submission.isCorrect ? "Correct" : "Incorrect"}
                   </p>
                 </div>
               )}
@@ -225,9 +235,13 @@ export function ManualEvaluationDialog({
             <div className="space-y-4 pt-2 border-t border-border/50">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="marks-input" className="text-xs font-semibold flex items-center gap-1.5">
+                  <Label
+                    htmlFor="marks-input"
+                    className="text-xs font-semibold flex items-center gap-1.5"
+                  >
                     <Award className="size-3.5 text-primary" />
-                    Assigned Marks (0 to {maxMarks}) <span className="text-destructive">*</span>
+                    Assigned Marks (0 to {maxMarks}){" "}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <span className="text-xs font-bold text-foreground">
                     {marks} / {maxMarks} pts
@@ -248,7 +262,10 @@ export function ManualEvaluationDialog({
 
               {/* Feedback and Rubric Remarks */}
               <div className="space-y-1.5">
-                <Label htmlFor="feedback-input" className="text-xs font-semibold flex items-center gap-1.5">
+                <Label
+                  htmlFor="feedback-input"
+                  className="text-xs font-semibold flex items-center gap-1.5"
+                >
                   <MessageSquare className="size-3.5 text-primary" />
                   Evaluator Rubric Feedback & Comments (Optional)
                 </Label>
@@ -273,7 +290,9 @@ export function ManualEvaluationDialog({
                       key={preset}
                       type="button"
                       onClick={() =>
-                        setFeedback((prev) => (prev ? `${prev} • ${preset}` : preset))
+                        setFeedback((prev) =>
+                          prev ? `${prev} • ${preset}` : preset,
+                        )
                       }
                       className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 transition-colors cursor-pointer"
                     >
@@ -287,7 +306,13 @@ export function ManualEvaluationDialog({
 
           {/* Footer Actions */}
           <div className="px-6 py-4 border-t border-border/60 bg-muted/20 flex items-center justify-end gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+              className="text-xs"
+            >
               Cancel
             </Button>
             <Button

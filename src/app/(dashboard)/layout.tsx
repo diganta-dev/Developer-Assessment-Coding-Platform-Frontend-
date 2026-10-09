@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import AuthGuard from "@/components/auth/auth-guard";
-import { ReactNode } from "react";
 
 export default function layout({ children }: { children: ReactNode }) {
-   return <AuthGuard> {children}</AuthGuard>;
-} 
+  return <AuthGuard> {children}</AuthGuard>;
+}

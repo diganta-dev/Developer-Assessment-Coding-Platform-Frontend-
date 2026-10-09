@@ -7,17 +7,17 @@ import type {
   IAssessmentListResponse,
   IAttemptDetailsResponse,
   IAttemptResultResponse,
+  ICalculateAttemptScoreResponse,
   ICandidateMyAttemptsFilters,
   ICandidateMyAttemptsResponse,
-  ICalculateAttemptScoreResponse,
   ICreateAssessmentPayload,
   ICreateSubmissionPayload,
   ICreateSubmissionResponse,
-  IDetailedAssessmentReportResponse,
   IDeleteAssessmentResponse,
+  IDetailedAssessmentReportResponse,
   IGetAssessmentAttemptsResponse,
-  IGetAssessmentResultsResponse,
   IGetAssessmentLeaderboardResponse,
+  IGetAssessmentResultsResponse,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
   IPublishAssessmentResponse,
@@ -308,7 +308,6 @@ export function PublishAssessmentProtected(
 }
 
 export const publishAssessmentDirect = PublishAssessmentProtected;
-
 
 export function inviteCandidateDirectRoute(
   assessmentId: string,

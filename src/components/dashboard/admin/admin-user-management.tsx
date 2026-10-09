@@ -52,9 +52,12 @@ export function AdminUserManagement() {
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole | "ALL">("ALL");
-  const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
+  const [selectedStatus, setSelectedStatus] = useState<
+    "ALL" | "ACTIVE" | "INACTIVE"
+  >("ALL");
 
-  const [deleteTargetUser, setDeleteTargetUser] = useState<IAdminUserListItem | null>(null);
+  const [deleteTargetUser, setDeleteTargetUser] =
+    useState<IAdminUserListItem | null>(null);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetAdminUsers({
@@ -90,7 +93,9 @@ export function AdminUserManagement() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-          queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+          queryClient.invalidateQueries({
+            queryKey: ["admin-dashboard-stats"],
+          });
           toast.add({
             title: "User Status Updated",
             description: `${targetUser.name} is now ${newStatus ? "Active" : "Deactivated"}.`,
@@ -98,10 +103,16 @@ export function AdminUserManagement() {
           });
         },
         onError: (err: unknown) => {
-          const apiErr = err as { data?: { message?: string }; message?: string };
+          const apiErr = err as {
+            data?: { message?: string };
+            message?: string;
+          };
           toast.add({
             title: "Update Failed",
-            description: apiErr?.data?.message || apiErr?.message || "Could not update user status.",
+            description:
+              apiErr?.data?.message ||
+              apiErr?.message ||
+              "Could not update user status.",
             type: "error",
           });
         },
@@ -127,7 +138,10 @@ export function AdminUserManagement() {
         const apiErr = err as { data?: { message?: string }; message?: string };
         toast.add({
           title: "Delete Failed",
-          description: apiErr?.data?.message || apiErr?.message || "Cannot delete user with active dependencies.",
+          description:
+            apiErr?.data?.message ||
+            apiErr?.message ||
+            "Cannot delete user with active dependencies.",
           type: "error",
         });
       },
@@ -155,25 +169,30 @@ export function AdminUserManagement() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Role Filter */}
             <div className="flex items-center gap-1">
-              {(["ALL", UserRole.CANDIDATE, UserRole.ADMIN, UserRole.SUPER_ADMIN] as const).map(
-                (role) => (
-                  <button
-                    key={role}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole(role);
-                      setPage(1);
-                    }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors cursor-pointer ${
-                      selectedRole === role
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border text-muted-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {role}
-                  </button>
-                ),
-              )}
+              {(
+                [
+                  "ALL",
+                  UserRole.CANDIDATE,
+                  UserRole.ADMIN,
+                  UserRole.SUPER_ADMIN,
+                ] as const
+              ).map((role) => (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole(role);
+                    setPage(1);
+                  }}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors cursor-pointer ${
+                    selectedRole === role
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
             </div>
 
             <span className="text-border">|</span>
@@ -206,7 +225,9 @@ export function AdminUserManagement() {
               onClick={() => refetch()}
               className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
             >
-              <RefreshCw className={`size-3 ${isRefetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`size-3 ${isRefetching ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </div>
@@ -217,7 +238,10 @@ export function AdminUserManagement() {
         {isLoading ? (
           <div className="p-6 space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={`user-skel-${i + 1}`} className="h-12 w-full rounded-xl" />
+              <Skeleton
+                key={`user-skel-${i + 1}`}
+                className="h-12 w-full rounded-xl"
+              />
             ))}
           </div>
         ) : isError ? (
@@ -229,16 +253,25 @@ export function AdminUserManagement() {
               Failed to load platform users
             </h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              {error instanceof Error ? error.message : "Ensure you have platform administrator rights."}
+              {error instanceof Error
+                ? error.message
+                : "Ensure you have platform administrator rights."}
             </p>
-            <Button size="sm" variant="outline" onClick={() => refetch()} className="text-xs">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              className="text-xs"
+            >
               Retry
             </Button>
           </div>
         ) : users.length === 0 ? (
           <div className="py-16 text-center space-y-2 text-muted-foreground">
             <Users className="size-8 mx-auto opacity-40" />
-            <p className="text-xs font-semibold text-foreground">No users found</p>
+            <p className="text-xs font-semibold text-foreground">
+              No users found
+            </p>
             <p className="text-[11px]">Adjust your search query or filters.</p>
           </div>
         ) : (
@@ -256,18 +289,29 @@ export function AdminUserManagement() {
               </thead>
               <tbody className="divide-y divide-border/40">
                 {users.map((usr) => (
-                  <tr key={usr.id} className="hover:bg-muted/20 transition-colors">
+                  <tr
+                    key={usr.id}
+                    className="hover:bg-muted/20 transition-colors"
+                  >
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
                         <Avatar className="size-8 rounded-full border border-border/60">
-                          <AvatarImage src={usr.profilePictureUrl || undefined} />
+                          <AvatarImage
+                            src={usr.profilePictureUrl || undefined}
+                          />
                           <AvatarFallback className="text-[11px] font-bold bg-primary/10 text-primary">
-                            {usr.name ? usr.name.slice(0, 2).toUpperCase() : "U"}
+                            {usr.name
+                              ? usr.name.slice(0, 2).toUpperCase()
+                              : "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold text-foreground">{usr.name}</p>
-                          <p className="text-[11px] text-muted-foreground">{usr.email}</p>
+                          <p className="font-semibold text-foreground">
+                            {usr.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {usr.email}
+                          </p>
                         </div>
                       </div>
                     </td>
@@ -319,7 +363,9 @@ export function AdminUserManagement() {
                           disabled={updateUserStatusMutation.isPending}
                           onClick={() => handleToggleStatus(usr)}
                           className="h-7 px-2 text-[11px] font-medium gap-1"
-                          title={usr.isActive ? "Deactivate User" : "Activate User"}
+                          title={
+                            usr.isActive ? "Deactivate User" : "Activate User"
+                          }
                         >
                           {usr.isActive ? (
                             <>
@@ -357,7 +403,8 @@ export function AdminUserManagement() {
         {meta && meta.totalPages > 1 && (
           <div className="p-3 border-t border-border/60 bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              Page {meta.page} of {meta.totalPages} ({meta.total} registered users)
+              Page {meta.page} of {meta.totalPages} ({meta.total} registered
+              users)
             </span>
             <div className="flex items-center gap-1">
               <Button
@@ -423,8 +470,8 @@ export function AdminUserManagement() {
           )}
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Are you sure you want to delete this user? Associated records, active
-            sessions, and invitations will be permanently removed.
+            Are you sure you want to delete this user? Associated records,
+            active sessions, and invitations will be permanently removed.
           </p>
 
           <DialogFooter className="gap-2 sm:gap-2 pt-1">

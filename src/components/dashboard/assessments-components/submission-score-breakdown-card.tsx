@@ -74,7 +74,9 @@ export function SubmissionScoreBreakdownCard({
           disabled={isRefetching}
           className="h-7 text-xs border-rose-500/30 text-rose-600 hover:bg-rose-500/10"
         >
-          <RefreshCw className={`h-3 w-3 mr-1 ${isRefetching ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-3 w-3 mr-1 ${isRefetching ? "animate-spin" : ""}`}
+          />
           Retry
         </Button>
       </div>
@@ -90,9 +92,15 @@ export function SubmissionScoreBreakdownCard({
   const isMCQ = scoreResult.problemType === "MCQ";
   const isWritten = scoreResult.problemType === "WRITTEN";
 
-  const codingDetails = isCoding ? (details as ICodingScoreBreakdown | undefined) : undefined;
-  const mcqDetails = isMCQ ? (details as IMCQScoreBreakdown | undefined) : undefined;
-  const writtenDetails = isWritten ? (details as IWrittenScoreBreakdown | undefined) : undefined;
+  const codingDetails = isCoding
+    ? (details as ICodingScoreBreakdown | undefined)
+    : undefined;
+  const mcqDetails = isMCQ
+    ? (details as IMCQScoreBreakdown | undefined)
+    : undefined;
+  const writtenDetails = isWritten
+    ? (details as IWrittenScoreBreakdown | undefined)
+    : undefined;
 
   return (
     <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-xs transition-all hover:border-border">
@@ -138,7 +146,8 @@ export function SubmissionScoreBreakdownCard({
             ) : (
               <XCircle className="h-3.5 w-3.5" />
             )}
-            {scoreResult.obtainedMarks} / {scoreResult.totalMarks} Marks ({scoreResult.percentage}%)
+            {scoreResult.obtainedMarks} / {scoreResult.totalMarks} Marks (
+            {scoreResult.percentage}%)
           </span>
 
           <Button
@@ -182,7 +191,8 @@ export function SubmissionScoreBreakdownCard({
                     Public Tests
                   </span>
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                    {codingDetails.publicTestsPassed} / {codingDetails.totalPublicTests}
+                    {codingDetails.publicTestsPassed} /{" "}
+                    {codingDetails.totalPublicTests}
                   </span>
                 </div>
 
@@ -193,7 +203,8 @@ export function SubmissionScoreBreakdownCard({
                     Hidden Tests
                   </span>
                   <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
-                    {codingDetails.hiddenTestsPassed} / {codingDetails.totalHiddenTests}
+                    {codingDetails.hiddenTestsPassed} /{" "}
+                    {codingDetails.totalHiddenTests}
                   </span>
                 </div>
 
@@ -275,7 +286,9 @@ export function SubmissionScoreBreakdownCard({
                   </span>
                   <span className="text-sm font-bold text-foreground">
                     {writtenDetails.wordCount}{" "}
-                    {writtenDetails.wordLimit ? `/ ${writtenDetails.wordLimit} max` : "words"}
+                    {writtenDetails.wordLimit
+                      ? `/ ${writtenDetails.wordLimit} max`
+                      : "words"}
                   </span>
                   {writtenDetails.isWordLimitExceeded && (
                     <span className="text-[10px] text-rose-500 font-semibold block mt-0.5">
@@ -327,7 +340,9 @@ export function SubmissionScoreBreakdownCard({
               disabled={isRefetching}
               className="h-7 text-[11px] text-muted-foreground hover:text-foreground"
             >
-              <RefreshCw className={`h-3 w-3 mr-1.5 ${isRefetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3 w-3 mr-1.5 ${isRefetching ? "animate-spin" : ""}`}
+              />
               Refresh Calculation
             </Button>
           </div>

@@ -169,7 +169,9 @@ export function CreateSubmissionDialog({
 
       const initialLang =
         existingSub?.language ||
-        (supportedLangs.includes("typescript") ? "typescript" : supportedLangs[0]) ||
+        (supportedLangs.includes("typescript")
+          ? "typescript"
+          : supportedLangs[0]) ||
         "javascript";
 
       setLanguage(initialLang);
@@ -188,8 +190,11 @@ export function CreateSubmissionDialog({
   }, [answerText]);
 
   const wordLimit =
-    (currentProblem?.writtenQuestion as { wordLimit?: number | null })?.wordLimit ?? null;
-  const isWordLimitExceeded = Boolean(wordLimit && writtenWordCount > wordLimit);
+    (currentProblem?.writtenQuestion as { wordLimit?: number | null })
+      ?.wordLimit ?? null;
+  const isWordLimitExceeded = Boolean(
+    wordLimit && writtenWordCount > wordLimit,
+  );
 
   // Supported languages for current coding problem
   const supportedLanguages = useMemo(() => {
@@ -209,15 +214,22 @@ export function CreateSubmissionDialog({
       return Boolean(selectedOptionId && selectedOptionId.trim() !== "");
     }
     if (currentProblem.type === "WRITTEN") {
-      return (
-        Boolean(answerText.trim().length > 0) && !isWordLimitExceeded
-      );
+      return Boolean(answerText.trim().length > 0) && !isWordLimitExceeded;
     }
     if (currentProblem.type === "CODING") {
-      return Boolean(sourceCode.trim().length > 0 && language.trim().length > 0);
+      return Boolean(
+        sourceCode.trim().length > 0 && language.trim().length > 0,
+      );
     }
     return false;
-  }, [currentProblem, selectedOptionId, answerText, isWordLimitExceeded, sourceCode, language]);
+  }, [
+    currentProblem,
+    selectedOptionId,
+    answerText,
+    isWordLimitExceeded,
+    sourceCode,
+    language,
+  ]);
 
   // Copy attempt ID helper
   const handleCopyAttemptId = () => {
@@ -274,12 +286,9 @@ export function CreateSubmissionDialog({
     const payload: ICreateSubmissionPayload = {
       attemptId,
       problemId: currentProblem.id,
-      selectedOptionId:
-        currentProblem.type === "MCQ" ? selectedOptionId : null,
-      answerText:
-        currentProblem.type === "WRITTEN" ? answerText.trim() : null,
-      sourceCode:
-        currentProblem.type === "CODING" ? sourceCode : null,
+      selectedOptionId: currentProblem.type === "MCQ" ? selectedOptionId : null,
+      answerText: currentProblem.type === "WRITTEN" ? answerText.trim() : null,
+      sourceCode: currentProblem.type === "CODING" ? sourceCode : null,
       language:
         currentProblem.type === "CODING" ? language.trim().toLowerCase() : null,
     };
@@ -348,7 +357,10 @@ export function CreateSubmissionDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="full" className="max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+        <DialogContent
+          size="full"
+          className="max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl"
+        >
           {/* ── Dialog Header ── */}
           <DialogHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -493,7 +505,9 @@ export function CreateSubmissionDialog({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="size-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                        #{currentProblemWrap.questionOrder || currentProblemIndex + 1}
+                        #
+                        {currentProblemWrap.questionOrder ||
+                          currentProblemIndex + 1}
                       </span>
                       <h3 className="text-sm font-bold text-foreground">
                         {currentProblem.title}
@@ -543,38 +557,42 @@ export function CreateSubmissionDialog({
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {currentProblem.mcqQuestion?.options?.map((opt, optIdx) => {
-                        const isSelected = selectedOptionId === opt.id;
-                        const optionLetter = String.fromCharCode(65 + (opt.optionOrder ?? optIdx));
+                      {currentProblem.mcqQuestion?.options?.map(
+                        (opt, optIdx) => {
+                          const isSelected = selectedOptionId === opt.id;
+                          const optionLetter = String.fromCharCode(
+                            65 + (opt.optionOrder ?? optIdx),
+                          );
 
-                        return (
-                          <div
-                            key={opt.id}
-                            onClick={() => setSelectedOptionId(opt.id)}
-                            className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-all cursor-pointer ${
-                              isSelected
-                                ? "bg-primary/10 border-primary text-foreground font-medium shadow-sm ring-1 ring-primary/40"
-                                : "bg-card/40 border-border/60 text-muted-foreground hover:bg-muted/40 hover:border-border"
-                            }`}
-                          >
-                            <span
-                              className={`size-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                          return (
+                            <div
+                              key={opt.id}
+                              onClick={() => setSelectedOptionId(opt.id)}
+                              className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-all cursor-pointer ${
                                 isSelected
-                                  ? "bg-primary text-primary-foreground shadow-xs"
-                                  : "border border-border text-muted-foreground bg-muted/40"
+                                  ? "bg-primary/10 border-primary text-foreground font-medium shadow-sm ring-1 ring-primary/40"
+                                  : "bg-card/40 border-border/60 text-muted-foreground hover:bg-muted/40 hover:border-border"
                               }`}
                             >
-                              {optionLetter}
-                            </span>
-                            <div className="flex-1 leading-relaxed pt-0.5">
-                              {opt.optionText}
+                              <span
+                                className={`size-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground shadow-xs"
+                                    : "border border-border text-muted-foreground bg-muted/40"
+                                }`}
+                              >
+                                {optionLetter}
+                              </span>
+                              <div className="flex-1 leading-relaxed pt-0.5">
+                                {opt.optionText}
+                              </div>
+                              {isSelected && (
+                                <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
+                              )}
                             </div>
-                            {isSelected && (
-                              <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
-                            )}
-                          </div>
-                        );
-                      })}
+                          );
+                        },
+                      )}
                     </div>
                   </div>
                 )}
@@ -663,7 +681,16 @@ export function CreateSubmissionDialog({
                       <div className="px-3.5 py-1.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
                         <span className="font-mono flex items-center gap-1.5">
                           <Code2 className="size-3 text-emerald-400" />
-                          solution.{language === "python" ? "py" : language === "cpp" ? "cpp" : language === "java" ? "java" : language === "go" ? "go" : "ts"}
+                          solution.
+                          {language === "python"
+                            ? "py"
+                            : language === "cpp"
+                              ? "cpp"
+                              : language === "java"
+                                ? "java"
+                                : language === "go"
+                                  ? "go"
+                                  : "ts"}
                         </span>
                         <span>Press Tab to indent</span>
                       </div>
@@ -679,7 +706,8 @@ export function CreateSubmissionDialog({
                             const nextVal = `${sourceCode.substring(0, start)}  ${sourceCode.substring(end)}`;
                             setSourceCode(nextVal);
                             setTimeout(() => {
-                              target.selectionStart = target.selectionEnd = start + 2;
+                              target.selectionStart = target.selectionEnd =
+                                start + 2;
                             }, 0);
                           }
                         }}
@@ -695,35 +723,40 @@ export function CreateSubmissionDialog({
                       currentProblem.codingQuestion.testCases.length > 0 && (
                         <div className="space-y-2 pt-1">
                           <h5 className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                            <span>Sample Test Cases ({currentProblem.codingQuestion.testCases.length})</span>
+                            <span>
+                              Sample Test Cases (
+                              {currentProblem.codingQuestion.testCases.length})
+                            </span>
                           </h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {currentProblem.codingQuestion.testCases.map((tc, tcIdx) => (
-                              <div
-                                key={tc.id || tcIdx}
-                                className="p-3 rounded-lg border border-border/60 bg-muted/30 text-xs font-mono space-y-1.5"
-                              >
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                                  Case #{tcIdx + 1}
-                                </span>
-                                <div>
-                                  <span className="text-[10px] text-muted-foreground block">
-                                    Input:
+                            {currentProblem.codingQuestion.testCases.map(
+                              (tc, tcIdx) => (
+                                <div
+                                  key={tc.id || tcIdx}
+                                  className="p-3 rounded-lg border border-border/60 bg-muted/30 text-xs font-mono space-y-1.5"
+                                >
+                                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                                    Case #{tcIdx + 1}
                                   </span>
-                                  <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto">
-                                    {tc.input}
-                                  </pre>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground block">
+                                      Input:
+                                    </span>
+                                    <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto">
+                                      {tc.input}
+                                    </pre>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-muted-foreground block">
+                                      Expected Output:
+                                    </span>
+                                    <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto text-emerald-600 dark:text-emerald-400">
+                                      {tc.expectedOutput}
+                                    </pre>
+                                  </div>
                                 </div>
-                                <div>
-                                  <span className="text-[10px] text-muted-foreground block">
-                                    Expected Output:
-                                  </span>
-                                  <pre className="bg-background/80 p-1.5 rounded border border-border/40 text-[11px] overflow-x-auto text-emerald-600 dark:text-emerald-400">
-                                    {tc.expectedOutput}
-                                  </pre>
-                                </div>
-                              </div>
-                            ))}
+                              ),
+                            )}
                           </div>
                         </div>
                       )}

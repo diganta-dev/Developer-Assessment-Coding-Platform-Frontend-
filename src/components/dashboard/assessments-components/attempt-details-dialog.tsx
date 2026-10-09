@@ -139,14 +139,17 @@ export function AttemptDetailsDialog({
   const isPassed =
     percentage != null && passingScore != null
       ? percentage >=
-      (passingScore <= 100 && totalMarks > 100
-        ? (passingScore / totalMarks) * 100
-        : passingScore)
+        (passingScore <= 100 && totalMarks > 100
+          ? (passingScore / totalMarks) * 100
+          : passingScore)
       : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="5xl" className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+      <DialogContent
+        size="5xl"
+        className="max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl"
+      >
         {/* ── Header ── */}
         <div className="p-5 border-b border-border/60 bg-muted/20 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -192,10 +195,11 @@ export function AttemptDetailsDialog({
                 className="h-8 text-xs gap-1.5 font-medium cursor-pointer"
               >
                 <RefreshCw
-                  className={`size-3.5 ${isRefetching
+                  className={`size-3.5 ${
+                    isRefetching
                       ? "animate-spin text-primary"
                       : "text-muted-foreground"
-                    }`}
+                  }`}
                 />
                 <span>Refresh</span>
               </Button>
@@ -298,10 +302,11 @@ export function AttemptDetailsDialog({
                     </div>
                   ) : isPassed != null ? (
                     <span
-                      className={`text-xs font-bold px-2 py-0.5 rounded ${isPassed
+                      className={`text-xs font-bold px-2 py-0.5 rounded ${
+                        isPassed
                           ? "bg-emerald-500/10 text-emerald-600"
                           : "bg-destructive/10 text-destructive"
-                        }`}
+                      }`}
                     >
                       {isPassed ? "PASSED" : "FAILED"}
                     </span>
@@ -320,7 +325,7 @@ export function AttemptDetailsDialog({
                 </span>
                 <p className="text-sm font-semibold text-foreground mt-0.5">
                   {status === "IN_PROGRESS" &&
-                    attemptData?.remainingSeconds != null
+                  attemptData?.remainingSeconds != null
                     ? formatDuration(attemptData.remainingSeconds)
                     : `${assessment?.durationMinutes || 0} mins max`}
                 </p>
@@ -344,20 +349,22 @@ export function AttemptDetailsDialog({
           <button
             type="button"
             onClick={() => setActiveTab("questions")}
-            className={`py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === "questions"
+            className={`py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              activeTab === "questions"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+            }`}
           >
             Questions & Submissions ({problems.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("overview")}
-            className={`py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === "overview"
+            className={`py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              activeTab === "overview"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+            }`}
           >
             Attempt Overview & Audit Info
           </button>
@@ -468,7 +475,9 @@ export function AttemptDetailsDialog({
                               className="h-6 text-[11px] px-2 font-medium border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
                             >
                               <Code2 className="size-2.5 mr-1" />
-                              <span>{isAnswered ? "Edit Answer" : "Answer"}</span>
+                              <span>
+                                {isAnswered ? "Edit Answer" : "Answer"}
+                              </span>
                             </Button>
                           )}
                         </div>
@@ -495,16 +504,18 @@ export function AttemptDetailsDialog({
                                 return (
                                   <div
                                     key={opt.id}
-                                    className={`p-2.5 rounded-lg border text-xs flex items-center gap-2 transition-colors ${isSelected
+                                    className={`p-2.5 rounded-lg border text-xs flex items-center gap-2 transition-colors ${
+                                      isSelected
                                         ? "bg-primary/10 border-primary text-foreground font-semibold shadow-xs"
                                         : "bg-background/50 border-border/60 text-muted-foreground"
-                                      }`}
+                                    }`}
                                   >
                                     <span
-                                      className={`size-4 rounded-full flex items-center justify-center text-[10px] border ${isSelected
+                                      className={`size-4 rounded-full flex items-center justify-center text-[10px] border ${
+                                        isSelected
                                           ? "bg-primary text-primary-foreground border-primary"
                                           : "border-border text-muted-foreground"
-                                        }`}
+                                      }`}
                                     >
                                       {String.fromCharCode(
                                         65 + (opt.optionOrder ?? 0),

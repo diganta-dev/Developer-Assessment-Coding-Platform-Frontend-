@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AssessmentManagement } from "@/components/dashboard/assessments-components/assessment-management";
 
 export const metadata: Metadata = {
   title: "Assessments Builder | Assessment Creator",
-  description: "Create, configure, publish tests, and release candidate results.",
+  description:
+    "Create, configure, publish tests, and release candidate results.",
 };
 
 export default function AssessmentCreatorAssessmentsPage() {
@@ -24,9 +25,12 @@ export default function AssessmentCreatorAssessmentsPage() {
 
       {/* Page Heading */}
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">Assessments & Tests</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Assessments & Tests
+        </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Design coding assessments, invite candidates, and publish official test results.
+          Design coding assessments, invite candidates, and publish official
+          test results.
         </p>
       </div>
 

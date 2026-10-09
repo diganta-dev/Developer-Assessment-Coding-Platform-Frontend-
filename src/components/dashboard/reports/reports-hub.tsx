@@ -7,8 +7,8 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { DetailedAssessmentReportView } from "@/components/dashboard/assessments-components/detailed-assessment-report-view";
 import { AssessmentAnalyticsView } from "./assessment-analytics-view";
 import { CompanyAnalyticsView } from "./company-analytics-view";
@@ -19,12 +19,16 @@ interface ReportsHubProps {
 
 export function ReportsHub({ defaultTab = "assessment" }: ReportsHubProps) {
   const searchParams = useSearchParams();
-  const queryTab = searchParams.get("tab") as "assessment" | "attempt" | "company" | null;
+  const queryTab = searchParams.get("tab") as
+    | "assessment"
+    | "attempt"
+    | "company"
+    | null;
   const attemptId = searchParams.get("attemptId");
 
-  const [activeTab, setActiveTab] = useState<"assessment" | "attempt" | "company">(
-    queryTab || (attemptId ? "attempt" : defaultTab),
-  );
+  const [activeTab, setActiveTab] = useState<
+    "assessment" | "attempt" | "company"
+  >(queryTab || (attemptId ? "attempt" : defaultTab));
 
   return (
     <div className="space-y-6">

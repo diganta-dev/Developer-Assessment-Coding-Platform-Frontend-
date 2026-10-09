@@ -307,7 +307,10 @@ export function SingleAssessmentDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent
+          size="5xl"
+          className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl"
+        >
           {/* ── Dialog Header Banner ── */}
           <div className="relative p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/40 to-background border-b border-border/60">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

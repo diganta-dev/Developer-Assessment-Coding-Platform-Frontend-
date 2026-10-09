@@ -1,4 +1,9 @@
-import { DashboardRole, UserRole, CompanyMemberRole, IUser } from "@/types";
+import {
+  CompanyMemberRole,
+  type DashboardRole,
+  type IUser,
+  UserRole,
+} from "@/types";
 
 /**
  * Mapping of DashboardRole to its primary overview dashboard route
@@ -18,7 +23,7 @@ export const ROLE_DASHBOARD_ROUTES: Record<DashboardRole, string> = {
  * or companyMembers array (Prisma relation from GET /api/v1/auth/me).
  */
 export function getCompanyRole(
-  user?: Partial<IUser> | null
+  user?: Partial<IUser> | null,
 ): CompanyMemberRole | string | null {
   if (!user) return null;
 
@@ -66,13 +71,17 @@ export function getCompanyId(user?: Partial<IUser> | null): string | null {
  * 3. If user has role: "CANDIDATE" WITH company role (e.g. COMPANY_ADMIN):
  *    -> Prioritizes company role to open the respective company dashboard (/company-admin).
  */
-export function getUserEffectiveRole(user?: Partial<IUser> | null): DashboardRole {
+export function getUserEffectiveRole(
+  user?: Partial<IUser> | null,
+): DashboardRole {
   if (!user) return UserRole.CANDIDATE;
 
   // 1. Check for company role first (from direct companyRole or companyMembers)
   const companyRole = getCompanyRole(user);
   if (companyRole) {
-    const normalizedCompanyRole = String(companyRole).trim().toUpperCase() as DashboardRole;
+    const normalizedCompanyRole = String(companyRole)
+      .trim()
+      .toUpperCase() as DashboardRole;
     if (normalizedCompanyRole in ROLE_DASHBOARD_ROUTES) {
       return normalizedCompanyRole;
     }
@@ -80,7 +89,9 @@ export function getUserEffectiveRole(user?: Partial<IUser> | null): DashboardRol
 
   // 2. Platform SUPER_ADMIN or ADMIN without company role
   if (user.role) {
-    const normalizedRole = String(user.role).trim().toUpperCase() as DashboardRole;
+    const normalizedRole = String(user.role)
+      .trim()
+      .toUpperCase() as DashboardRole;
     if (normalizedRole in ROLE_DASHBOARD_ROUTES) {
       return normalizedRole;
     }
@@ -95,11 +106,13 @@ export function getUserEffectiveRole(user?: Partial<IUser> | null): DashboardRol
  */
 export function isUserAuthorized(
   user: Partial<IUser> | null | undefined,
-  allowedRoles: DashboardRole[]
+  allowedRoles: DashboardRole[],
 ): boolean {
   if (!user) return false;
 
-  const normalizedAllowed = new Set(allowedRoles.map((r) => String(r).toUpperCase()));
+  const normalizedAllowed = new Set(
+    allowedRoles.map((r) => String(r).toUpperCase()),
+  );
   const effectiveRole = getUserEffectiveRole(user);
 
   // 1. Effective role directly matches allowed roles
@@ -111,7 +124,8 @@ export function isUserAuthorized(
   if (
     user.role &&
     (user.role === UserRole.SUPER_ADMIN || user.role === UserRole.ADMIN) &&
-    (normalizedAllowed.has(UserRole.ADMIN) || normalizedAllowed.has(UserRole.SUPER_ADMIN))
+    (normalizedAllowed.has(UserRole.ADMIN) ||
+      normalizedAllowed.has(UserRole.SUPER_ADMIN))
   ) {
     return true;
   }
@@ -134,7 +148,7 @@ export function isUserAuthorized(
  * Defaults to "/candidate" or fallback if not matched.
  */
 export function getRoleDashboardRoute(
-  roleOrUser?: DashboardRole | string | Partial<IUser> | null
+  roleOrUser?: DashboardRole | string | Partial<IUser> | null,
 ): string {
   if (!roleOrUser) return "/login";
 
@@ -144,7 +158,9 @@ export function getRoleDashboardRoute(
     return ROLE_DASHBOARD_ROUTES[effectiveRole] || "/candidate";
   }
 
-  const normalizedRole = String(roleOrUser).trim().toUpperCase() as DashboardRole;
+  const normalizedRole = String(roleOrUser)
+    .trim()
+    .toUpperCase() as DashboardRole;
   if (normalizedRole in ROLE_DASHBOARD_ROUTES) {
     return ROLE_DASHBOARD_ROUTES[normalizedRole];
   }
@@ -174,5 +190,3 @@ export function getRoleDashboardRoute(
 export function getUserDashboardRoute(user?: Partial<IUser> | null): string {
   return getRoleDashboardRoute(user);
 }
-
-

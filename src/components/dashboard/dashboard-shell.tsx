@@ -1,20 +1,20 @@
 "use client";
 
+import type { ReactNode } from "react";
+import { UserMenu } from "@/components/layout/user-menu";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ReactNode } from "react";
-import { DashboardSidebar } from "./dashboard-sidebar";
-import { DashboardRole } from "@/types";
 import { useGetMe } from "@/hook";
-import { UserMenu } from "@/components/layout/user-menu";
+import type { DashboardRole } from "@/types";
+import { DashboardSidebar } from "./dashboard-sidebar";
 
 export default function DashboardShell({
   children,
   role,
-}: { 
+}: {
   children: ReactNode;
   role?: DashboardRole;
 }) {

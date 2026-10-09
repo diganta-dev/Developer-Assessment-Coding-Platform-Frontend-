@@ -1,15 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addProblemInAssessment,
+  addProblemsDirectRoute,
   calculateAttemptScore,
   createAssessment,
   createSubmissionFromAttempt,
   deleteAssessment,
+  deleteAssessmentDirectRoute,
   finalizeAndSubmitAttempt,
+  GetSingleAssessment,
   getAssessmentAttempts,
   getAssessmentInvitation,
-  getAssessmentResults,
   getAssessmentLeaderBoard,
+  getAssessmentResults,
   getAttemptDetails,
   getAttemptResult,
   getCandidateMyAttempts,
@@ -17,22 +20,19 @@ import {
   getDetailedAssesssmentReport,
   getMyAssessments,
   getMyAttempts,
-  GetSingleAssessment,
+  getSingleAssessmentDirectRoute,
   inviteCandidate,
+  inviteCandidateDirectRoute,
+  PublishAssessmentProtected,
+  pubLishResults,
   publishAssessment,
   publishResults,
   startAttempt,
+  startAttemptDirectRoute,
   submitAssessmentAttempt,
   updateAssessment,
-  verifyAssessmentInvitation,
-  pubLishResults,
-  startAttemptDirectRoute,
-  PublishAssessmentProtected,
-  inviteCandidateDirectRoute,
-  getSingleAssessmentDirectRoute,
-  addProblemsDirectRoute,
   updateAssessmentDirectRoute,
-  deleteAssessmentDirectRoute,
+  verifyAssessmentInvitation,
 } from "@/api/assessment.api";
 import type {
   IAddProblemInAssessment,
@@ -42,12 +42,12 @@ import type {
   ICreateSubmissionPayload,
   IInviteCandidatePayload,
   IInviteCandidateResponse,
+  IPublishResultsPayload,
   IStartAttemptPayload,
   IStartAttemptResponse,
   ISubmitAttemptPayload,
-  StartAttemptParams,
   IUpdateAssessmentPayload,
-  IPublishResultsPayload,
+  StartAttemptParams,
 } from "@/types/assessment.type";
 
 export function useCreateAssessment() {
@@ -260,12 +260,11 @@ export function useCreateSubmissionFromAttempt() {
       payload: ICreateSubmissionPayload;
     }) => createSubmissionFromAttempt(variables.attemptId, variables.payload),
   });
-} 
+}
 
 export function useCalculateAttemptScore() {
   return useMutation({
     mutationFn: (attemptId: string) => calculateAttemptScore(attemptId),
-    
   });
 }
 export function useGetMyAssessments(filters?: IAssessmentFilters) {
@@ -281,7 +280,7 @@ export function useGetSingleAssessment(assessmentId: string) {
     enabled: Boolean(assessmentId),
     refetchInterval: false,
   });
-} 
+}
 
 export function useUpdateAssessment(
   assessmentId?: string,
@@ -294,11 +293,11 @@ export function useUpdateAssessment(
     }) => {
       const targetId = variables?.assessmentId ?? assessmentId;
       const targetPayload = variables?.payload ?? payload;
-      
+
       if (!targetId || !targetPayload) {
         throw new Error("assessmentId and payload are required");
       }
-      
+
       return updateAssessment(targetId, targetPayload);
     },
   });
@@ -317,7 +316,7 @@ export function useGetAssessmentAttempts(assessmentId: string) {
     enabled: Boolean(assessmentId),
     refetchInterval: false,
   });
-} 
+}
 
 export function useGetAssessmentResults(assessmentId: string) {
   return useQuery({
@@ -390,11 +389,14 @@ export function useStartAttemptDirectRoute(defaultAssessmentId?: string) {
         throw new Error("Assessment ID is required to start an attempt.");
       }
 
-      let payload: IStartAttemptPayload | undefined = undefined;
+      let payload: IStartAttemptPayload | undefined;
       if (typeof variables === "object" && variables !== null) {
         if ("payload" in variables && variables.payload) {
           payload = variables.payload;
-        } else if ("invitationToken" in variables && variables.invitationToken) {
+        } else if (
+          "invitationToken" in variables &&
+          variables.invitationToken
+        ) {
           payload = { invitationToken: variables.invitationToken };
         }
       }
@@ -403,8 +405,6 @@ export function useStartAttemptDirectRoute(defaultAssessmentId?: string) {
     },
   });
 }
-
- 
 
 export function usePublishAssessmentProtected(defaultAssessmentId?: string) {
   return useMutation({
@@ -486,6 +486,7 @@ export function useUpdateAssessmentDirectRoute(defaultAssessmentId?: string) {
 
 export function useDeleteAssessmentDirectRoute() {
   return useMutation({
-    mutationFn: (assessmentId: string) => deleteAssessmentDirectRoute(assessmentId),
+    mutationFn: (assessmentId: string) =>
+      deleteAssessmentDirectRoute(assessmentId),
   });
 }

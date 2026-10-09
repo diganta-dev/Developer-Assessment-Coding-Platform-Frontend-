@@ -51,8 +51,7 @@ export function useGetRankingLeaderboard(
  */
 export function usePublishAssessmentResults() {
   return useMutation({
-    mutationFn: (assessmentId: string) =>
-      publishAssessmentResult(assessmentId),
+    mutationFn: (assessmentId: string) => publishAssessmentResult(assessmentId),
   });
 }
 

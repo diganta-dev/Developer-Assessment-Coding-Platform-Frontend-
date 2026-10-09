@@ -1,5 +1,8 @@
 "use client";
 
+import { Code2 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -12,18 +15,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Code2 } from "lucide-react";
-import { DashboardRole, SidebarItems, UserRole } from "@/types";
+import { useGetMe } from "@/hook";
 import {
   adminRoutes,
+  assessmentCreatorRoutes,
   candidateRoutes,
   companyAdminRoutes,
-  assessmentCreatorRoutes,
   evaluatorRoutes,
 } from "@/routes";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useGetMe } from "@/hook";
+import { type DashboardRole, type SidebarItems, UserRole } from "@/types";
 import { getUserEffectiveRole } from "@/utils";
 
 const sidebarRoutes: Partial<Record<DashboardRole, SidebarItems>> = {

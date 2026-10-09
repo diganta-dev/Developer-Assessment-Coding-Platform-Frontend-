@@ -993,6 +993,3 @@ export interface IGetAssessmentLeaderboardResponse {
         isPublished?: boolean;
       };
 }
-
-
-

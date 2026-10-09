@@ -1,8 +1,6 @@
 import apiClient from "@/lib/apiClient";
+import type { ICreateSubmissionPayload } from "@/types/assessment.type";
 import type { ICodingEvaluationResponse } from "@/types/evaluation.type";
-import type {
-  ICreateSubmissionPayload,
-} from "@/types/assessment.type";
 import type {
   IDirectSubmissionResponse,
   ISingleSubmissionResponse,
@@ -88,9 +86,11 @@ export function getMySubmissions(
 /**
  * 7. Get all submissions for a specific attempt
  */
-export function getAttemptSubmissions(
-  attemptId: string,
-): Promise<{ success: boolean; message: string; data: import("@/types/submission.type").ISubmissionItem[] }> {
+export function getAttemptSubmissions(attemptId: string): Promise<{
+  success: boolean;
+  message: string;
+  data: import("@/types/submission.type").ISubmissionItem[];
+}> {
   return apiClient(`submission/attempts/${attemptId}`, {
     method: "GET",
   });

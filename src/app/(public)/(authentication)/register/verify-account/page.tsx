@@ -1,8 +1,8 @@
-import VerifyAccountForm from "@/components/form/verify-account-form";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import loginImage from "@/assets/login-bg.jpg";
+import VerifyAccountForm from "@/components/form/verify-account-form";
 
 export default function VerifyAccountPage() {
   return (

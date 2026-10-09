@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Award,
@@ -19,6 +17,8 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
+import Link from "next/link";
+import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -135,7 +135,8 @@ export function CandidateOverview() {
             )}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Monitor your coding test invitations, resume active exams, and check verified scorecards.
+            Monitor your coding test invitations, resume active exams, and check
+            verified scorecards.
           </p>
         </div>
 
@@ -182,11 +183,14 @@ export function CandidateOverview() {
                   </span>
                 </div>
                 <h3 className="text-sm font-semibold text-foreground">
-                  {stats.activeAttempt.assessment?.title || "Technical Assessment"}
+                  {stats.activeAttempt.assessment?.title ||
+                    "Technical Assessment"}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {stats.activeAttempt.assessment?.company?.name || "Benchmark Company"} •{" "}
-                  {stats.activeAttempt.assessment?.durationMinutes || 60} mins allowed window
+                  {stats.activeAttempt.assessment?.company?.name ||
+                    "Benchmark Company"}{" "}
+                  • {stats.activeAttempt.assessment?.durationMinutes || 60} mins
+                  allowed window
                 </p>
               </div>
             </div>
@@ -196,7 +200,8 @@ export function CandidateOverview() {
               className={buttonVariants({
                 variant: "default",
                 size: "sm",
-                className: "bg-amber-600 hover:bg-amber-700 text-white shrink-0",
+                className:
+                  "bg-amber-600 hover:bg-amber-700 text-white shrink-0",
               })}
             >
               Resume Assessment
@@ -315,7 +320,8 @@ export function CandidateOverview() {
               Recent Assessment Activity
             </CardTitle>
             <CardDescription className="text-xs">
-              Quick overview of your latest test invitations and attempt progress
+              Quick overview of your latest test invitations and attempt
+              progress
             </CardDescription>
           </div>
           <Link
@@ -343,7 +349,8 @@ export function CandidateOverview() {
                 No assessment attempts recorded yet
               </p>
               <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
-                When you accept invitations or start coding assessments, your live progress will appear here.
+                When you accept invitations or start coding assessments, your
+                live progress will appear here.
               </p>
               <Link
                 href="/candidate/assessments"
@@ -388,7 +395,9 @@ export function CandidateOverview() {
                           {item.assessment?.durationMinutes && (
                             <>
                               <span>•</span>
-                              <span>{item.assessment.durationMinutes} mins</span>
+                              <span>
+                                {item.assessment.durationMinutes} mins
+                              </span>
                             </>
                           )}
                           <span>•</span>
@@ -405,7 +414,9 @@ export function CandidateOverview() {
                       ) : status === "EVALUATED" ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           <CheckCircle2 className="size-3" />
-                          {scorePercentage != null ? `${scorePercentage}%` : "Evaluated"}
+                          {scorePercentage != null
+                            ? `${scorePercentage}%`
+                            : "Evaluated"}
                         </span>
                       ) : status === "SUBMITTED" ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -456,7 +467,8 @@ export function CandidateOverview() {
             Candidate Portal Hub & Modules
           </CardTitle>
           <CardDescription className="text-xs">
-            Direct access to assessments, invitations, scorecards, submissions, and portfolio
+            Direct access to assessments, invitations, scorecards, submissions,
+            and portfolio
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -501,7 +513,8 @@ export function CandidateOverview() {
               Solution Submissions
             </span>
             <span className="text-[11px] text-muted-foreground leading-relaxed">
-              Review written and code answers, test case pass counts, and feedback.
+              Review written and code answers, test case pass counts, and
+              feedback.
             </span>
           </Link>
 

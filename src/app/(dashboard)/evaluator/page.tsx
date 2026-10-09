@@ -1,3 +1,8 @@
+import { CheckSquare, FileText, Layers } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
+import { EvaluatorGradingQueue } from "@/components/dashboard/evaluator/evaluator-grading-queue";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -5,11 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckSquare, FileText, Layers } from "lucide-react";
-import Link from "next/link";
-import { Suspense } from "react";
-import { EvaluatorGradingQueue } from "@/components/dashboard/evaluator/evaluator-grading-queue";
-import { buttonVariants } from "@/components/ui/button";
 
 export default function EvaluatorPage() {
   return (
@@ -24,7 +24,8 @@ export default function EvaluatorPage() {
             Evaluator Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Review candidate code submissions, grade evaluations, and inspect detailed attempt reports.
+            Review candidate code submissions, grade evaluations, and inspect
+            detailed attempt reports.
           </p>
         </div>
 
@@ -56,12 +57,18 @@ export default function EvaluatorPage() {
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
             <CardTitle>Assigned Assessments</CardTitle>
-            <CardDescription>Browse test windows, proctoring rules, and candidate rosters</CardDescription>
+            <CardDescription>
+              Browse test windows, proctoring rules, and candidate rosters
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/evaluator/assessments"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               Browse Assessments
             </Link>
@@ -71,12 +78,18 @@ export default function EvaluatorPage() {
         <Card>
           <CardHeader>
             <CardTitle>Submissions</CardTitle>
-            <CardDescription>Candidate test submissions pending grading</CardDescription>
+            <CardDescription>
+              Candidate test submissions pending grading
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/evaluator/submissions"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               View Submissions
             </Link>
@@ -86,12 +99,18 @@ export default function EvaluatorPage() {
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
             <CardTitle>Detailed Reports</CardTitle>
-            <CardDescription>Inspect test case telemetry, anti-cheat audit logs, and code</CardDescription>
+            <CardDescription>
+              Inspect test case telemetry, anti-cheat audit logs, and code
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/evaluator/report"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               View Candidate Reports
             </Link>

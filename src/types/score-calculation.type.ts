@@ -1,5 +1,5 @@
-import type { Difficulty, ProblemType } from "./question.type";
 import type { EvaluationStatus } from "./evaluation.type";
+import type { Difficulty, ProblemType } from "./question.type";
 
 export interface ICodingScoreBreakdown {
   submissionId: string;

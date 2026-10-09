@@ -58,11 +58,11 @@ import type {
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
 import { isUserAuthorized } from "@/utils";
+import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
 import { AttemptResultDialog } from "./attempt-result-dialog";
 import { CalculateScoreDialog } from "./calculate-score-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
-import { AssessmentLeaderboardDialog } from "./assessment-leaderboard-dialog";
 
 export interface AssessmentResultsDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
@@ -283,7 +283,10 @@ export function AssessmentResultsDialog({
       const st = r.status?.toUpperCase();
       if (st === "PASSED" || (passingScore > 0 && score >= passingScore)) {
         passed++;
-      } else if (st === "FAILED" || (passingScore > 0 && score < passingScore)) {
+      } else if (
+        st === "FAILED" ||
+        (passingScore > 0 && score < passingScore)
+      ) {
         failed++;
       } else {
         pending++;
@@ -331,7 +334,10 @@ export function AssessmentResultsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent
+          size="5xl"
+          className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl"
+        >
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/30 to-background border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -349,7 +355,9 @@ export function AssessmentResultsDialog({
                     }`}
                   >
                     <span className="size-1.5 rounded-full bg-current" />
-                    {isPublishedGlobal ? "Official Published" : "Unpublished Draft"}
+                    {isPublishedGlobal
+                      ? "Official Published"
+                      : "Unpublished Draft"}
                   </span>
                 </div>
 
@@ -477,7 +485,9 @@ export function AssessmentResultsDialog({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
                   <span>
-                    <strong>Results are unpublished:</strong> Candidate scores are currently hidden. Release finalized grades to publish candidate reports.
+                    <strong>Results are unpublished:</strong> Candidate scores
+                    are currently hidden. Release finalized grades to publish
+                    candidate reports.
                   </span>
                 </div>
                 {canPublishResults && (
@@ -729,7 +739,11 @@ export function AssessmentResultsDialog({
                             <TableCell>
                               <div className="space-y-0.5">
                                 <p className="text-xs font-bold text-foreground font-mono">
-                                  {item.obtainedMarks} / {item.totalMarks || assessment?.totalMarks || 100} pts
+                                  {item.obtainedMarks} /{" "}
+                                  {item.totalMarks ||
+                                    assessment?.totalMarks ||
+                                    100}{" "}
+                                  pts
                                 </p>
                                 <div className="flex items-center gap-1.5">
                                   <span

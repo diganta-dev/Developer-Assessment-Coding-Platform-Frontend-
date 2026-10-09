@@ -44,17 +44,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { useGetMe } from "@/hook";
 import {
   useGetCompanyAllAssessments,
   useInviteCandidateDirectRoute,
 } from "@/hook/assessment.hook";
-import { useGetMe } from "@/hook";
-import { isUserAuthorized } from "@/utils";
 import { CompanyMemberRole, UserRole } from "@/types";
 import type {
   IAssessment,
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
+import { isUserAuthorized } from "@/utils";
 
 export interface InviteCandidateDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
@@ -412,7 +412,8 @@ export function InviteCandidateDialog({
             queryKey: ["assessment-single", targetAssessment.id],
           });
 
-          const count = res?.data?.count || res?.data?.invitedCount || emails.length;
+          const count =
+            res?.data?.count || res?.data?.invitedCount || emails.length;
           toast.add({
             title: "Invitations Dispatched Successfully",
             description:
@@ -445,7 +446,10 @@ export function InviteCandidateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent size="2xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="2xl"
+        className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {/* Header */}
         <DialogHeader className="space-y-1.5 pb-0.5">
           <div className="flex items-center gap-3">
@@ -462,7 +466,8 @@ export function InviteCandidateDialog({
                 </span>
               </div>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Generate secure access tokens and dispatch test invitation emails to candidates
+                Generate secure access tokens and dispatch test invitation
+                emails to candidates
               </DialogDescription>
             </div>
           </div>
@@ -477,11 +482,12 @@ export function InviteCandidateDialog({
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               You are currently authenticated as{" "}
-              <strong className="text-foreground">{userRoleDisplay}</strong>. Under
-              system access policies, only <strong>Platform Admins</strong>,{" "}
-              <strong>Company Owners</strong>, and <strong>Company Admins</strong> are
-              authorized to dispatch candidate invitations. Assessment Creators and
-              Evaluators do not have permission to invite candidates.
+              <strong className="text-foreground">{userRoleDisplay}</strong>.
+              Under system access policies, only{" "}
+              <strong>Platform Admins</strong>, <strong>Company Owners</strong>,
+              and <strong>Company Admins</strong> are authorized to dispatch
+              candidate invitations. Assessment Creators and Evaluators do not
+              have permission to invite candidates.
             </p>
           </div>
         )}
@@ -494,8 +500,8 @@ export function InviteCandidateDialog({
               <span>Assessment Archived / Completed</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Cannot dispatch invitations to an assessment that is closed, expired, or
-              archived.
+              Cannot dispatch invitations to an assessment that is closed,
+              expired, or archived.
             </p>
           </div>
         )}
@@ -507,8 +513,8 @@ export function InviteCandidateDialog({
               <span>Assessment Deadline Passed</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              The submission deadline for this test has already passed. Please update
-              the end date before inviting candidates.
+              The submission deadline for this test has already passed. Please
+              update the end date before inviting candidates.
             </p>
           </div>
         )}
@@ -695,7 +701,8 @@ export function InviteCandidateDialog({
                   Upload CSV or TXT candidate list
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  File should contain email addresses separated by commas or lines
+                  File should contain email addresses separated by commas or
+                  lines
                 </p>
               </div>
               <input

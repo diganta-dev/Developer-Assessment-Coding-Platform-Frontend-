@@ -111,7 +111,8 @@ export function ForgotPasswordDialog({
         onSuccess: () => {
           toast.add({
             title: "Password Reset Successful",
-            description: "Your credentials have been updated. You can now log in.",
+            description:
+              "Your credentials have been updated. You can now log in.",
             type: "success",
           });
           onOpenChange(false);

@@ -37,15 +37,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
-import { usePublishAssessmentProtected } from "@/hook/assessment.hook";
 import { useGetMe } from "@/hook";
-import { isUserAuthorized } from "@/utils";
+import { usePublishAssessmentProtected } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
 import type {
   IAssessment,
   IPublishAssessmentResponse,
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
+import { isUserAuthorized } from "@/utils";
 
 export interface PublishAssessmentDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
@@ -86,12 +86,10 @@ export function PublishAssessmentDialog({
   ]);
 
   const creatorId =
-    assessment?.creatorId ||
-    assessment?.createdById ||
-    assessment?.creator?.id;
+    assessment?.creatorId || assessment?.createdById || assessment?.creator?.id;
 
   const isAssessmentCreator = Boolean(
-    currentUser?.id && creatorId && currentUser.id === creatorId
+    currentUser?.id && creatorId && currentUser.id === creatorId,
   );
 
   const canPublish = isPlatformAdmin || isAuthorizedRole || isAssessmentCreator;
@@ -162,7 +160,8 @@ export function PublishAssessmentDialog({
   };
 
   const handleConfirmPublish = () => {
-    if (!assessment?.id || !isReadyToPublish || publishMutation.isPending) return;
+    if (!assessment?.id || !isReadyToPublish || publishMutation.isPending)
+      return;
 
     publishMutation.mutate(assessment.id, {
       onSuccess: (res: IPublishAssessmentResponse) => {
@@ -218,7 +217,10 @@ export function PublishAssessmentDialog({
         }
       }}
     >
-      <DialogContent size="xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="xl"
+        className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {/* Header */}
         <DialogHeader className="space-y-1.5 pb-0.5">
           <div className="flex items-center gap-3">
@@ -235,7 +237,8 @@ export function PublishAssessmentDialog({
                 </span>
               </div>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Transition this assessment from Draft to Published, unlocking test access for candidates
+                Transition this assessment from Draft to Published, unlocking
+                test access for candidates
               </DialogDescription>
             </div>
           </div>
@@ -250,11 +253,12 @@ export function PublishAssessmentDialog({
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               You are currently authenticated as{" "}
-              <strong className="text-foreground">{userRoleDisplay}</strong>. Only{" "}
-              <strong>Platform Admins</strong>, <strong>Company Owners</strong>,{" "}
-              <strong>Company Admins</strong>, or the{" "}
-              <strong>Assessment Creator</strong> have authorization to publish
-              assessments. Evaluators and candidates do not have permission.
+              <strong className="text-foreground">{userRoleDisplay}</strong>.
+              Only <strong>Platform Admins</strong>,{" "}
+              <strong>Company Owners</strong>, <strong>Company Admins</strong>,
+              or the <strong>Assessment Creator</strong> have authorization to
+              publish assessments. Evaluators and candidates do not have
+              permission.
             </p>
           </div>
         )}
@@ -267,8 +271,8 @@ export function PublishAssessmentDialog({
               <span>No Questions Attached</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Cannot publish an assessment with zero questions. Please attach at least
-              one coding challenge or MCQ problem before publishing.
+              Cannot publish an assessment with zero questions. Please attach at
+              least one coding challenge or MCQ problem before publishing.
             </p>
           </div>
         )}
@@ -280,8 +284,8 @@ export function PublishAssessmentDialog({
               <span>Invalid Test Duration</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Assessment duration must be greater than 0 minutes. Please edit the
-              assessment settings.
+              Assessment duration must be greater than 0 minutes. Please edit
+              the assessment settings.
             </p>
           </div>
         )}
@@ -307,9 +311,9 @@ export function PublishAssessmentDialog({
               <span>Passing Score Exceeds Total Marks</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Passing score ({assessment.passingScore}) cannot be greater than total
-              marks ({assessment.totalMarks}). Please adjust the passing threshold or
-              add more problems.
+              Passing score ({assessment.passingScore}) cannot be greater than
+              total marks ({assessment.totalMarks}). Please adjust the passing
+              threshold or add more problems.
             </p>
           </div>
         )}
@@ -322,8 +326,8 @@ export function PublishAssessmentDialog({
             </div>
             <p className="text-[11px] text-muted-foreground">
               This assessment is currently in{" "}
-              <strong className="uppercase">{assessment.status}</strong> status and is
-              already open for candidate evaluations.
+              <strong className="uppercase">{assessment.status}</strong> status
+              and is already open for candidate evaluations.
             </p>
           </div>
         )}
@@ -360,7 +364,8 @@ export function PublishAssessmentDialog({
                 Draft Assessment
               </span>
               <span className="text-[10px] text-muted-foreground">
-                Current Status: <strong className="uppercase">{assessment.status}</strong>
+                Current Status:{" "}
+                <strong className="uppercase">{assessment.status}</strong>
               </span>
             </div>
           </div>
@@ -369,7 +374,8 @@ export function PublishAssessmentDialog({
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <FileQuestion className="size-3.5 text-primary" />
               <span>
-                Questions: <strong className="text-foreground">{problemsCount}</strong>
+                Questions:{" "}
+                <strong className="text-foreground">{problemsCount}</strong>
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -385,7 +391,9 @@ export function PublishAssessmentDialog({
               <FileCheck2 className="size-3.5 text-primary" />
               <span>
                 Total:{" "}
-                <strong className="text-foreground">{assessment.totalMarks}</strong>
+                <strong className="text-foreground">
+                  {assessment.totalMarks}
+                </strong>
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -408,16 +416,17 @@ export function PublishAssessmentDialog({
           </div>
           <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
             <li>
-              Upon publishing, invited candidates will receive active exam access
-              according to your scheduled test window.
+              Upon publishing, invited candidates will receive active exam
+              access according to your scheduled test window.
             </li>
             <li>
-              Once candidate attempts begin, problem questions and score allocations
-              will be permanently locked to ensure evaluation fairness.
+              Once candidate attempts begin, problem questions and score
+              allocations will be permanently locked to ensure evaluation
+              fairness.
             </li>
             <li>
-              You can track candidate submissions and proctoring telemetry in real time
-              from the attempts monitor.
+              You can track candidate submissions and proctoring telemetry in
+              real time from the attempts monitor.
             </li>
           </ul>
         </div>

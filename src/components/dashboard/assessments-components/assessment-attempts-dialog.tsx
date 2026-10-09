@@ -58,11 +58,11 @@ import type {
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
 import { isUserAuthorized } from "@/utils";
+import { AssessmentResultsDialog } from "./assessment-results-dialog";
 import { AttemptDetailsDialog } from "./attempt-details-dialog";
 import { CalculateScoreDialog } from "./calculate-score-dialog";
 import { DetailedAssessmentReportDialog } from "./detailed-assessment-report-dialog";
 import { PublishResultsDialog } from "./publish-results-dialog";
-import { AssessmentResultsDialog } from "./assessment-results-dialog";
 
 export interface AssessmentAttemptsDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
@@ -300,7 +300,10 @@ export function AssessmentAttemptsDialog({
       if (a.obtainedMarks !== null && a.obtainedMarks !== undefined) {
         totalScore += a.obtainedMarks;
         scoredCount++;
-      } else if (a.result?.obtainedMarks !== null && a.result?.obtainedMarks !== undefined) {
+      } else if (
+        a.result?.obtainedMarks !== null &&
+        a.result?.obtainedMarks !== undefined
+      ) {
         totalScore += a.result.obtainedMarks;
         scoredCount++;
       }
@@ -345,7 +348,10 @@ export function AssessmentAttemptsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent
+          size="5xl"
+          className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl"
+        >
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-primary/5 via-muted/30 to-background border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -502,7 +508,10 @@ export function AssessmentAttemptsDialog({
               {(
                 [
                   { key: "ALL", label: `All (${attempts.length})` },
-                  { key: "IN_PROGRESS", label: `In Progress (${stats.inProgress})` },
+                  {
+                    key: "IN_PROGRESS",
+                    label: `In Progress (${stats.inProgress})`,
+                  },
                   { key: "SUBMITTED", label: `Submitted (${stats.submitted})` },
                   { key: "EVALUATED", label: `Evaluated (${stats.evaluated})` },
                   { key: "EXPIRED", label: `Expired (${stats.expired})` },

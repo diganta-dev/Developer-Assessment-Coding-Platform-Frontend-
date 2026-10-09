@@ -32,15 +32,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
-import { usePublishResults } from "@/hook/assessment.hook";
 import { useGetMe } from "@/hook";
-import { isUserAuthorized } from "@/utils";
+import { usePublishResults } from "@/hook/assessment.hook";
 import { CompanyMemberRole, UserRole } from "@/types";
 import type {
   IAssessment,
   IPublishResultsData,
   ISingleAssessmentDetail,
 } from "@/types/assessment.type";
+import { isUserAuthorized } from "@/utils";
 
 export interface PublishResultsDialogProps {
   assessment: IAssessment | ISingleAssessmentDetail | null;
@@ -86,12 +86,10 @@ export function PublishResultsDialog({
   ]);
 
   const creatorId =
-    assessment?.creatorId ||
-    assessment?.createdById ||
-    assessment?.creator?.id;
+    assessment?.creatorId || assessment?.createdById || assessment?.creator?.id;
 
   const isAssessmentCreator = Boolean(
-    currentUser?.id && creatorId && currentUser.id === creatorId
+    currentUser?.id && creatorId && currentUser.id === creatorId,
   );
 
   const canPublish = isPlatformAdmin || isAuthorizedRole || isAssessmentCreator;
@@ -201,13 +199,16 @@ export function PublishResultsDialog({
             type: "error",
           });
         },
-      }
+      },
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent size="xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="xl"
+        className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {/* Header */}
         <DialogHeader className="space-y-1.5 pb-0.5">
           <div className="flex items-center gap-3">
@@ -224,7 +225,8 @@ export function PublishResultsDialog({
                 </span>
               </div>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Calculate official standings, generate reports, and release scores to candidates
+                Calculate official standings, generate reports, and release
+                scores to candidates
               </DialogDescription>
             </div>
           </div>
@@ -240,9 +242,9 @@ export function PublishResultsDialog({
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Scores and percentiles for{" "}
-                <strong className="text-foreground">{assessment.title}</strong> have
-                been finalized. Candidates can now view their scores, detailed breakdown,
-                and pass/fail status in their portal.
+                <strong className="text-foreground">{assessment.title}</strong>{" "}
+                have been finalized. Candidates can now view their scores,
+                detailed breakdown, and pass/fail status in their portal.
               </p>
 
               {/* Stats Overview */}
@@ -293,7 +295,9 @@ export function PublishResultsDialog({
                 <span>
                   Published:{" "}
                   {publishedResultData.publishedAt
-                    ? new Date(publishedResultData.publishedAt).toLocaleTimeString()
+                    ? new Date(
+                        publishedResultData.publishedAt,
+                      ).toLocaleTimeString()
                     : "Just now"}
                 </span>
               </div>
@@ -321,11 +325,14 @@ export function PublishResultsDialog({
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
                   You are currently authenticated as{" "}
-                  <strong className="text-foreground">{userEffectiveRoleDisplay}</strong>.
-                  Only <strong>Platform Admins</strong>, <strong>Company Owners</strong>,{" "}
+                  <strong className="text-foreground">
+                    {userEffectiveRoleDisplay}
+                  </strong>
+                  . Only <strong>Platform Admins</strong>,{" "}
+                  <strong>Company Owners</strong>,{" "}
                   <strong>Company Admins</strong>, or the{" "}
-                  <strong>Assessment Creator</strong> can trigger rank recalculation and
-                  publish results.
+                  <strong>Assessment Creator</strong> can trigger rank
+                  recalculation and publish results.
                 </p>
               </div>
             )}
@@ -369,7 +376,8 @@ export function PublishResultsDialog({
                     </span>
                   )}
                   <span className="text-[10px] text-muted-foreground">
-                    Status: <strong className="uppercase">{assessment.status}</strong>
+                    Status:{" "}
+                    <strong className="uppercase">{assessment.status}</strong>
                   </span>
                 </div>
               </div>
@@ -379,7 +387,9 @@ export function PublishResultsDialog({
                   <FileCheck2 className="size-3 text-primary" />
                   <span>
                     Total Marks:{" "}
-                    <strong className="text-foreground">{assessment.totalMarks}</strong>
+                    <strong className="text-foreground">
+                      {assessment.totalMarks}
+                    </strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -412,8 +422,8 @@ export function PublishResultsDialog({
                     <span>Recalculate Competitive Ranks & Percentiles</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-normal">
-                    Re-computes candidate percentiles, ranks, and resolves ties before
-                    official release.
+                    Re-computes candidate percentiles, ranks, and resolves ties
+                    before official release.
                   </p>
                 </div>
                 <button
@@ -423,7 +433,9 @@ export function PublishResultsDialog({
                   disabled={!canPublish || publishMutation.isPending}
                   onClick={() => setRecalculateRanks(!recalculateRanks)}
                   className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    recalculateRanks ? "bg-emerald-600" : "bg-muted-foreground/30"
+                    recalculateRanks
+                      ? "bg-emerald-600"
+                      : "bg-muted-foreground/30"
                   }`}
                 >
                   <span
@@ -441,8 +453,8 @@ export function PublishResultsDialog({
                     <span>Publish All Completed Submissions</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-normal">
-                    Releases final scorecards and answers to all eligible candidates who
-                    completed the test.
+                    Releases final scorecards and answers to all eligible
+                    candidates who completed the test.
                   </p>
                 </div>
                 <button
@@ -472,15 +484,16 @@ export function PublishResultsDialog({
               </div>
               <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
                 <li>
-                  Candidates will immediately view their earned score, percentage,
-                  standings, and breakdown.
+                  Candidates will immediately view their earned score,
+                  percentage, standings, and breakdown.
                 </li>
                 <li>
-                  An official assessment analytics report will be updated on the platform.
+                  An official assessment analytics report will be updated on the
+                  platform.
                 </li>
                 <li>
-                  Evaluator reviews and proctoring audit flags are locked into the final
-                  record.
+                  Evaluator reviews and proctoring audit flags are locked into
+                  the final record.
                 </li>
               </ul>
             </div>

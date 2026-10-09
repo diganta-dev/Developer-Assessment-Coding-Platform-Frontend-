@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ReportsHub } from "@/components/dashboard/reports";

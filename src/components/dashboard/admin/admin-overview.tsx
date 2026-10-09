@@ -72,7 +72,8 @@ export function AdminOverview() {
             Global Administration & Telemetry
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Monitor infrastructure health, manage global user directories, and oversee organization compliance.
+            Monitor infrastructure health, manage global user directories, and
+            oversee organization compliance.
           </p>
         </div>
 
@@ -88,7 +89,9 @@ export function AdminOverview() {
             disabled={isRefetchingStats}
             className="text-xs font-semibold gap-1.5 h-8 cursor-pointer"
           >
-            <RefreshCw className={`size-3.5 ${isRefetchingStats ? "animate-spin text-primary" : ""}`} />
+            <RefreshCw
+              className={`size-3.5 ${isRefetchingStats ? "animate-spin text-primary" : ""}`}
+            />
             Refresh Telemetry
           </Button>
         </div>
@@ -98,7 +101,10 @@ export function AdminOverview() {
       {isLoadingStats ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={`admin-stat-skel-${i + 1}`} className="h-28 rounded-xl" />
+            <Skeleton
+              key={`admin-stat-skel-${i + 1}`}
+              className="h-28 rounded-xl"
+            />
           ))}
         </div>
       ) : (
@@ -118,7 +124,8 @@ export function AdminOverview() {
                 {stats?.users.total.toLocaleString() ?? "0"}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {stats?.users.active ?? 0} Active • {stats?.users.candidates ?? 0} Candidates
+                {stats?.users.active ?? 0} Active •{" "}
+                {stats?.users.candidates ?? 0} Candidates
               </p>
             </CardContent>
           </Card>
@@ -138,7 +145,8 @@ export function AdminOverview() {
                 {stats?.companies.total.toLocaleString() ?? "0"}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {stats?.companies.verified ?? 0} Verified • {stats?.companies.unverified ?? 0} Pending
+                {stats?.companies.verified ?? 0} Verified •{" "}
+                {stats?.companies.unverified ?? 0} Pending
               </p>
             </CardContent>
           </Card>
@@ -158,7 +166,8 @@ export function AdminOverview() {
                 {stats?.assessments.total.toLocaleString() ?? "0"}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {stats?.assessments.published ?? 0} Published • {stats?.assessments.active ?? 0} In Progress
+                {stats?.assessments.published ?? 0} Published •{" "}
+                {stats?.assessments.active ?? 0} In Progress
               </p>
             </CardContent>
           </Card>
@@ -206,7 +215,10 @@ export function AdminOverview() {
           {isLoadingSystem ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={`sys-skel-${i + 1}`} className="h-20 rounded-xl" />
+                <Skeleton
+                  key={`sys-skel-${i + 1}`}
+                  className="h-20 rounded-xl"
+                />
               ))}
             </div>
           ) : (
@@ -217,7 +229,9 @@ export function AdminOverview() {
                     <Clock className="size-3 text-primary" />
                     Server Uptime
                   </div>
-                  <p className="text-base font-bold text-foreground">{uptimeFormatted}</p>
+                  <p className="text-base font-bold text-foreground">
+                    {uptimeFormatted}
+                  </p>
                 </div>
 
                 <div className="p-3 rounded-xl border border-border/60 bg-card space-y-1">
@@ -226,7 +240,8 @@ export function AdminOverview() {
                     Heap Memory
                   </div>
                   <p className="text-base font-bold text-foreground">
-                    {system?.processMemory.heapUsedMb ?? 0} MB / {system?.processMemory.heapTotalMb ?? 0} MB
+                    {system?.processMemory.heapUsedMb ?? 0} MB /{" "}
+                    {system?.processMemory.heapTotalMb ?? 0} MB
                   </p>
                 </div>
 
@@ -263,22 +278,30 @@ export function AdminOverview() {
                       Users: <strong>{system.databaseCounts.users}</strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Companies: <strong>{system.databaseCounts.companies}</strong>
+                      Companies:{" "}
+                      <strong>{system.databaseCounts.companies}</strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Assessments: <strong>{system.databaseCounts.assessments}</strong>
+                      Assessments:{" "}
+                      <strong>{system.databaseCounts.assessments}</strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Attempts: <strong>{system.databaseCounts.assessmentAttempts}</strong>
+                      Attempts:{" "}
+                      <strong>
+                        {system.databaseCounts.assessmentAttempts}
+                      </strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Submissions: <strong>{system.databaseCounts.submissions}</strong>
+                      Submissions:{" "}
+                      <strong>{system.databaseCounts.submissions}</strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Evaluations: <strong>{system.databaseCounts.evaluations}</strong>
+                      Evaluations:{" "}
+                      <strong>{system.databaseCounts.evaluations}</strong>
                     </span>
                     <span className="px-2 py-1 rounded-md bg-muted/60 border border-border/50">
-                      Cheating Events: <strong>{system.databaseCounts.antiCheatEvents}</strong>
+                      Cheating Events:{" "}
+                      <strong>{system.databaseCounts.antiCheatEvents}</strong>
                     </span>
                   </div>
                 </div>

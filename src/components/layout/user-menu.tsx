@@ -1,5 +1,14 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,11 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { useLogout } from "@/hook";
-import { IUser } from "@/types";
-import { getCompanyRole, getRoleDashboardRoute, getUserEffectiveRole } from "@/utils";
-import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, LayoutDashboard, Loader2, LogOut, ShieldCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { IUser } from "@/types";
+import {
+  getCompanyRole,
+  getRoleDashboardRoute,
+  getUserEffectiveRole,
+} from "@/utils";
 
 interface UserMenuProps {
   user: IUser;

@@ -1,3 +1,4 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   addCompanyMember,
   getCompanyMembers,
@@ -11,7 +12,6 @@ import type {
   UpdateCompanyMemberRolePayload,
   UpdateCompanyPayload,
 } from "@/types/company.type";
-import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useUserCompany() {
   return useQuery({

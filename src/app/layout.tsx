@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Roboto } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import Providers from "@/providers";
-import { Toaster } from "@/components/ui/toast";
 
 const robotoHeading = Roboto({
   subsets: ["latin"],

@@ -24,7 +24,10 @@ export function DetailedAssessmentReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="full" className="max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl">
+      <DialogContent
+        size="full"
+        className="max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl"
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Detailed Assessment Report</DialogTitle>
           <DialogDescription>

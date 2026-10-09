@@ -529,7 +529,9 @@ export function ManageTeam() {
                 <Trash2 className="size-5" />
               </div>
               <div className="space-y-0.5">
-                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">Remove Member</DialogTitle>
+                <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
+                  Remove Member
+                </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
                   Are you sure you want to remove this member from your
                   organization? They will immediately lose access to team

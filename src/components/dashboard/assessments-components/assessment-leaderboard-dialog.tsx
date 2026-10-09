@@ -278,7 +278,8 @@ export function AssessmentLeaderboardDialog({
     if (Array.isArray(raw)) {
       items = raw as IAssessmentLeaderboardItem[];
     } else if (Array.isArray((raw as { leaderboard?: unknown })?.leaderboard)) {
-      items = (raw as { leaderboard: IAssessmentLeaderboardItem[] }).leaderboard;
+      items = (raw as { leaderboard: IAssessmentLeaderboardItem[] })
+        .leaderboard;
     } else if (Array.isArray((raw as { results?: unknown })?.results)) {
       items = (raw as { results: IAssessmentLeaderboardItem[] }).results;
     }
@@ -329,7 +330,9 @@ export function AssessmentLeaderboardDialog({
       const email = item.candidate?.email?.toLowerCase() || "";
       const rankStr = `#${item.rank}`;
 
-      return name.includes(term) || email.includes(term) || rankStr.includes(term);
+      return (
+        name.includes(term) || email.includes(term) || rankStr.includes(term)
+      );
     });
   }, [leaderboardList, activeTab, searchTerm, assessment, myEntry]);
 
@@ -388,7 +391,10 @@ export function AssessmentLeaderboardDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="5xl" className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl">
+        <DialogContent
+          size="5xl"
+          className="max-h-[90vh] overflow-y-auto p-0 gap-0 [scrollbar-width:thin] shadow-2xl"
+        >
           {/* ── Dialog Header Banner ── */}
           <div className="p-5 sm:p-6 bg-gradient-to-br from-amber-500/10 via-background to-primary/5 border-b border-border/60 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -415,7 +421,8 @@ export function AssessmentLeaderboardDialog({
                 </DialogTitle>
 
                 <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-                  Official candidate merit rankings, test performance percentiles, and scores.
+                  Official candidate merit rankings, test performance
+                  percentiles, and scores.
                 </DialogDescription>
               </div>
 
@@ -461,10 +468,15 @@ export function AssessmentLeaderboardDialog({
                   </div>
                   <div>
                     <p className="font-bold text-foreground">
-                      Your Standing: Rank #{myEntry.rank} of {stats.total} candidates
+                      Your Standing: Rank #{myEntry.rank} of {stats.total}{" "}
+                      candidates
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      Score: <strong>{myEntry.obtainedMarks} / {myEntry.totalMarks} pts</strong> ({myEntry.percentage}%)
+                      Score:{" "}
+                      <strong>
+                        {myEntry.obtainedMarks} / {myEntry.totalMarks} pts
+                      </strong>{" "}
+                      ({myEntry.percentage}%)
                     </p>
                   </div>
                 </div>
@@ -594,10 +606,15 @@ export function AssessmentLeaderboardDialog({
             <div className="flex flex-wrap items-center gap-1.5 shrink-0 [scrollbar-width:none]">
               {(
                 [
-                  { key: "ALL", label: `All Ranked (${leaderboardList.length})` },
+                  {
+                    key: "ALL",
+                    label: `All Ranked (${leaderboardList.length})`,
+                  },
                   { key: "TOP_10", label: "Top 10" },
                   { key: "PASSED", label: `Passed (${stats.passedCount})` },
-                  ...(myEntry ? [{ key: "MY_RANK" as const, label: "My Standing" }] : []),
+                  ...(myEntry
+                    ? [{ key: "MY_RANK" as const, label: "My Standing" }]
+                    : []),
                 ] as const
               ).map(({ key, label }) => (
                 <Button
@@ -747,7 +764,9 @@ export function AssessmentLeaderboardDialog({
                       /* Data Rows */
                       filteredList.map((item, idx) => {
                         const isMe = Boolean(
-                          myEntry && (item.id === myEntry.id || item.rank === myEntry.rank),
+                          myEntry &&
+                            (item.id === myEntry.id ||
+                              item.rank === myEntry.rank),
                         );
                         const cand = item.candidate;
                         const rankNum = item.rank || idx + 1;
@@ -759,7 +778,8 @@ export function AssessmentLeaderboardDialog({
 
                         const isPassed =
                           item.status?.toUpperCase() === "PASSED" ||
-                          (passingScore > 0 && item.obtainedMarks >= passingScore);
+                          (passingScore > 0 &&
+                            item.obtainedMarks >= passingScore);
 
                         const targetAttemptId = item.attemptId || item.id || "";
 
@@ -822,7 +842,10 @@ export function AssessmentLeaderboardDialog({
                                     {canInspectDetails
                                       ? cand?.email || "No email"
                                       : cand?.email
-                                        ? cand.email.replace(/(.{2})(.*)(?=@)/, "$1***")
+                                        ? cand.email.replace(
+                                            /(.{2})(.*)(?=@)/,
+                                            "$1***",
+                                          )
                                         : "Participating Candidate"}
                                   </p>
                                 </div>

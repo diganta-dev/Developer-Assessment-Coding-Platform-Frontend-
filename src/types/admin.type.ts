@@ -1,5 +1,5 @@
-import type { UserRole } from "./user.type";
 import type { Difficulty, IPaginationMeta, ProblemType } from "./question.type";
+import type { UserRole } from "./user.type";
 
 export interface IAdminDashboardStats {
   users: {

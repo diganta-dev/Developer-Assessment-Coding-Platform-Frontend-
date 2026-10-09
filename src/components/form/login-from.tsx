@@ -1,7 +1,15 @@
 "use client";
 
+import { GoogleLogin } from "@react-oauth/google";
 import { useForm } from "@tanstack/react-form";
-import { Input } from "../ui/input";
+import { useQueryClient } from "@tanstack/react-query";
+import { Eye, EyeClosed } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useLogin } from "@/hook";
+import { getRoleDashboardRoute } from "@/utils/role-routes";
+import { loginSchema } from "@/validation";
 import { Button } from "../ui/button";
 import {
   Field,
@@ -10,20 +18,10 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "../ui/field";
-
-import { useState } from "react";
-import { Eye, EyeClosed } from "lucide-react";
-
-import { useRouter } from "next/navigation";
-import { toast } from "../ui/toast";
+import { Input } from "../ui/input";
 import { Spinner } from "../ui/spinner";
-import { GoogleLogin } from "@react-oauth/google";
-import Link from "next/link";
-import { loginSchema } from "@/validation";
-import { useLogin } from "@/hook";
-import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "../ui/toast";
 import { ForgotPasswordDialog } from "./forgot-password-dialog";
-import { getRoleDashboardRoute } from "@/utils/role-routes";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +56,9 @@ export default function LoginForm() {
               description: "Please verify your account OTP to continue.",
               type: "warning",
             });
-            router.push(`/register/verify-account?email=${encodeURIComponent(res.data.email || value.email)}`);
+            router.push(
+              `/register/verify-account?email=${encodeURIComponent(res.data.email || value.email)}`,
+            );
             return;
           }
 

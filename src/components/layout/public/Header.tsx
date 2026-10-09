@@ -1,24 +1,24 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   Building2,
   Code2,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
   Menu,
   X,
-  LayoutDashboard,
-  LogOut,
-  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { useGetMe, useLogout } from "@/hook";
 import { getCompanyRole, getRoleDashboardRoute } from "@/utils";
 import { UserMenu } from "../user-menu";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/toast";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -202,7 +202,12 @@ export function Header() {
           {user ? (
             <div className="flex flex-col gap-2 border-t border-border pt-4">
               <div className="flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground">
-                <span className="truncate">Signed in as <strong className="text-foreground">{user.name || user.email}</strong></span>
+                <span className="truncate">
+                  Signed in as{" "}
+                  <strong className="text-foreground">
+                    {user.name || user.email}
+                  </strong>
+                </span>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary uppercase shrink-0">
                   {getCompanyRole(user) || user.role}
                 </span>

@@ -1,8 +1,8 @@
-import VerifyCompanyForm from "@/components/form/company-verify";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import loginImage from "@/assets/login-bg.jpg";
+import VerifyCompanyForm from "@/components/form/company-verify";
 
 export default function VerifyCompanyPage() {
   return (

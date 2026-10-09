@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
-import AuthLoading from "./auth-loading";
+import { type ReactNode, useEffect } from "react";
 import { useGetMe } from "@/hook";
-
+import AuthLoading from "./auth-loading";
 
 export default function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -12,7 +11,6 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
   const { data, isPending, isError } = useGetMe();
 
   const user = data?.data;
-  
 
   useEffect(() => {
     if (isPending) {

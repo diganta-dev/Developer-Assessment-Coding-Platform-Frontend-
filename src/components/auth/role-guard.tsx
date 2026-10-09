@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
-import AuthLoading from "./auth-loading";
-import { DashboardRole } from "@/types";
-import AccessDenied from "./access-denied";
+import { type ReactNode, useEffect } from "react";
 import { useGetMe } from "@/hook";
-import { isUserAuthorized, getRoleDashboardRoute } from "@/utils";
+import type { DashboardRole } from "@/types";
+import { getRoleDashboardRoute, isUserAuthorized } from "@/utils";
+import AccessDenied from "./access-denied";
+import AuthLoading from "./auth-loading";
 
 interface IProps {
   children: ReactNode;

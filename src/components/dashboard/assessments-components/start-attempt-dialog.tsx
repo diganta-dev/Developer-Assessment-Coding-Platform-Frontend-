@@ -41,14 +41,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { useStartAttemptDirectRoute } from "@/hook/assessment.hook";
 import { useGetMe } from "@/hook";
+import { useStartAttemptDirectRoute } from "@/hook/assessment.hook";
 import { UserRole } from "@/types";
 import type {
   IAssessment,
+  ISingleAssessmentDetail,
   IStartAttemptPayload,
   IStartAttemptResponse,
-  ISingleAssessmentDetail,
 } from "@/types/assessment.type";
 
 export interface StartAttemptDialogProps {
@@ -101,13 +101,15 @@ export function StartAttemptDialog({
 
   // Assessment lifecycle checks
   const isDraft = assessment.status === "DRAFT";
-  const isExpired = assessment.status === "EXPIRED" || assessment.status === "ARCHIVED";
+  const isExpired =
+    assessment.status === "EXPIRED" || assessment.status === "ARCHIVED";
   const isUpcoming =
     assessment.startDate && new Date(assessment.startDate) > new Date();
   const isPastDeadline =
     assessment.endDate && new Date(assessment.endDate) < new Date();
 
-  const isAssessmentOpen = !isDraft && !isExpired && !isUpcoming && !isPastDeadline;
+  const isAssessmentOpen =
+    !isDraft && !isExpired && !isUpcoming && !isPastDeadline;
 
   const handleCopyId = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -123,7 +125,8 @@ export function StartAttemptDialog({
   };
 
   const handleStartAttempt = () => {
-    if (!assessment.id || !isCandidate || startAttemptMutation.isPending) return;
+    if (!assessment.id || !isCandidate || startAttemptMutation.isPending)
+      return;
 
     const payload: IStartAttemptPayload = {};
     if (invitationToken.trim()) {
@@ -138,7 +141,9 @@ export function StartAttemptDialog({
       {
         onSuccess: (res) => {
           // React Query invalidation in calling component (AGENTS.md Rule 2)
-          queryClient.invalidateQueries({ queryKey: ["candidate-my-attempts"] });
+          queryClient.invalidateQueries({
+            queryKey: ["candidate-my-attempts"],
+          });
           queryClient.invalidateQueries({ queryKey: ["my-attempts"] });
           queryClient.invalidateQueries({
             queryKey: ["assessment-attempts", assessment.id],
@@ -170,7 +175,7 @@ export function StartAttemptDialog({
           const targetAttemptId = res.data?.attempt?.id;
           if (targetAttemptId) {
             router.push(
-              `/candidate/assessments?assessmentId=${assessment.id}&attemptId=${targetAttemptId}`
+              `/candidate/assessments?assessmentId=${assessment.id}&attemptId=${targetAttemptId}`,
             );
           }
         },
@@ -189,13 +194,16 @@ export function StartAttemptDialog({
             type: "error",
           });
         },
-      }
+      },
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="xl" className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4">
+      <DialogContent
+        size="xl"
+        className="max-h-[88vh] overflow-y-auto p-5 sm:p-6 gap-4"
+      >
         {/* Header */}
         <DialogHeader className="space-y-1.5 pb-0.5">
           <div className="flex items-center gap-3">
@@ -212,7 +220,8 @@ export function StartAttemptDialog({
                 </span>
               </div>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Launch your timed evaluation session or resume an active in-progress attempt
+                Launch your timed evaluation session or resume an active
+                in-progress attempt
               </DialogDescription>
             </div>
           </div>
@@ -227,10 +236,11 @@ export function StartAttemptDialog({
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               You are currently authenticated as{" "}
-              <strong className="text-foreground">{userRoleDisplay}</strong>. Under
-              anti-cheat and platform integrity rules, only registered{" "}
+              <strong className="text-foreground">{userRoleDisplay}</strong>.
+              Under anti-cheat and platform integrity rules, only registered{" "}
               <strong>Candidates</strong> are permitted to start or sit for an
-              assessment. Recruiters, evaluators, and administrators cannot take tests.
+              assessment. Recruiters, evaluators, and administrators cannot take
+              tests.
             </p>
           </div>
         )}
@@ -243,8 +253,8 @@ export function StartAttemptDialog({
               <span>Assessment In Draft</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              This assessment is currently in draft mode and has not yet been published
-              by the recruiter.
+              This assessment is currently in draft mode and has not yet been
+              published by the recruiter.
             </p>
           </div>
         )}
@@ -257,7 +267,10 @@ export function StartAttemptDialog({
             </div>
             <p className="text-[11px] text-muted-foreground">
               This assessment opens on{" "}
-              <strong>{new Date(assessment.startDate!).toLocaleString()}</strong>.
+              <strong>
+                {new Date(assessment.startDate!).toLocaleString()}
+              </strong>
+              .
             </p>
           </div>
         )}
@@ -307,7 +320,8 @@ export function StartAttemptDialog({
                 Verified Test
               </span>
               <span className="text-[10px] text-muted-foreground">
-                Status: <strong className="uppercase">{assessment.status}</strong>
+                Status:{" "}
+                <strong className="uppercase">{assessment.status}</strong>
               </span>
             </div>
           </div>
@@ -326,7 +340,9 @@ export function StartAttemptDialog({
               <FileCheck2 className="size-3.5 text-primary" />
               <span>
                 Total Marks:{" "}
-                <strong className="text-foreground">{assessment.totalMarks}</strong>
+                <strong className="text-foreground">
+                  {assessment.totalMarks}
+                </strong>
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -367,9 +383,9 @@ export function StartAttemptDialog({
             className="text-xs h-8 font-mono placeholder:font-sans"
           />
           <p className="text-[11px] text-muted-foreground leading-normal">
-            If you received an invitation token link via email, enter it above to claim
-            access. If this assessment was already assigned directly to your candidate
-            profile, you can proceed directly.
+            If you received an invitation token link via email, enter it above
+            to claim access. If this assessment was already assigned directly to
+            your candidate profile, you can proceed directly.
           </p>
         </div>
 
@@ -381,16 +397,17 @@ export function StartAttemptDialog({
           </div>
           <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
             <li>
-              <strong>Continuous Timer:</strong> Your exam countdown begins immediately
-              when you click Start. The server clock continues even if you close the tab.
+              <strong>Continuous Timer:</strong> Your exam countdown begins
+              immediately when you click Start. The server clock continues even
+              if you close the tab.
             </li>
             <li>
-              <strong>Idempotent Resumption:</strong> If your connection drops, return
-              here to resume your attempt with your remaining time.
+              <strong>Idempotent Resumption:</strong> If your connection drops,
+              return here to resume your attempt with your remaining time.
             </li>
             <li>
-              <strong>Anti-Cheat Proctoring:</strong> Browser tab switches, window blur
-              events, and code pasting are monitored and logged.
+              <strong>Anti-Cheat Proctoring:</strong> Browser tab switches,
+              window blur events, and code pasting are monitored and logged.
             </li>
           </ul>
         </div>
@@ -412,7 +429,11 @@ export function StartAttemptDialog({
             type="button"
             size="sm"
             onClick={handleStartAttempt}
-            disabled={!isCandidate || !isAssessmentOpen || startAttemptMutation.isPending}
+            disabled={
+              !isCandidate ||
+              !isAssessmentOpen ||
+              startAttemptMutation.isPending
+            }
             className={`text-xs h-8 gap-1.5 font-semibold text-white shadow-sm cursor-pointer ${
               isCandidate && isAssessmentOpen
                 ? "bg-emerald-600 hover:bg-emerald-700"

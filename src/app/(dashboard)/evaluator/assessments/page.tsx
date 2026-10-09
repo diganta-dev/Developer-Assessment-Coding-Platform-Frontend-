@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { GetAllAssessment } from "@/components/dashboard/assessments-components/getAllAssessment";
@@ -30,7 +30,8 @@ export default function EvaluatorAssessmentsPage() {
           Assigned Assessments
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Review your assigned company assessments, test schedules, and candidate invitation rosters.
+          Review your assigned company assessments, test schedules, and
+          candidate invitation rosters.
         </p>
       </div>
 

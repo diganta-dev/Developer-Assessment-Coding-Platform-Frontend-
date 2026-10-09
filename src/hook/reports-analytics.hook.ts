@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   getAssessmentReport,
   getAssessmentStatistics,
@@ -7,7 +8,6 @@ import {
   getPassFailStatistics,
   getScoreDistribution,
 } from "@/api/reports-analytics.api";
-import { useQuery } from "@tanstack/react-query";
 
 /**
  * 1. Query comprehensive assessment report

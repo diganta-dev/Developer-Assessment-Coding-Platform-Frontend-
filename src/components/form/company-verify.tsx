@@ -1,6 +1,10 @@
 "use client";
 
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useCompanyVerfication, useVerifyAccount } from "@/hook";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -9,15 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Button } from "../ui/button";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
-import { useEffect, useState } from "react";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
-
-import { toast } from "../ui/toast";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { Spinner } from "../ui/spinner";
-import { useCompanyVerfication, useVerifyAccount } from "@/hook";
+import { toast } from "../ui/toast";
 
 const RESEND_COOLDOWN = 120;
 
@@ -29,7 +28,8 @@ export default function VerifyCompanyForm() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
 
-  const { mutate: verifyAccount, isPending: isVerifying } = useCompanyVerfication();
+  const { mutate: verifyAccount, isPending: isVerifying } =
+    useCompanyVerfication();
 
   const email = searchParams.get("email") || "";
 

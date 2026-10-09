@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   Award,
@@ -32,14 +30,21 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { useGetDetailedAssesssmentReport } from "@/hook/assessment.hook";
-import { CheatingRiskAuditDialog } from "./cheating-risk-dialog";
 import type {
   AntiCheatEventType,
   IAntiCheatEvent,
@@ -47,6 +52,7 @@ import type {
   IDetailedReportSubmissionItem,
   ISanitizedAssessmentProblem,
 } from "@/types/assessment.type";
+import { CheatingRiskAuditDialog } from "./cheating-risk-dialog";
 
 interface DetailedAssessmentReportViewProps {
   attemptId?: string | null;
@@ -73,7 +79,10 @@ function formatDate(dateStr?: string | null, fallback = "N/A"): string {
   }
 }
 
-function formatRelativeTime(startStr?: string | null, eventStr?: string | null): string {
+function formatRelativeTime(
+  startStr?: string | null,
+  eventStr?: string | null,
+): string {
   if (!startStr || !eventStr) return "";
   try {
     const start = new Date(startStr).getTime();
@@ -126,12 +135,17 @@ export function DetailedAssessmentReportView({
   const searchParams = useSearchParams();
   const [customAttemptId, setCustomAttemptId] = useState<string>("");
   const [lookupInput, setLookupInput] = useState<string>("");
-  const effectiveAttemptId = attemptId || customAttemptId || searchParams?.get("attemptId") || "";
+  const effectiveAttemptId =
+    attemptId || customAttemptId || searchParams?.get("attemptId") || "";
 
-  const [activeTab, setActiveTab] = useState<"questions" | "proctoring" | "candidate">("questions");
-  const [questionFilter, setQuestionFilter] = useState<QuestionFilterType>("ALL");
+  const [activeTab, setActiveTab] = useState<
+    "questions" | "proctoring" | "candidate"
+  >("questions");
+  const [questionFilter, setQuestionFilter] =
+    useState<QuestionFilterType>("ALL");
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
-  const [isCheatingRiskDialogOpen, setIsCheatingRiskDialogOpen] = useState(false);
+  const [isCheatingRiskDialogOpen, setIsCheatingRiskDialogOpen] =
+    useState(false);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useGetDetailedAssesssmentReport(effectiveAttemptId);
@@ -192,7 +206,11 @@ export function DetailedAssessmentReportView({
         id: sub.problemId,
         title: `Question #${idx + 1}`,
         description: "",
-        type: sub.sourceCode ? "CODING" : sub.selectedOptionId ? "MCQ" : "WRITTEN",
+        type: sub.sourceCode
+          ? "CODING"
+          : sub.selectedOptionId
+            ? "MCQ"
+            : "WRITTEN",
         difficulty: "MEDIUM",
         marks: sub.marks ?? 0,
         mcqQuestion: null,
@@ -214,7 +232,10 @@ export function DetailedAssessmentReportView({
       if (questionFilter === "MCQ") return type === "MCQ";
       if (questionFilter === "WRITTEN") return type === "WRITTEN";
       if (questionFilter === "INCORRECT") {
-        return isCorrect === false || (item.submission && (item.submission.marks ?? 0) === 0);
+        return (
+          isCorrect === false ||
+          (item.submission && (item.submission.marks ?? 0) === 0)
+        );
       }
       return true;
     });
@@ -223,7 +244,9 @@ export function DetailedAssessmentReportView({
   // Result metrics
   const totalMarks = result?.totalMarks ?? assessment?.totalMarks ?? 0;
   const obtainedMarks = result?.obtainedMarks ?? 0;
-  const percentage = result?.percentage ?? (totalMarks > 0 ? Math.round((obtainedMarks / totalMarks) * 100) : 0);
+  const percentage =
+    result?.percentage ??
+    (totalMarks > 0 ? Math.round((obtainedMarks / totalMarks) * 100) : 0);
   const passingScore = result?.passingScore ?? assessment?.passingScore ?? null;
   const isPassed =
     result?.status?.toUpperCase() === "PASSED" ||
@@ -244,26 +267,32 @@ export function DetailedAssessmentReportView({
       return {
         level: "CLEAN",
         label: "Verified Clean Integrity",
-        colorClass: "text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
+        colorClass:
+          "text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
         badgeText: "High Trust",
-        description: "Zero anti-cheat flags recorded. Session was strictly compliant.",
+        description:
+          "Zero anti-cheat flags recorded. Session was strictly compliant.",
       };
     }
     if (totalViolations <= 3 && !(antiCheat?.summary?.FULLSCREEN_EXIT ?? 0)) {
       return {
         level: "LOW_RISK",
         label: "Low Proctoring Risk",
-        colorClass: "text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10",
+        colorClass:
+          "text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10",
         badgeText: "Review Recommended",
-        description: "Minor window or tab movements detected during the attempt.",
+        description:
+          "Minor window or tab movements detected during the attempt.",
       };
     }
     return {
       level: "HIGH_RISK",
       label: "Elevated Proctoring Risk",
-      colorClass: "text-rose-600 dark:text-rose-400 border-rose-500/20 bg-rose-500/10",
+      colorClass:
+        "text-rose-600 dark:text-rose-400 border-rose-500/20 bg-rose-500/10",
       badgeText: "Audit Required",
-      description: "Multiple violations or fullscreen exits detected. Careful review required.",
+      description:
+        "Multiple violations or fullscreen exits detected. Careful review required.",
     };
   }, [totalViolations, antiCheat]);
 
@@ -299,7 +328,8 @@ export function DetailedAssessmentReportView({
               Detailed Assessment Report
             </CardTitle>
             <CardDescription className="max-w-md mx-auto text-xs">
-              Access comprehensive candidate evaluations, question-level source code, test case telemetry, and anti-cheat proctoring logs.
+              Access comprehensive candidate evaluations, question-level source
+              code, test case telemetry, and anti-cheat proctoring logs.
             </CardDescription>
           </CardHeader>
           <CardContent className="max-w-md mx-auto pb-8 space-y-4">
@@ -326,7 +356,11 @@ export function DetailedAssessmentReportView({
                   className="pl-9 h-9 text-xs"
                 />
               </div>
-              <Button type="submit" size="sm" className="h-9 px-4 text-xs font-semibold cursor-pointer">
+              <Button
+                type="submit"
+                size="sm"
+                className="h-9 px-4 text-xs font-semibold cursor-pointer"
+              >
                 View Report
               </Button>
             </form>
@@ -336,10 +370,20 @@ export function DetailedAssessmentReportView({
                 How to open an attempt report:
               </p>
               <ul className="list-disc pl-4 space-y-1 text-[11px]">
-                <li>Go to <strong>Assessments</strong> in your navigation sidebar.</li>
-                <li>Open the <strong>Invitations & Candidates</strong> list for any assessment.</li>
-                <li>Click the <strong>Report</strong> button next to a candidate who has completed or submitted their test.</li>
-                <li>Or paste the candidate attempt UUID in the input field above.</li>
+                <li>
+                  Go to <strong>Assessments</strong> in your navigation sidebar.
+                </li>
+                <li>
+                  Open the <strong>Invitations & Candidates</strong> list for
+                  any assessment.
+                </li>
+                <li>
+                  Click the <strong>Report</strong> button next to a candidate
+                  who has completed or submitted their test.
+                </li>
+                <li>
+                  Or paste the candidate attempt UUID in the input field above.
+                </li>
               </ul>
             </div>
           </CardContent>
@@ -384,15 +428,27 @@ export function DetailedAssessmentReportView({
           Failed to load detailed assessment report
         </h3>
         <p className="text-xs text-muted-foreground max-w-md mx-auto">
-          {error instanceof Error ? error.message : "The detailed report could not be retrieved. Ensure you have the required Admin or Company Staff permissions."}
+          {error instanceof Error
+            ? error.message
+            : "The detailed report could not be retrieved. Ensure you have the required Admin or Company Staff permissions."}
         </p>
         <div className="flex items-center justify-center gap-2 pt-2">
-          <Button size="sm" variant="outline" onClick={() => refetch()} className="text-xs">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => refetch()}
+            className="text-xs"
+          >
             <RefreshCw className="size-3.5 mr-1.5" />
             Retry
           </Button>
           {onClose && (
-            <Button size="sm" variant="ghost" onClick={onClose} className="text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onClose}
+              className="text-xs"
+            >
               Close
             </Button>
           )}
@@ -424,7 +480,11 @@ export function DetailedAssessmentReportView({
                     : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
                 }`}
               >
-                {isPassed ? <CheckCircle2 className="size-3" /> : <XCircle className="size-3" />}
+                {isPassed ? (
+                  <CheckCircle2 className="size-3" />
+                ) : (
+                  <XCircle className="size-3" />
+                )}
                 {isPassed ? "PASSED" : "FAILED"}
               </span>
             ) : (
@@ -439,7 +499,8 @@ export function DetailedAssessmentReportView({
             {assessment?.title || "Assessment Report"}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Admin & Evaluator Review • Company: {assessment?.company?.name || "Independent"}
+            Admin & Evaluator Review • Company:{" "}
+            {assessment?.company?.name || "Independent"}
           </p>
         </div>
 
@@ -488,7 +549,9 @@ export function DetailedAssessmentReportView({
             className="h-8 text-xs gap-1.5 font-medium cursor-pointer"
             title="Refresh latest candidate metrics"
           >
-            <RefreshCw className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`} />
+            <RefreshCw
+              className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`}
+            />
             <span>Refresh</span>
           </Button>
 
@@ -557,18 +620,21 @@ export function DetailedAssessmentReportView({
               {/* Skills / Links if candidate profile exists */}
               {candidate?.profile && (
                 <div className="flex items-center gap-2 pt-1 flex-wrap">
-                  {candidate.profile.skills && Array.isArray(candidate.profile.skills) && (
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {candidate.profile.skills.slice(0, 5).map((skill: string) => (
-                        <span
-                          key={skill}
-                          className="text-[10px] px-1.5 py-0.2 rounded-sm bg-muted text-muted-foreground border border-border/50"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {candidate.profile.skills &&
+                    Array.isArray(candidate.profile.skills) && (
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {candidate.profile.skills
+                          .slice(0, 5)
+                          .map((skill: string) => (
+                            <span
+                              key={skill}
+                              className="text-[10px] px-1.5 py-0.2 rounded-sm bg-muted text-muted-foreground border border-border/50"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                      </div>
+                    )}
 
                   {candidate.profile.githubUrl && (
                     <a
@@ -630,7 +696,9 @@ export function DetailedAssessmentReportView({
         {/* Score & Threshold */}
         <Card className="p-4 border-border/70 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Performance Benchmark</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Performance Benchmark
+            </span>
             <Award className="size-4 text-primary" />
           </div>
           <div className="mt-2.5">
@@ -656,7 +724,9 @@ export function DetailedAssessmentReportView({
         {/* Proctoring Risk & Anti-Cheat */}
         <Card className="p-4 border-border/70 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Integrity Rating</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Integrity Rating
+            </span>
             {totalViolations === 0 ? (
               <ShieldCheck className="size-4 text-emerald-500" />
             ) : totalViolations <= 3 ? (
@@ -685,13 +755,17 @@ export function DetailedAssessmentReportView({
         {/* Time Spent vs Duration */}
         <Card className="p-4 border-border/70 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Time Utilization</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Time Utilization
+            </span>
             <Timer className="size-4 text-sky-500" />
           </div>
           <div className="mt-2.5">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-extrabold tracking-tight text-foreground">
-                {attempt?.durationMinutes != null ? `${attempt.durationMinutes}m` : "N/A"}
+                {attempt?.durationMinutes != null
+                  ? `${attempt.durationMinutes}m`
+                  : "N/A"}
               </span>
               <span className="text-xs font-medium text-muted-foreground">
                 Allowed: {assessment?.durationMinutes}m
@@ -708,7 +782,9 @@ export function DetailedAssessmentReportView({
         {/* Evaluation & Submissions Count */}
         <Card className="p-4 border-border/70 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Submission Audit</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Submission Audit
+            </span>
             <FileCheck2 className="size-4 text-indigo-500" />
           </div>
           <div className="mt-2.5">
@@ -721,7 +797,9 @@ export function DetailedAssessmentReportView({
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {result?.rank != null ? `Platform Rank #${result.rank}` : "Official Score Calculated"}
+              {result?.rank != null
+                ? `Platform Rank #${result.rank}`
+                : "Official Score Calculated"}
             </p>
           </div>
         </Card>
@@ -740,7 +818,9 @@ export function DetailedAssessmentReportView({
             }`}
           >
             <Code2 className="size-3.5 text-primary" />
-            <span>Problem Submissions & Answers ({combinedProblems.length})</span>
+            <span>
+              Problem Submissions & Answers ({combinedProblems.length})
+            </span>
           </button>
 
           <button
@@ -799,7 +879,7 @@ export function DetailedAssessmentReportView({
                     key: "INCORRECT",
                     label: `Needs Review (${
                       combinedProblems.filter(
-                        (p) => p.submission && p.submission.isCorrect === false
+                        (p) => p.submission && p.submission.isCorrect === false,
                       ).length
                     })`,
                   },
@@ -821,7 +901,8 @@ export function DetailedAssessmentReportView({
             </div>
 
             <span className="text-xs text-muted-foreground">
-              Showing {filteredProblems.length} of {combinedProblems.length} questions
+              Showing {filteredProblems.length} of {combinedProblems.length}{" "}
+              questions
             </span>
           </div>
 
@@ -860,8 +941,8 @@ export function DetailedAssessmentReportView({
                               probType === "CODING"
                                 ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
                                 : probType === "MCQ"
-                                ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-                                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                             }`}
                           >
                             {probType}
@@ -872,8 +953,8 @@ export function DetailedAssessmentReportView({
                               difficulty === "EASY"
                                 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                 : difficulty === "HARD"
-                                ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
-                                : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                  ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                                  : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                             }`}
                           >
                             {difficulty}
@@ -898,7 +979,8 @@ export function DetailedAssessmentReportView({
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                              <Clock className="size-3.5" /> {sub?.status || "Evaluated"}
+                              <Clock className="size-3.5" />{" "}
+                              {sub?.status || "Evaluated"}
                             </span>
                           )
                         ) : (
@@ -911,7 +993,9 @@ export function DetailedAssessmentReportView({
                           <span className="text-xs font-bold text-foreground">
                             {marksAwarded} / {marksAllocated}
                           </span>
-                          <span className="text-[10px] block text-muted-foreground">pts</span>
+                          <span className="text-[10px] block text-muted-foreground">
+                            pts
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -934,11 +1018,15 @@ export function DetailedAssessmentReportView({
                         </p>
 
                         <div className="space-y-2">
-                          {prob?.mcqQuestion?.options && prob.mcqQuestion.options.length > 0 ? (
+                          {prob?.mcqQuestion?.options &&
+                          prob.mcqQuestion.options.length > 0 ? (
                             prob.mcqQuestion.options.map((opt) => {
-                              const isSelected = sub?.selectedOptionId === opt.id;
+                              const isSelected =
+                                sub?.selectedOptionId === opt.id;
                               // Note: options might have isCorrect if populated by backend for staff review
-                              const isOptCorrect = (opt as { isCorrect?: boolean }).isCorrect;
+                              const isOptCorrect = (
+                                opt as { isCorrect?: boolean }
+                              ).isCorrect;
 
                               return (
                                 <div
@@ -947,17 +1035,21 @@ export function DetailedAssessmentReportView({
                                     isSelected && isOptCorrect
                                       ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-950 dark:text-emerald-200"
                                       : isSelected && !isOptCorrect
-                                      ? "bg-rose-500/10 border-rose-500/40 text-rose-950 dark:text-rose-200"
-                                      : isOptCorrect
-                                      ? "bg-emerald-500/5 border-emerald-500/30 text-foreground"
-                                      : "bg-muted/20 border-border/60 text-muted-foreground"
+                                        ? "bg-rose-500/10 border-rose-500/40 text-rose-950 dark:text-rose-200"
+                                        : isOptCorrect
+                                          ? "bg-emerald-500/5 border-emerald-500/30 text-foreground"
+                                          : "bg-muted/20 border-border/60 text-muted-foreground"
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5">
                                     <span className="size-5 rounded-full border flex items-center justify-center font-bold text-[10px]">
-                                      {String.fromCharCode(65 + (opt.optionOrder || 0))}
+                                      {String.fromCharCode(
+                                        65 + (opt.optionOrder || 0),
+                                      )}
                                     </span>
-                                    <span className="font-medium">{opt.optionText}</span>
+                                    <span className="font-medium">
+                                      {opt.optionText}
+                                    </span>
                                   </div>
 
                                   <div className="flex items-center gap-2 shrink-0">
@@ -968,7 +1060,8 @@ export function DetailedAssessmentReportView({
                                     )}
                                     {isOptCorrect && (
                                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                        <Check className="size-3" /> Correct Answer
+                                        <Check className="size-3" /> Correct
+                                        Answer
                                       </span>
                                     )}
                                   </div>
@@ -977,7 +1070,8 @@ export function DetailedAssessmentReportView({
                             })
                           ) : (
                             <p className="text-xs text-muted-foreground">
-                              Candidate selected option ID: {sub?.selectedOptionId || "None"}
+                              Candidate selected option ID:{" "}
+                              {sub?.selectedOptionId || "None"}
                             </p>
                           )}
                         </div>
@@ -1002,7 +1096,8 @@ export function DetailedAssessmentReportView({
                               Test Cases
                             </span>
                             <span className="font-bold text-foreground">
-                              {sub?.passedTests ?? 0} Passed / {sub?.failedTests ?? 0} Failed
+                              {sub?.passedTests ?? 0} Passed /{" "}
+                              {sub?.failedTests ?? 0} Failed
                             </span>
                           </div>
                           <div>
@@ -1010,7 +1105,9 @@ export function DetailedAssessmentReportView({
                               Execution Time
                             </span>
                             <span className="font-bold text-foreground">
-                              {sub?.executionTimeMs != null ? `${sub.executionTimeMs} ms` : "N/A"}
+                              {sub?.executionTimeMs != null
+                                ? `${sub.executionTimeMs} ms`
+                                : "N/A"}
                             </span>
                           </div>
                           <div>
@@ -1018,7 +1115,9 @@ export function DetailedAssessmentReportView({
                               Memory Used
                             </span>
                             <span className="font-bold text-foreground">
-                              {sub?.memoryUsedMb != null ? `${sub.memoryUsedMb} MB` : "N/A"}
+                              {sub?.memoryUsedMb != null
+                                ? `${sub.memoryUsedMb} MB`
+                                : "N/A"}
                             </span>
                           </div>
                         </div>
@@ -1027,7 +1126,8 @@ export function DetailedAssessmentReportView({
                         <div>
                           <div className="flex items-center justify-between pb-1.5">
                             <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                              <Code2 className="size-3.5 text-primary" /> Submitted Source Code:
+                              <Code2 className="size-3.5 text-primary" />{" "}
+                              Submitted Source Code:
                             </span>
 
                             {sub?.sourceCode && (
@@ -1035,13 +1135,17 @@ export function DetailedAssessmentReportView({
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleCopyCode(sub.id, sub.sourceCode || "")}
+                                onClick={() =>
+                                  handleCopyCode(sub.id, sub.sourceCode || "")
+                                }
                                 className="h-7 text-xs gap-1 font-medium cursor-pointer"
                               >
                                 {copiedCodeId === sub.id ? (
                                   <>
                                     <Check className="size-3 text-emerald-600" />
-                                    <span className="text-emerald-600 font-semibold">Copied</span>
+                                    <span className="text-emerald-600 font-semibold">
+                                      Copied
+                                    </span>
                                   </>
                                 ) : (
                                   <>
@@ -1067,33 +1171,46 @@ export function DetailedAssessmentReportView({
                         </div>
 
                         {/* Test Cases preview if available */}
-                        {prob?.codingQuestion?.testCases && prob.codingQuestion.testCases.length > 0 && (
-                          <div className="space-y-2 pt-2">
-                            <span className="text-xs font-semibold text-foreground">
-                              Test Cases Configured ({prob.codingQuestion.testCases.length}):
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {prob.codingQuestion.testCases.map((tc, tcIdx) => (
-                                <div
-                                  key={tc.id || tcIdx}
-                                  className="p-2.5 rounded-lg border border-border/60 bg-muted/20 text-xs space-y-1 font-mono"
-                                >
-                                  <div className="text-[10px] text-muted-foreground font-sans font-semibold">
-                                    Test Case #{tcIdx + 1} ({tc.type || "PUBLIC"})
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Input: </span>
-                                    <span className="text-foreground">{tc.input}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Expected: </span>
-                                    <span className="text-foreground">{tc.expectedOutput}</span>
-                                  </div>
-                                </div>
-                              ))}
+                        {prob?.codingQuestion?.testCases &&
+                          prob.codingQuestion.testCases.length > 0 && (
+                            <div className="space-y-2 pt-2">
+                              <span className="text-xs font-semibold text-foreground">
+                                Test Cases Configured (
+                                {prob.codingQuestion.testCases.length}):
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {prob.codingQuestion.testCases.map(
+                                  (tc, tcIdx) => (
+                                    <div
+                                      key={tc.id || tcIdx}
+                                      className="p-2.5 rounded-lg border border-border/60 bg-muted/20 text-xs space-y-1 font-mono"
+                                    >
+                                      <div className="text-[10px] text-muted-foreground font-sans font-semibold">
+                                        Test Case #{tcIdx + 1} (
+                                        {tc.type || "PUBLIC"})
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">
+                                          Input:{" "}
+                                        </span>
+                                        <span className="text-foreground">
+                                          {tc.input}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">
+                                          Expected:{" "}
+                                        </span>
+                                        <span className="text-foreground">
+                                          {tc.expectedOutput}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     )}
 
@@ -1120,7 +1237,8 @@ export function DetailedAssessmentReportView({
                     {sub?.evaluations && sub.evaluations.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-border/60 space-y-3">
                         <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                          <Award className="size-3.5 text-primary" /> Staff Evaluator Reviews:
+                          <Award className="size-3.5 text-primary" /> Staff
+                          Evaluator Reviews:
                         </span>
 
                         <div className="space-y-2">
@@ -1133,7 +1251,9 @@ export function DetailedAssessmentReportView({
                                 <span>
                                   Evaluator:{" "}
                                   <strong className="text-foreground">
-                                    {ev.evaluator?.name || ev.evaluator?.email || "Staff Evaluator"}
+                                    {ev.evaluator?.name ||
+                                      ev.evaluator?.email ||
+                                      "Staff Evaluator"}
                                   </strong>
                                 </span>
                                 <span className="font-bold text-primary">
@@ -1256,7 +1376,9 @@ export function DetailedAssessmentReportView({
                   <div className="flex items-center justify-center p-1.5 mx-auto rounded-lg bg-muted text-muted-foreground size-8">
                     <Icon className="size-4" />
                   </div>
-                  <p className="text-xl font-bold text-foreground">{cat.count}</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {cat.count}
+                  </p>
                   <p className="text-[10px] font-medium text-muted-foreground leading-tight">
                     {cat.label}
                   </p>
@@ -1269,19 +1391,24 @@ export function DetailedAssessmentReportView({
           <Card className="border-border/70 shadow-xs">
             <CardHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20">
               <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Clock className="size-4 text-primary" /> Chronological Proctoring Audit Log
+                <Clock className="size-4 text-primary" /> Chronological
+                Proctoring Audit Log
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {antiCheatEvents.length === 0 ? (
                 <div className="p-8 text-center text-xs text-muted-foreground">
                   <ShieldCheck className="size-8 mx-auto text-emerald-500 mb-2" />
-                  No security incidents or anti-cheat triggers occurred during this attempt.
+                  No security incidents or anti-cheat triggers occurred during
+                  this attempt.
                 </div>
               ) : (
                 <div className="divide-y divide-border/60 max-h-96 overflow-y-auto">
                   {antiCheatEvents.map((event, idx) => {
-                    const relative = formatRelativeTime(attempt?.startedAt, event.occurredAt);
+                    const relative = formatRelativeTime(
+                      attempt?.startedAt,
+                      event.occurredAt,
+                    );
                     return (
                       <div
                         key={event.id || idx}
@@ -1330,27 +1457,40 @@ export function DetailedAssessmentReportView({
           <Card className="border-border/70 shadow-xs">
             <CardHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20">
               <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                <User className="size-4 text-primary" /> Candidate Profile & Credentials
+                <User className="size-4 text-primary" /> Candidate Profile &
+                Credentials
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-5 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Full Name</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Full Name
+                  </span>
                   <span className="font-bold text-foreground">
                     {candidate?.name || "Not provided"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Email Address</span>
-                  <span className="font-bold text-foreground">{candidate?.email}</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Email Address
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {candidate?.email}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Candidate ID</span>
-                  <span className="font-mono text-muted-foreground">{candidate?.id}</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Candidate ID
+                  </span>
+                  <span className="font-mono text-muted-foreground">
+                    {candidate?.id}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Professional Title</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Professional Title
+                  </span>
                   <span className="font-medium text-foreground">
                     {candidate?.profile?.title || "Candidate"}
                   </span>
@@ -1359,30 +1499,33 @@ export function DetailedAssessmentReportView({
 
               {candidate?.profile?.bio && (
                 <div className="pt-2">
-                  <span className="text-muted-foreground block text-[11px] mb-1">Bio / Summary</span>
+                  <span className="text-muted-foreground block text-[11px] mb-1">
+                    Bio / Summary
+                  </span>
                   <p className="text-xs text-foreground bg-muted/30 p-3 rounded-lg border border-border/60">
                     {candidate.profile.bio}
                   </p>
                 </div>
               )}
 
-              {candidate?.profile?.skills && Array.isArray(candidate.profile.skills) && (
-                <div className="pt-2">
-                  <span className="text-muted-foreground block text-[11px] mb-1.5">
-                    Demonstrated Skills
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {candidate.profile.skills.map((skill: string) => (
-                      <span
-                        key={skill}
-                        className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-secondary text-secondary-foreground border border-border/50"
-                      >
-                        {skill}
-                      </span>
-                    ))}
+              {candidate?.profile?.skills &&
+                Array.isArray(candidate.profile.skills) && (
+                  <div className="pt-2">
+                    <span className="text-muted-foreground block text-[11px] mb-1.5">
+                      Demonstrated Skills
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {candidate.profile.skills.map((skill: string) => (
+                        <span
+                          key={skill}
+                          className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-secondary text-secondary-foreground border border-border/50"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               <div className="pt-2 flex flex-col gap-2">
                 {candidate?.profile?.resumeUrl && (
@@ -1392,7 +1535,8 @@ export function DetailedAssessmentReportView({
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-semibold"
                   >
-                    <ExternalLink className="size-3.5" /> Download / Open Candidate Resume
+                    <ExternalLink className="size-3.5" /> Download / Open
+                    Candidate Resume
                   </a>
                 )}
                 {candidate?.profile?.githubUrl && (
@@ -1423,30 +1567,45 @@ export function DetailedAssessmentReportView({
           <Card className="border-border/70 shadow-xs">
             <CardHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20">
               <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                <FileCheck2 className="size-4 text-primary" /> Assessment Configuration & Rules
+                <FileCheck2 className="size-4 text-primary" /> Assessment
+                Configuration & Rules
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-5 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Assessment Title</span>
-                  <span className="font-bold text-foreground">{assessment?.title}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Target Score</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Assessment Title
+                  </span>
                   <span className="font-bold text-foreground">
-                    {passingScore != null ? `${passingScore}%` : "No minimum passing threshold"}
+                    {assessment?.title}
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Duration Allocated</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Target Score
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {passingScore != null
+                      ? `${passingScore}%`
+                      : "No minimum passing threshold"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Duration Allocated
+                  </span>
                   <span className="font-bold text-foreground">
                     {assessment?.durationMinutes} minutes
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[11px]">Total Points</span>
-                  <span className="font-bold text-foreground">{totalMarks} points</span>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Total Points
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {totalMarks} points
+                  </span>
                 </div>
               </div>
 
@@ -1459,7 +1618,10 @@ export function DetailedAssessmentReportView({
                   <div>Status: {attempt?.status}</div>
                   <div>Started At: {formatDate(attempt?.startedAt)}</div>
                   <div>Submitted At: {formatDate(attempt?.submittedAt)}</div>
-                  <div>Calculated Duration: {attempt?.durationMinutes ?? "N/A"} minutes</div>
+                  <div>
+                    Calculated Duration: {attempt?.durationMinutes ?? "N/A"}{" "}
+                    minutes
+                  </div>
                 </div>
               </div>
             </CardContent>

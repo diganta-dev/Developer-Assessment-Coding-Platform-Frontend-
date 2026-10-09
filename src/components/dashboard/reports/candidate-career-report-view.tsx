@@ -115,7 +115,8 @@ export function CandidateCareerReportView({
           No Candidate Career Report Found
         </h3>
         <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-          Take assessments to build your talent portfolio and track skill category mastery.
+          Take assessments to build your talent portfolio and track skill
+          category mastery.
         </p>
       </Card>
     );
@@ -205,7 +206,9 @@ export function CandidateCareerReportView({
             <div className="text-2xl font-black text-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-6 w-6 text-emerald-500" />
               <span>
-                {report.totalAntiCheatViolations === 0 ? "100%" : `${Math.max(0, 100 - report.totalAntiCheatViolations * 10)}%`}
+                {report.totalAntiCheatViolations === 0
+                  ? "100%"
+                  : `${Math.max(0, 100 - report.totalAntiCheatViolations * 10)}%`}
               </span>
             </div>
             <div className="text-[11px] text-muted-foreground">
@@ -223,7 +226,8 @@ export function CandidateCareerReportView({
               Skill Category Mastery & Accuracy
             </CardTitle>
             <CardDescription className="text-xs">
-              Demonstrated accuracy breakdown across coding, written, and MCQ formats.
+              Demonstrated accuracy breakdown across coding, written, and MCQ
+              formats.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -238,14 +242,17 @@ export function CandidateCareerReportView({
                       {cat.problemType}
                     </span>
                     <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                      {cat.attemptedCount} / {cat.totalProblemsEncountered} attempted
+                      {cat.attemptedCount} / {cat.totalProblemsEncountered}{" "}
+                      attempted
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Accuracy</span>
-                      <span className="font-bold text-foreground">{cat.accuracyRate}%</span>
+                      <span className="font-bold text-foreground">
+                        {cat.accuracyRate}%
+                      </span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                       <div
@@ -276,7 +283,8 @@ export function CandidateCareerReportView({
               Assessment Attempt History
             </CardTitle>
             <CardDescription className="text-xs">
-              Chronological log of completed assessment attempts and benchmark ranks.
+              Chronological log of completed assessment attempts and benchmark
+              ranks.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -303,7 +311,8 @@ export function CandidateCareerReportView({
                           {att.companyName}
                         </td>
                         <td className="p-3 text-right font-bold text-foreground">
-                          {att.obtainedMarks} / {att.totalMarks} ({att.percentage}%)
+                          {att.obtainedMarks} / {att.totalMarks} (
+                          {att.percentage}%)
                         </td>
                         <td className="p-3 text-right">
                           {att.rank ? (

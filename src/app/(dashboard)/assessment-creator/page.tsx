@@ -1,3 +1,6 @@
+import { Database, FileCode2, FileText } from "lucide-react";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -5,9 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileCode2, Database, FileText } from "lucide-react";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 
 export default function AssessmentCreatorPage() {
   return (
@@ -22,7 +22,8 @@ export default function AssessmentCreatorPage() {
             Assessment Creator Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Author coding challenges, manage problem banks, and inspect candidate attempt reports.
+            Author coding challenges, manage problem banks, and inspect
+            candidate attempt reports.
           </p>
         </div>
 
@@ -54,12 +55,18 @@ export default function AssessmentCreatorPage() {
         <Card>
           <CardHeader>
             <CardTitle>Assessments</CardTitle>
-            <CardDescription>Manage and configure test templates</CardDescription>
+            <CardDescription>
+              Manage and configure test templates
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/assessment-creator/assessments"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               View Assessments
             </Link>
@@ -69,12 +76,18 @@ export default function AssessmentCreatorPage() {
         <Card>
           <CardHeader>
             <CardTitle>Problem Bank</CardTitle>
-            <CardDescription>Browse and add algorithmic questions and test cases</CardDescription>
+            <CardDescription>
+              Browse and add algorithmic questions and test cases
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/assessment-creator/problems"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               View Problem Bank
             </Link>
@@ -84,12 +97,18 @@ export default function AssessmentCreatorPage() {
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
             <CardTitle>Assessment Reports</CardTitle>
-            <CardDescription>Audit test submissions, scoring rubrics, and proctoring logs</CardDescription>
+            <CardDescription>
+              Audit test submissions, scoring rubrics, and proctoring logs
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href="/assessment-creator/report"
-              className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full" })}
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               View Detailed Reports
             </Link>

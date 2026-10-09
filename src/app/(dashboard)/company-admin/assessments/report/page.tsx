@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { DetailedAssessmentReportView } from "@/components/dashboard/assessments-components/detailed-assessment-report-view";
@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "Detailed Assessment Report | Company Admin",
-  description: "Candidate submission breakdown, test case telemetry, and anti-cheat audit report.",
+  description:
+    "Candidate submission breakdown, test case telemetry, and anti-cheat audit report.",
 };
 
 export default function CompanyStaffAttemptReportPage() {

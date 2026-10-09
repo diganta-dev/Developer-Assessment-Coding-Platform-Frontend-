@@ -95,7 +95,9 @@ export function EvaluatorGradingQueue() {
   const stats = useMemo(() => {
     const total = meta?.total ?? evaluations.length;
     const pending = evaluations.filter((e) => e.status === "PENDING").length;
-    const completed = evaluations.filter((e) => e.status === "COMPLETED").length;
+    const completed = evaluations.filter(
+      (e) => e.status === "COMPLETED",
+    ).length;
     const manual = evaluations.filter((e) => e.type === "MANUAL").length;
     return { total, pending, completed, manual };
   }, [meta, evaluations]);
@@ -115,10 +117,16 @@ export function EvaluatorGradingQueue() {
           });
         },
         onError: (err: unknown) => {
-          const apiErr = err as { data?: { message?: string }; message?: string };
+          const apiErr = err as {
+            data?: { message?: string };
+            message?: string;
+          };
           toast.add({
             title: "Evaluation Failed",
-            description: apiErr?.data?.message || apiErr?.message || "Could not execute code evaluation.",
+            description:
+              apiErr?.data?.message ||
+              apiErr?.message ||
+              "Could not execute code evaluation.",
             type: "error",
           });
         },
@@ -135,10 +143,16 @@ export function EvaluatorGradingQueue() {
           });
         },
         onError: (err: unknown) => {
-          const apiErr = err as { data?: { message?: string }; message?: string };
+          const apiErr = err as {
+            data?: { message?: string };
+            message?: string;
+          };
           toast.add({
             title: "Evaluation Failed",
-            description: apiErr?.data?.message || apiErr?.message || "Could not evaluate MCQ submission.",
+            description:
+              apiErr?.data?.message ||
+              apiErr?.message ||
+              "Could not evaluate MCQ submission.",
             type: "error",
           });
         },
@@ -159,7 +173,8 @@ export function EvaluatorGradingQueue() {
             Candidate Submissions & Grading Queue
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Evaluate candidate coding challenges, grade open-ended written questions, and review automated test cases.
+            Evaluate candidate coding challenges, grade open-ended written
+            questions, and review automated test cases.
           </p>
         </div>
 
@@ -171,7 +186,9 @@ export function EvaluatorGradingQueue() {
           disabled={isRefetching}
           className="text-xs font-semibold gap-1.5 h-8 shrink-0 cursor-pointer"
         >
-          <RefreshCw className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`} />
+          <RefreshCw
+            className={`size-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`}
+          />
           Refresh Queue
         </Button>
       </div>
@@ -179,38 +196,56 @@ export function EvaluatorGradingQueue() {
       {/* ── Statistics Summary Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Total In Queue</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Total In Queue
+          </p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-foreground">{stats.total}</span>
+            <span className="text-2xl font-bold text-foreground">
+              {stats.total}
+            </span>
             <span className="text-xs text-muted-foreground">Submissions</span>
           </div>
         </Card>
 
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Pending Review</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Pending Review
+          </p>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {stats.pending}
             </span>
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Needs Action</span>
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              Needs Action
+            </span>
           </div>
         </Card>
 
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Completed Grades</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Completed Grades
+          </p>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats.completed}
             </span>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Evaluated</span>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              Evaluated
+            </span>
           </div>
         </Card>
 
         <Card className="p-4 border-border/70 shadow-xs space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Manual Rubric</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            Manual Rubric
+          </p>
           <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-primary">{stats.manual}</span>
-            <span className="text-xs text-muted-foreground">Written/Custom</span>
+            <span className="text-2xl font-bold text-primary">
+              {stats.manual}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Written/Custom
+            </span>
           </div>
         </Card>
       </div>
@@ -281,7 +316,10 @@ export function EvaluatorGradingQueue() {
         {isLoading ? (
           <div className="p-6 space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={`eval-skel-${i + 1}`} className="h-14 w-full rounded-xl" />
+              <Skeleton
+                key={`eval-skel-${i + 1}`}
+                className="h-14 w-full rounded-xl"
+              />
             ))}
           </div>
         ) : isError ? (
@@ -297,14 +335,21 @@ export function EvaluatorGradingQueue() {
                 ? error.message
                 : "Unable to retrieve submissions queue. Please verify Evaluator or Admin permissions."}
             </p>
-            <Button size="sm" variant="outline" onClick={() => refetch()} className="text-xs">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              className="text-xs"
+            >
               Retry
             </Button>
           </div>
         ) : filteredEvaluations.length === 0 ? (
           <div className="py-16 text-center space-y-2 text-muted-foreground">
             <HelpCircle className="size-8 mx-auto opacity-40" />
-            <p className="text-xs font-semibold text-foreground">No submissions found</p>
+            <p className="text-xs font-semibold text-foreground">
+              No submissions found
+            </p>
             <p className="text-[11px] max-w-sm mx-auto">
               No evaluation records match the selected status or type criteria.
             </p>
@@ -406,7 +451,9 @@ export function EvaluatorGradingQueue() {
                       </td>
 
                       <td className="py-3.5 px-4 text-muted-foreground text-[11px]">
-                        {ev.evaluator?.name || ev.evaluator?.email || "System / Unassigned"}
+                        {ev.evaluator?.name ||
+                          ev.evaluator?.email ||
+                          "System / Unassigned"}
                       </td>
 
                       <td className="py-3.5 px-4 text-right">
@@ -424,7 +471,8 @@ export function EvaluatorGradingQueue() {
                           </Button>
 
                           {/* Auto evaluate re-trigger for coding/mcq */}
-                          {(prob?.type === "CODING" || prob?.type === "MCQ") && (
+                          {(prob?.type === "CODING" ||
+                            prob?.type === "MCQ") && (
                             <Button
                               type="button"
                               size="sm"

@@ -1,6 +1,11 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { IPaginationMeta } from "@/types";
 
@@ -49,10 +54,11 @@ export function Pagination({ meta, onPageChange, isLoading }: PaginationProps) {
         ) : (
           <>
             Showing{" "}
-            <span className="font-semibold text-foreground">{startItem}–{endItem}</span>
-            {" "}of{" "}
-            <span className="font-semibold text-foreground">{total}</span>
-            {" "}results
+            <span className="font-semibold text-foreground">
+              {startItem}–{endItem}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{total}</span>{" "}
+            results
           </>
         )}
       </p>
@@ -87,7 +93,10 @@ export function Pagination({ meta, onPageChange, isLoading }: PaginationProps) {
         <div className="flex items-center gap-0.5">
           {pageNumbers.map((p, idx) =>
             p === "..." ? (
-              <span key={`ellipsis-${idx}`} className="px-1.5 text-xs text-muted-foreground select-none">
+              <span
+                key={`ellipsis-${idx}`}
+                className="px-1.5 text-xs text-muted-foreground select-none"
+              >
                 ···
               </span>
             ) : (
@@ -104,7 +113,7 @@ export function Pagination({ meta, onPageChange, isLoading }: PaginationProps) {
               >
                 {p}
               </Button>
-            )
+            ),
           )}
         </div>
 

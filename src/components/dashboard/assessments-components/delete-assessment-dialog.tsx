@@ -6,9 +6,7 @@ import {
   Award,
   Clock,
   Code2,
-  FileQuestion,
   Loader2,
-  ShieldAlert,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -177,13 +175,18 @@ export function DeleteAssessmentDialog({
           <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
             <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-semibold">Caution: Live / Published Assessment</p>
+              <p className="font-semibold">
+                Caution: Live / Published Assessment
+              </p>
               <p className="text-[11px] text-amber-700/90 dark:text-amber-300/80 leading-relaxed">
-                This assessment is marked as <strong>{assessment.status}</strong>.
+                This assessment is marked as{" "}
+                <strong>{assessment.status}</strong>.
                 {invitationsCount > 0 || attemptsCount > 0 ? (
                   <span>
-                    {" "}It currently has <strong>{invitationsCount}</strong> invitations and{" "}
-                    <strong>{attemptsCount}</strong> attempts recorded.
+                    {" "}
+                    It currently has <strong>{invitationsCount}</strong>{" "}
+                    invitations and <strong>{attemptsCount}</strong> attempts
+                    recorded.
                   </span>
                 ) : null}{" "}
                 Deleting it will immediately disconnect all candidate access.
@@ -194,8 +197,11 @@ export function DeleteAssessmentDialog({
 
         <p className="text-xs text-muted-foreground">
           Are you sure you want to permanently delete{" "}
-          <strong className="text-foreground">&quot;{assessment.title}&quot;</strong>?
-          All associated test configurations and questions linked to this assessment will be removed.
+          <strong className="text-foreground">
+            &quot;{assessment.title}&quot;
+          </strong>
+          ? All associated test configurations and questions linked to this
+          assessment will be removed.
         </p>
 
         <DialogFooter className="gap-2 sm:gap-2 pt-2">

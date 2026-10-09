@@ -20,13 +20,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,32 +36,42 @@ interface CheatingRiskAuditDialogProps {
 
 const RISK_LEVEL_CONFIG: Record<
   CheatingRiskLevel,
-  { label: string; badgeClass: string; bgClass: string; textClass: string; icon: typeof ShieldCheck }
+  {
+    label: string;
+    badgeClass: string;
+    bgClass: string;
+    textClass: string;
+    icon: typeof ShieldCheck;
+  }
 > = {
   LOW: {
     label: "Low Risk",
-    badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    badgeClass:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
     bgClass: "bg-emerald-500",
     textClass: "text-emerald-600 dark:text-emerald-400",
     icon: ShieldCheck,
   },
   MEDIUM: {
     label: "Moderate Risk",
-    badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    badgeClass:
+      "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
     bgClass: "bg-amber-500",
     textClass: "text-amber-600 dark:text-amber-400",
     icon: Shield,
   },
   HIGH: {
     label: "High Risk",
-    badgeClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+    badgeClass:
+      "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
     bgClass: "bg-rose-500",
     textClass: "text-rose-600 dark:text-rose-400",
     icon: ShieldAlert,
   },
   CRITICAL: {
     label: "Critical Violation",
-    badgeClass: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30",
+    badgeClass:
+      "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30",
     bgClass: "bg-red-600",
     textClass: "text-red-600 dark:text-red-400",
     icon: AlertTriangle,
@@ -262,7 +266,9 @@ export function CheatingRiskAuditDialog({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
                       <div className="p-3 rounded-xl bg-muted/60 text-foreground shrink-0 mt-0.5">
-                        <RiskIcon className={`size-7 ${riskConfig.textClass}`} />
+                        <RiskIcon
+                          className={`size-7 ${riskConfig.textClass}`}
+                        />
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -350,7 +356,9 @@ export function CheatingRiskAuditDialog({
                   </p>
                 </div>
                 <div className="p-3 rounded-xl border border-border/60 bg-card text-center space-y-1">
-                  <p className="text-xs text-muted-foreground">Fullscreen Exits</p>
+                  <p className="text-xs text-muted-foreground">
+                    Fullscreen Exits
+                  </p>
                   <p className="text-xl font-bold text-foreground">
                     {report.eventsByType?.FULLSCREEN_EXIT || 0}
                   </p>
@@ -442,7 +450,8 @@ export function CheatingRiskAuditDialog({
                         Formal Proctor Review
                       </h4>
                       <p className="text-[11px] text-muted-foreground">
-                        Flag this attempt for evaluation committee or disqualify candidate immediately.
+                        Flag this attempt for evaluation committee or disqualify
+                        candidate immediately.
                       </p>
                     </div>
                     <Button
@@ -476,7 +485,10 @@ export function CheatingRiskAuditDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <Label htmlFor="flag-reason" className="text-xs font-semibold">
+                      <Label
+                        htmlFor="flag-reason"
+                        className="text-xs font-semibold"
+                      >
                         Reason <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -492,7 +504,10 @@ export function CheatingRiskAuditDialog({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="flag-severity" className="text-xs font-semibold">
+                        <Label
+                          htmlFor="flag-severity"
+                          className="text-xs font-semibold"
+                        >
                           Severity
                         </Label>
                         <select
@@ -529,7 +544,10 @@ export function CheatingRiskAuditDialog({
                     </div>
 
                     <div className="space-y-1">
-                      <Label htmlFor="flag-notes" className="text-xs font-semibold">
+                      <Label
+                        htmlFor="flag-notes"
+                        className="text-xs font-semibold"
+                      >
                         Additional Notes (Optional)
                       </Label>
                       <Textarea

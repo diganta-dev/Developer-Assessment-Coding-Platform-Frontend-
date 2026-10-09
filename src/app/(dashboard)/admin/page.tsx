@@ -36,7 +36,8 @@ export default function AdminPage() {
             Platform User Management Directory
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Quickly activate or deactivate user accounts, filter by role, or inspect accounts.
+            Quickly activate or deactivate user accounts, filter by role, or
+            inspect accounts.
           </p>
         </div>
 

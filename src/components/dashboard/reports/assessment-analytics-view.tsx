@@ -22,8 +22,8 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -121,7 +121,8 @@ export function AssessmentAnalyticsView({
               Assessment Analytics & Cohort Telemetry
             </h2>
             <p className="text-xs text-muted-foreground">
-              Select an assessment to inspect completion funnel, difficulty diagnostics, and pass rates.
+              Select an assessment to inspect completion funnel, difficulty
+              diagnostics, and pass rates.
             </p>
           </div>
         </div>
@@ -168,7 +169,8 @@ export function AssessmentAnalyticsView({
             No Assessment Selected
           </h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Please choose an assessment from the dropdown above to view reports and analytics.
+            Please choose an assessment from the dropdown above to view reports
+            and analytics.
           </p>
         </Card>
       ) : isReportLoading ? (
@@ -224,7 +226,8 @@ export function AssessmentAnalyticsView({
                   {report.invitedCandidates}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  {report.startedCandidates} started ({report.completionRate}% completion)
+                  {report.startedCandidates} started ({report.completionRate}%
+                  completion)
                 </div>
               </CardContent>
             </Card>
@@ -260,7 +263,8 @@ export function AssessmentAnalyticsView({
                   {report.passRate}%
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  {report.passedCandidates} passed · {report.failedCandidates} failed
+                  {report.passedCandidates} passed · {report.failedCandidates}{" "}
+                  failed
                 </div>
               </CardContent>
             </Card>
@@ -296,7 +300,8 @@ export function AssessmentAnalyticsView({
                   </span>
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Cohort outcome variance and near-miss candidate classification.
+                  Cohort outcome variance and near-miss candidate
+                  classification.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -347,7 +352,8 @@ export function AssessmentAnalyticsView({
                   )}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Distribution of candidate total scores grouped by percentage percentiles.
+                  Distribution of candidate total scores grouped by percentage
+                  percentiles.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -377,86 +383,88 @@ export function AssessmentAnalyticsView({
           )}
 
           {/* Problem Performance Matrix */}
-          {report.questionPerformance && report.questionPerformance.length > 0 && (
-            <Card className="border-border/70 shadow-xs">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold text-foreground">
-                  Problem Performance & Accuracy Breakdown
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Detailed diagnostics for each challenge in this assessment.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-xl border border-border/70 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-muted/40 text-muted-foreground border-b border-border/70 uppercase font-semibold text-[10px]">
-                        <tr>
-                          <th className="p-3">Problem Title</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Difficulty</th>
-                          <th className="p-3 text-right">Max Marks</th>
-                          <th className="p-3 text-right">Submissions</th>
-                          <th className="p-3 text-right">Accuracy Rate</th>
-                          <th className="p-3 text-right">Avg Score</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border/60">
-                        {report.questionPerformance.map((q) => (
-                          <tr key={q.problemId} className="hover:bg-muted/20">
-                            <td className="p-3 font-semibold text-foreground">
-                              {q.title}
-                            </td>
-                            <td className="p-3">
-                              <span className="rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium">
-                                {q.type}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <span
-                                className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
-                                  q.difficulty === "EASY"
-                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                    : q.difficulty === "MEDIUM"
-                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                                }`}
-                              >
-                                {q.difficulty}
-                              </span>
-                            </td>
-                            <td className="p-3 text-right font-medium text-foreground">
-                              {q.maxMarks}
-                            </td>
-                            <td className="p-3 text-right text-muted-foreground">
-                              {q.totalSubmissions} ({q.correctSubmissions} correct)
-                            </td>
-                            <td className="p-3 text-right">
-                              <span
-                                className={`font-bold ${
-                                  q.accuracyRate >= 70
-                                    ? "text-emerald-600 dark:text-emerald-400"
-                                    : q.accuracyRate >= 40
-                                      ? "text-amber-600 dark:text-amber-400"
-                                      : "text-rose-600 dark:text-rose-400"
-                                }`}
-                              >
-                                {q.accuracyRate}%
-                              </span>
-                            </td>
-                            <td className="p-3 text-right font-bold text-foreground">
-                              {q.averageScore}
-                            </td>
+          {report.questionPerformance &&
+            report.questionPerformance.length > 0 && (
+              <Card className="border-border/70 shadow-xs">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-bold text-foreground">
+                    Problem Performance & Accuracy Breakdown
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Detailed diagnostics for each challenge in this assessment.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-xl border border-border/70 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-muted/40 text-muted-foreground border-b border-border/70 uppercase font-semibold text-[10px]">
+                          <tr>
+                            <th className="p-3">Problem Title</th>
+                            <th className="p-3">Type</th>
+                            <th className="p-3">Difficulty</th>
+                            <th className="p-3 text-right">Max Marks</th>
+                            <th className="p-3 text-right">Submissions</th>
+                            <th className="p-3 text-right">Accuracy Rate</th>
+                            <th className="p-3 text-right">Avg Score</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-border/60">
+                          {report.questionPerformance.map((q) => (
+                            <tr key={q.problemId} className="hover:bg-muted/20">
+                              <td className="p-3 font-semibold text-foreground">
+                                {q.title}
+                              </td>
+                              <td className="p-3">
+                                <span className="rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium">
+                                  {q.type}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span
+                                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
+                                    q.difficulty === "EASY"
+                                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                      : q.difficulty === "MEDIUM"
+                                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                                  }`}
+                                >
+                                  {q.difficulty}
+                                </span>
+                              </td>
+                              <td className="p-3 text-right font-medium text-foreground">
+                                {q.maxMarks}
+                              </td>
+                              <td className="p-3 text-right text-muted-foreground">
+                                {q.totalSubmissions} ({q.correctSubmissions}{" "}
+                                correct)
+                              </td>
+                              <td className="p-3 text-right">
+                                <span
+                                  className={`font-bold ${
+                                    q.accuracyRate >= 70
+                                      ? "text-emerald-600 dark:text-emerald-400"
+                                      : q.accuracyRate >= 40
+                                        ? "text-amber-600 dark:text-amber-400"
+                                        : "text-rose-600 dark:text-rose-400"
+                                  }`}
+                                >
+                                  {q.accuracyRate}%
+                                </span>
+                              </td>
+                              <td className="p-3 text-right font-bold text-foreground">
+                                {q.averageScore}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
           {/* Anti-Cheat & Telemetry Summary */}
           {report.antiCheatStatistics && (
@@ -472,7 +480,8 @@ export function AssessmentAnalyticsView({
                   </span>
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Summary of proctor violations detected during assessment attempts.
+                  Summary of proctor violations detected during assessment
+                  attempts.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

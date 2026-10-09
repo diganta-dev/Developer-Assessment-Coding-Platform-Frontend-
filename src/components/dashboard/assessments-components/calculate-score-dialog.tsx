@@ -55,7 +55,10 @@ interface CalculateScoreDialogProps {
   onSuccess?: (data: ICalculateAttemptScoreData) => void;
 }
 
-function formatDate(dateVal?: string | Date | null, fallback = "Just now"): string {
+function formatDate(
+  dateVal?: string | Date | null,
+  fallback = "Just now",
+): string {
   if (!dateVal) return fallback;
   try {
     const d = new Date(dateVal);
@@ -86,9 +89,8 @@ export function CalculateScoreDialog({
   const calculateMutation = useCalculateAttemptScore();
 
   // Attempt details query to show current status before calculating
-  const { data: attemptRes, isLoading: isAttemptLoading } = useGetAttemptDetails(
-    attemptId || "",
-  );
+  const { data: attemptRes, isLoading: isAttemptLoading } =
+    useGetAttemptDetails(attemptId || "");
 
   const attemptData = attemptRes?.data;
   const attempt = attemptData?.attempt;
@@ -96,9 +98,8 @@ export function CalculateScoreDialog({
   const candidate = attempt?.candidate;
 
   // Stored calculation result from mutation
-  const [calcResult, setCalcResult] = useState<ICalculateAttemptScoreData | null>(
-    null,
-  );
+  const [calcResult, setCalcResult] =
+    useState<ICalculateAttemptScoreData | null>(null);
   const [resultDialogOpen, setResultDialogOpen] = useState<boolean>(false);
 
   // Handle calculation action
@@ -163,12 +164,16 @@ export function CalculateScoreDialog({
   };
 
   const isPending = calculateMutation.isPending;
-  const breakdownList: IAttemptScoreBreakdownItem[] = calcResult?.breakdown || [];
+  const breakdownList: IAttemptScoreBreakdownItem[] =
+    calcResult?.breakdown || [];
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent size="3xl" className="max-h-[88vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+        <DialogContent
+          size="3xl"
+          className="max-h-[88vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl"
+        >
           {/* ── Dialog Header ── */}
           <DialogHeader className="p-5 border-b border-border/60 bg-muted/20 space-y-2.5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -186,13 +191,18 @@ export function CalculateScoreDialog({
                 </div>
                 <DialogDescription className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="font-semibold text-foreground">
-                    {assessmentTitle || assessment?.title || "Assessment Attempt"}
+                    {assessmentTitle ||
+                      assessment?.title ||
+                      "Assessment Attempt"}
                   </span>
                   <span>•</span>
                   <span>
                     Candidate:{" "}
                     <strong className="text-foreground">
-                      {candidateName || candidate?.name || candidate?.email || "Candidate"}
+                      {candidateName ||
+                        candidate?.name ||
+                        candidate?.email ||
+                        "Candidate"}
                     </strong>
                   </span>
                   <span>•</span>
@@ -207,7 +217,10 @@ export function CalculateScoreDialog({
 
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground font-semibold uppercase">
-                  Status: {calcResult?.attemptStatus || attempt?.status || "IN_PROGRESS"}
+                  Status:{" "}
+                  {calcResult?.attemptStatus ||
+                    attempt?.status ||
+                    "IN_PROGRESS"}
                 </span>
               </div>
             </div>
@@ -222,7 +235,11 @@ export function CalculateScoreDialog({
                 <span>Automated Scoring & Telemetry Pipeline</span>
               </div>
               <p className="text-muted-foreground leading-relaxed pl-6 text-[11px]">
-                Triggering score calculation aggregates MCQ auto-evaluations, code testcase execution marks, and written essay evaluations. It determines pass/fail thresholds, transitions attempt state to EVALUATED once complete, and atomically syncs official Result records.
+                Triggering score calculation aggregates MCQ auto-evaluations,
+                code testcase execution marks, and written essay evaluations. It
+                determines pass/fail thresholds, transitions attempt state to
+                EVALUATED once complete, and atomically syncs official Result
+                records.
               </p>
             </div>
 
@@ -283,7 +300,8 @@ export function CalculateScoreDialog({
                       Evaluation Progress
                     </span>
                     <p className="text-xs font-bold text-foreground pt-1">
-                      {calcResult.evaluatedProblems} of {calcResult.totalProblems} Graded
+                      {calcResult.evaluatedProblems} of{" "}
+                      {calcResult.totalProblems} Graded
                     </p>
                     {calcResult.pendingProblems > 0 && (
                       <span className="text-[10px] text-amber-500 block">
@@ -298,7 +316,10 @@ export function CalculateScoreDialog({
                   <div className="space-y-2.5">
                     <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
                       <ListChecks className="size-3.5 text-primary" />
-                      <span>Granular Problem Score Breakdown ({breakdownList.length}):</span>
+                      <span>
+                        Granular Problem Score Breakdown ({breakdownList.length}
+                        ):
+                      </span>
                     </h4>
 
                     <div className="rounded-xl border border-border/70 overflow-hidden bg-card/50">
@@ -311,7 +332,9 @@ export function CalculateScoreDialog({
                               <th className="py-2.5 px-3">Type</th>
                               <th className="py-2.5 px-3">Difficulty</th>
                               <th className="py-2.5 px-3">Status</th>
-                              <th className="py-2.5 px-3 text-right">Awarded Marks</th>
+                              <th className="py-2.5 px-3 text-right">
+                                Awarded Marks
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-border/40">
@@ -340,7 +363,8 @@ export function CalculateScoreDialog({
                                       item.submissionStatus === "EVALUATED" ||
                                       item.submissionStatus === "PASSED"
                                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                        : item.submissionStatus === "NOT_SUBMITTED"
+                                        : item.submissionStatus ===
+                                            "NOT_SUBMITTED"
                                           ? "bg-muted text-muted-foreground"
                                           : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                                     }`}
@@ -382,7 +406,9 @@ export function CalculateScoreDialog({
                     Ready to Calculate Attempt Score
                   </h4>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-                    Click the button below to execute score calculation across all submissions. The engine will evaluate answers, aggregate marks, determine final percentage, and update result status.
+                    Click the button below to execute score calculation across
+                    all submissions. The engine will evaluate answers, aggregate
+                    marks, determine final percentage, and update result status.
                   </p>
                 </div>
 
