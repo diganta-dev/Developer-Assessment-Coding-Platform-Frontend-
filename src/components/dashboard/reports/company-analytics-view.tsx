@@ -15,6 +15,16 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -222,7 +232,87 @@ export function CompanyAnalyticsView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Visual Funnel Bar Chart */}
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { stage: "1. Invited", count: funnel.invited, fill: "#3b82f6" },
+                    { stage: "2. Started", count: funnel.started, fill: "#8b5cf6" },
+                    { stage: "3. Completed", count: funnel.completed, fill: "#f59e0b" },
+                    { stage: "4. Passed", count: funnel.passed, fill: "#10b981" },
+                  ]}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border/40"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="stage"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        const percentageOfInvited =
+                          funnel.invited > 0
+                            ? Math.round((d.count / funnel.invited) * 100)
+                            : 0;
+                        return (
+                          <div className="rounded-xl border border-border/80 bg-background/95 p-2.5 shadow-xl backdrop-blur-md text-xs">
+                            <p className="font-bold text-foreground mb-1">
+                              {d.stage}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Candidates:{" "}
+                              <strong className="text-primary font-bold">
+                                {d.count}
+                              </strong>
+                            </p>
+                            <p className="text-muted-foreground">
+                              Conversion:{" "}
+                              <strong className="text-emerald-600 font-bold">
+                                {percentageOfInvited}% of invited
+                              </strong>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    name="Candidates"
+                    radius={[6, 6, 0, 0]}
+                  >
+                    {[
+                      { fill: "#3b82f6" },
+                      { fill: "#8b5cf6" },
+                      { fill: "#f59e0b" },
+                      { fill: "#10b981" },
+                    ].map((entry, idx) => (
+                      <Cell key={`funnel-cell-${idx}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border/40">
               <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
                 <span className="text-[10px] uppercase font-semibold text-muted-foreground block">
                   1. Invited

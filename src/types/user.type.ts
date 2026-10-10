@@ -23,6 +23,32 @@ export interface ICompanyMember {
   updatedAt?: string;
 }
 
+export interface ICandidateProfile {
+  id?: string;
+  userId?: string;
+  phone?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  profileImage?: string | null;
+  profileImagePublicId?: string | null;
+  resumeUrl?: string | null;
+  resumePublicId?: string | null;
+  resumeFileName?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IUpdateProfilePayload {
+  name?: string;
+  phone?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+}
+
 export interface IUser {
   id?: string;
   _id?: string;
@@ -33,10 +59,12 @@ export interface IUser {
   companyId?: string | null;
   companyRole?: CompanyMemberRole | string | null;
   companyMembers?: ICompanyMember[];
-  candidateProfile?: any;
+  candidateProfile?: ICandidateProfile | null;
   avatar?: string;
   profilePictureUrl?: string | null;
+  profilePicturePublicId?: string | null;
   status?: string;
   tokenVersion?: number;
   [key: string]: any;
 }
+

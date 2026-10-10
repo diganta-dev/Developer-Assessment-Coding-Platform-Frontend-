@@ -24,6 +24,16 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -352,32 +362,100 @@ export function AssessmentAnalyticsView({
                   )}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Distribution of candidate total scores grouped by percentage
-                  percentiles.
+                  Distribution of candidate total scores grouped by percentage percentiles.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {(Array.isArray(scoreDistribution)
-                  ? scoreDistribution
-                  : scoreDistribution.buckets
-                ).map((bucket) => (
-                  <div key={bucket.range} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-medium">
-                      <span className="text-foreground">{bucket.range}</span>
-                      <span className="text-muted-foreground">
-                        {bucket.count} candidates ({bucket.percentageOfTotal}%)
-                      </span>
-                    </div>
-                    <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-500"
-                        style={{
-                          width: `${Math.min(100, Math.max(bucket.percentageOfTotal, bucket.count > 0 ? 5 : 0))}%`,
+              <CardContent className="space-y-4">
+                {/* Recharts Bar Visualizer */}
+                <div className="h-56 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={
+                        Array.isArray(scoreDistribution)
+                          ? scoreDistribution
+                          : scoreDistribution.buckets
+                      }
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-border/40"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="range"
+                        stroke="#888888"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#888888"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="rounded-xl border border-border/80 bg-background/95 p-2.5 shadow-xl backdrop-blur-md text-xs">
+                                <p className="font-bold text-foreground mb-1">
+                                  Score Band: {data.range}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Candidates:{" "}
+                                  <strong className="text-primary font-bold">
+                                    {data.count}
+                                  </strong>
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Cohort Share:{" "}
+                                  <strong className="text-foreground font-semibold">
+                                    {data.percentageOfTotal}%
+                                  </strong>
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
                         }}
                       />
+                      <Bar
+                        dataKey="count"
+                        name="Candidates"
+                        fill="#3b82f6"
+                        radius={[6, 6, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="pt-2 border-t border-border/40 space-y-2">
+                  {(Array.isArray(scoreDistribution)
+                    ? scoreDistribution
+                    : scoreDistribution.buckets
+                  ).map((bucket) => (
+                    <div key={bucket.range} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs font-medium">
+                        <span className="text-foreground">{bucket.range}</span>
+                        <span className="text-muted-foreground">
+                          {bucket.count} candidates ({bucket.percentageOfTotal}%)
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, Math.max(bucket.percentageOfTotal, bucket.count > 0 ? 5 : 0))}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -394,7 +472,77 @@ export function AssessmentAnalyticsView({
                     Detailed diagnostics for each challenge in this assessment.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
+                  {/* Problem Accuracy Comparison Chart */}
+                  <div className="h-56 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={report.questionPerformance.map((q) => ({
+                          title:
+                            q.title.length > 15
+                              ? `${q.title.slice(0, 15)}...`
+                              : q.title,
+                          accuracy: q.accuracyRate,
+                          avgScore: q.averageScore,
+                          type: q.type,
+                        }))}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          className="stroke-border/40"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="title"
+                          stroke="#888888"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          stroke="#888888"
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                          unit="%"
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const d = payload[0].payload;
+                              return (
+                                <div className="rounded-xl border border-border/80 bg-background/95 p-2.5 shadow-xl backdrop-blur-md text-xs">
+                                  <p className="font-bold text-foreground mb-1">
+                                    {d.title} ({d.type})
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    Accuracy:{" "}
+                                    <strong className="text-emerald-600 font-bold">
+                                      {d.accuracy}%
+                                    </strong>
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    Average Score:{" "}
+                                    <strong className="text-primary font-bold">
+                                      {d.avgScore} marks
+                                    </strong>
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar
+                          dataKey="accuracy"
+                          name="Accuracy Rate (%)"
+                          fill="#10b981"
+                          radius={[6, 6, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                   <div className="rounded-xl border border-border/70 overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs text-left">

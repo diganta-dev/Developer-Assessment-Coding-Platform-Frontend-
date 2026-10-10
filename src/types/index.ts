@@ -11,3 +11,4 @@ export * from "./score-calculation.type";
 export * from "./sidebar.type";
 export * from "./submission.type";
 export * from "./user.type";
+export * from "./payment.type";

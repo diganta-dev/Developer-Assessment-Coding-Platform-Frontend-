@@ -3,8 +3,10 @@ import {
   addCompanyMember,
   getCompanyMembers,
   getUserCompany,
+  removeCompanyLogo,
   removeMember,
   updateCompany,
+  uploadCompanyLogo,
   updateCompanyMemberRole,
 } from "@/api/company.api";
 import type {
@@ -77,3 +79,27 @@ export function useUpdateCompany() {
     }) => updateCompany(companyId, payload),
   });
 }
+
+/**
+ * Pure TanStack Query mutation hook to upload/replace company logo
+ */
+export function useUploadCompanyLogo() {
+  return useMutation({
+    mutationFn: ({
+      companyId,
+      formData,
+    }: {
+      companyId: string;
+      formData: FormData;
+    }) => uploadCompanyLogo(companyId, formData),
+  });
+}
+
+/**
+ * Pure TanStack Query mutation hook to remove company logo
+ */
+export function useRemoveCompanyLogo() {
+  return useMutation({
+    mutationFn: (companyId: string) => removeCompanyLogo(companyId),
+  });
+} 

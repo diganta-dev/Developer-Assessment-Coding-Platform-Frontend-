@@ -34,6 +34,7 @@ import {
   useGetAdminDashboardStats,
   useGetAdminSystemStats,
 } from "@/hook/admin.hook";
+import { AdminAnalyticsCharts } from "./admin-analytics-charts";
 
 export function AdminOverview() {
   const {
@@ -193,6 +194,9 @@ export function AdminOverview() {
           </Card>
         </div>
       )}
+
+      {/* ── Visual Analytics & Telemetry Charts ── */}
+      <AdminAnalyticsCharts stats={stats} system={system} />
 
       {/* ── System Infrastructure Telemetry Banner ── */}
       <Card className="border-border/70 overflow-hidden shadow-xs">

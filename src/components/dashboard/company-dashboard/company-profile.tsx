@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyMembers, useUserCompany } from "@/hook/company.hook";
 import type { ICompany, ICompanyMemberItem } from "@/types";
 import { EditCompanyDialog } from "./edit-company-dialog";
+import { CompanyLogoUploader } from "./company-logo-uploader";
 
 function getInitials(name?: string) {
   if (!name) return "CO";
@@ -245,19 +246,7 @@ export default function CompanyProfile() {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           {/* Logo & Company Identity */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <Avatar className="size-20 sm:size-24 rounded-2xl ring-4 ring-background/90 shadow-md bg-muted/60 shrink-0 after:rounded-2xl">
-              {isValidLogoUrl(company.logoUrl) && !logoError ? (
-                <AvatarImage
-                  src={company.logoUrl || undefined}
-                  alt={company.name}
-                  onError={() => setLogoError(true)}
-                  className="object-cover rounded-2xl"
-                />
-              ) : null}
-              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 text-primary font-bold text-xl sm:text-2xl border border-primary/10">
-                {getInitials(company.name)}
-              </AvatarFallback>
-            </Avatar>
+            <CompanyLogoUploader company={company} size="lg" showControls={true} />
 
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5">

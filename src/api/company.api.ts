@@ -49,3 +49,22 @@ export function updateCompany(
     body: payload,
   });
 }
+
+/**
+ * Uploads or replaces the company's profile logo via multipart/form-data.
+ */
+export function uploadCompanyLogo(companyId: string, formData: FormData) {
+  return apiClient(`company/${companyId}/logo`, {
+    method: "PATCH",
+    body: formData,
+  });
+}
+
+/**
+ * Removes the company's profile logo from DB and Cloudinary.
+ */
+export function removeCompanyLogo(companyId: string) {
+  return apiClient(`company/${companyId}/logo`, {
+    method: "DELETE",
+  });
+}

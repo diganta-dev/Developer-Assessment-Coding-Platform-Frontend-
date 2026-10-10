@@ -19,6 +19,19 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -230,8 +243,95 @@ export function CandidateCareerReportView({
               formats.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <CardContent className="space-y-6">
+            {/* Skill Mastery Recharts Bar Visualizer */}
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={skillMastery.map((cat) => ({
+                    type: cat.problemType,
+                    accuracy: cat.accuracyRate,
+                    avgScore: cat.averageScorePercentage,
+                    attempted: cat.attemptedCount,
+                  }))}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border/40"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="type"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    unit="%"
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        return (
+                          <div className="rounded-xl border border-border/80 bg-background/95 p-2.5 shadow-xl backdrop-blur-md text-xs">
+                            <p className="font-bold text-foreground mb-1">
+                              Skill Domain: {d.type}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Accuracy Rate:{" "}
+                              <strong className="text-emerald-600 font-bold">
+                                {d.accuracy}%
+                              </strong>
+                            </p>
+                            <p className="text-muted-foreground">
+                              Average Score:{" "}
+                              <strong className="text-primary font-bold">
+                                {d.avgScore}%
+                              </strong>
+                            </p>
+                            <p className="text-muted-foreground">
+                              Problems Attempted:{" "}
+                              <strong className="text-foreground font-semibold">
+                                {d.attempted}
+                              </strong>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    align="right"
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ paddingBottom: 10 }}
+                  />
+                  <Bar
+                    dataKey="accuracy"
+                    name="Accuracy (%)"
+                    fill="#10b981"
+                    radius={[6, 6, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="avgScore"
+                    name="Avg Score (%)"
+                    fill="#3b82f6"
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-border/40">
               {skillMastery.map((cat) => (
                 <div
                   key={cat.problemType}
@@ -256,7 +356,7 @@ export function CandidateCareerReportView({
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                       <div
-                        className="h-full bg-primary rounded-full"
+                        className="h-full bg-emerald-500 rounded-full"
                         style={{ width: `${Math.min(100, cat.accuracyRate)}%` }}
                       />
                     </div>
@@ -270,6 +370,104 @@ export function CandidateCareerReportView({
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Assessment Score Trajectory Chart */}
+      {history.length > 0 && (
+        <Card className="border-border/70 shadow-xs">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-bold text-foreground flex items-center justify-between">
+              <span>Assessment Score Performance Trajectory</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {history.length} completed attempts
+              </span>
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Candidate percentage score curve across chronological assessment attempts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-60 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={[...history]
+                    .reverse()
+                    .map((att, idx) => ({
+                      index: idx + 1,
+                      title:
+                        att.assessmentTitle.length > 15
+                          ? `${att.assessmentTitle.slice(0, 15)}...`
+                          : att.assessmentTitle,
+                      percentage: att.percentage,
+                      date: formatDate(att.submittedAt),
+                      marks: `${att.obtainedMarks}/${att.totalMarks}`,
+                    }))}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border/40"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="title"
+                    stroke="#888888"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    unit="%"
+                    domain={[0, 100]}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        return (
+                          <div className="rounded-xl border border-border/80 bg-background/95 p-2.5 shadow-xl backdrop-blur-md text-xs">
+                            <p className="font-bold text-foreground mb-1">
+                              {d.title}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Score:{" "}
+                              <strong className="text-primary font-bold">
+                                {d.percentage}% ({d.marks})
+                              </strong>
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              Completed: {d.date}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="percentage"
+                    name="Score Percentage"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#scoreGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>

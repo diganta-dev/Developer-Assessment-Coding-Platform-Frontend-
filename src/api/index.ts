@@ -9,3 +9,5 @@ export * from "./ranking.api";
 export * from "./reports-analytics.api";
 export * from "./score-calculation.api";
 export * from "./submission.api";
+export * from "./user.api";
+export * from "./payment.api";

@@ -26,6 +26,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetCandidateMyAttempts } from "@/hook/assessment.hook";
 import { useGetMe } from "@/hook/auth.hook";
+import { ProfileAvatarUploader } from "./profile-avatar-uploader";
+import { ProfileResumeUploader } from "./profile-resume-uploader";
+import { ProfileDetailsEditor } from "./profile-details-editor";
 import type { ICandidateAttemptItem } from "@/types/assessment.type";
 
 function getInitials(name?: string | null, email?: string): string {
@@ -78,6 +81,9 @@ export function CandidateProfileView() {
     (a) => a.status === "EVALUATED" || a.status === "SUBMITTED",
   );
 
+  const heroAvatarUrl =
+    user?.profilePictureUrl || user?.avatar || user?.candidateProfile?.profileImage;
+
   if (userLoading) {
     return (
       <div className="space-y-6">
@@ -129,9 +135,9 @@ export function CandidateProfileView() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start sm:items-center gap-5">
             <Avatar className="size-20 sm:size-24 rounded-2xl ring-4 ring-background/90 shadow-md bg-muted shrink-0">
-              {user.avatar ? (
+              {heroAvatarUrl ? (
                 <AvatarImage
-                  src={user.avatar}
+                  src={heroAvatarUrl}
                   alt={user.name || "Candidate"}
                   className="object-cover"
                 />
@@ -187,12 +193,27 @@ export function CandidateProfileView() {
         </div>
       </div>
 
-      {/* 2. Candidate Portfolio Stats */}
+      {/* 2. Profile Management & Uploads Grid */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column: Avatar & Resume Uploaders */}
+        <div className="space-y-6 lg:col-span-5">
+          <ProfileAvatarUploader user={user} />
+          <ProfileResumeUploader user={user} />
+        </div>
+
+        {/* Right Column: Personal & Professional Profile Editor */}
+        <div className="lg:col-span-7">
+          <ProfileDetailsEditor user={user} />
+        </div>
+      </div>
+
+      {/* 3. Candidate Portfolio Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Assessments Taken
+
             </CardTitle>
             <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600 dark:text-blue-400">
               <Code2 className="size-4" />

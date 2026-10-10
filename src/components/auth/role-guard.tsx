@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
 import { useGetMe } from "@/hook";
-import type { DashboardRole } from "@/types";
+import { CompanyMemberRole, type DashboardRole, UserRole } from "@/types";
 import { getRoleDashboardRoute, isUserAuthorized } from "@/utils";
 import AccessDenied from "./access-denied";
 import AuthLoading from "./auth-loading";
+import CompanyPaymentGuard from "./company-payment-guard";
 
 interface IProps {
   children: ReactNode;
@@ -21,6 +22,21 @@ export default function RoleGuard({ children, roles }: IProps) {
   const user = data?.data;
 
   const isAuthorized = isUserAuthorized(user, roles);
+
+  // Check if accessing company workspace while company payment is unverified
+  const isCompanyRoleRequired =
+    roles.includes(CompanyMemberRole.COMPANY_ADMIN) ||
+    roles.includes(CompanyMemberRole.COMPANY_OWNER);
+
+  const company = user?.companyMembers?.[0]?.company;
+  const isPlatformAdmin =
+    user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN;
+
+  const isUnpaidCompany =
+    isCompanyRoleRequired &&
+    !isPlatformAdmin &&
+    company &&
+    company.isPaymentVerified === false;
 
   useEffect(() => {
     if (isPending) {
@@ -44,6 +60,11 @@ export default function RoleGuard({ children, roles }: IProps) {
 
   if (isError || !user) {
     return <AuthLoading label="Redirecting..." />;
+  }
+
+  // Mandatory Payment Barrier: Enforce payment verification before company dashboard
+  if (isUnpaidCompany) {
+    return <CompanyPaymentGuard company={company} />;
   }
 
   if (isAuthorized) {

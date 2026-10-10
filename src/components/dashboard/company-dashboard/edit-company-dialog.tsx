@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useUpdateCompany } from "@/hook/company.hook";
 import type { ICompany } from "@/types";
+import { CompanyLogoUploader } from "./company-logo-uploader";
 
 interface EditCompanyDialogProps {
   open: boolean;
@@ -138,41 +139,13 @@ export function EditCompanyDialog({
               </div>
             )}
 
-            {/* Logo Preview & Input */}
-            <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-muted/30 p-3.5">
-              <Avatar className="size-16 rounded-xl border border-border shrink-0">
-                {logoUrl.trim() ? (
-                  <AvatarImage
-                    src={logoUrl.trim()}
-                    alt={name || "Company Logo"}
-                    className="object-cover"
-                  />
-                ) : null}
-                <AvatarFallback className="rounded-xl font-bold text-sm bg-primary/10 text-primary">
-                  {getInitials(name)}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="flex-1 space-y-1">
-                <Label
-                  htmlFor="logoUrl"
-                  className="text-xs font-semibold flex items-center gap-1.5"
-                >
-                  <ImageIcon className="size-3.5 text-muted-foreground" />
-                  Logo URL
-                </Label>
-                <Input
-                  id="logoUrl"
-                  placeholder="https://example.com/logo.png"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  className="h-8 text-xs font-mono"
-                  disabled={updateCompanyMutation.isPending}
-                />
-                <p className="text-[11px] text-muted-foreground">
-                  Provide a direct public image link (PNG, JPG, SVG).
-                </p>
-              </div>
+            {/* Logo Uploader */}
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-3.5 space-y-2">
+              <Label className="text-xs font-semibold flex items-center gap-1.5 text-foreground">
+                <ImageIcon className="size-3.5 text-primary" />
+                Company Profile Picture / Logo
+              </Label>
+              <CompanyLogoUploader company={company} size="md" showControls={true} />
             </div>
 
             {/* Company Name */}

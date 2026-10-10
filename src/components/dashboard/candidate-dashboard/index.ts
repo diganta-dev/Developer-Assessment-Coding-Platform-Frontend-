@@ -4,3 +4,6 @@ export * from "./candidate-my-results";
 export * from "./candidate-my-submissions";
 export * from "./candidate-overview";
 export * from "./candidate-profile-view";
+export * from "./profile-avatar-uploader";
+export * from "./profile-resume-uploader";
+export * from "./profile-details-editor";

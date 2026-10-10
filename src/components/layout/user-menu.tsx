@@ -2,11 +2,14 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  Building2,
   ChevronDown,
+  CreditCard,
   LayoutDashboard,
   Loader2,
   LogOut,
   ShieldCheck,
+  User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,6 +49,8 @@ export function UserMenu({ user }: UserMenuProps) {
   const companyRole = getCompanyRole(user);
   const displayRole = companyRole || user.role;
   const dashboardUrl = getRoleDashboardRoute(user);
+  const avatarUrl =
+    user.profilePictureUrl || user.avatar || user.candidateProfile?.profileImage;
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -64,6 +69,7 @@ export function UserMenu({ user }: UserMenuProps) {
         queryClient.setQueryData(["user"], null);
         await queryClient.invalidateQueries({ queryKey: ["user"] });
         await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+        await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
         queryClient.clear();
         router.push("/login");
         router.refresh();
@@ -88,10 +94,17 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex cursor-pointer items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs transition-all hover:border-border hover:bg-muted/70 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2"
+        className="group flex cursor-pointer items-center gap-2 rounded-full border border-border/60 bg-muted/40 p-1 pr-3 text-xs transition-all hover:border-border hover:bg-muted/70 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2"
         aria-label="User account menu"
       >
-        <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+        <Avatar className="size-6 ring-1 ring-border shrink-0">
+          {avatarUrl ? (
+            <AvatarImage src={avatarUrl} alt={user.name || "User"} className="object-cover" />
+          ) : null}
+          <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">
+            {getInitials(user.name || user.email || displayRole)}
+          </AvatarFallback>
+        </Avatar>
         <span className="max-w-[120px] truncate font-medium text-foreground">
           {user.name || user.email}
         </span>
@@ -108,10 +121,10 @@ export function UserMenu({ user }: UserMenuProps) {
       >
         {/* User Card */}
         <div className="flex items-center gap-3 p-2">
-          <Avatar className="size-9 ring-1 ring-border">
-            {user.avatar && (
-              <AvatarImage src={user.avatar} alt={user.name || "User"} />
-            )}
+          <Avatar className="size-10 ring-1 ring-border shrink-0">
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={user.name || "User"} className="object-cover" />
+            ) : null}
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
               {getInitials(user.name || user.email || displayRole)}
             </AvatarFallback>
@@ -134,6 +147,17 @@ export function UserMenu({ user }: UserMenuProps) {
 
         <DropdownMenuSeparator className="my-1.5" />
 
+        {/* Pending Registration Payment Link */}
+        {user.companyMembers?.[0]?.company?.isPaymentVerified === false && (
+          <DropdownMenuItem
+            onClick={() => router.push("/company-registration/verify-company?status=pending")}
+            className="cursor-pointer gap-2 py-2 text-[#E2136E] font-semibold bg-[#E2136E]/5 hover:bg-[#E2136E]/10"
+          >
+            <CreditCard className="size-4 text-[#E2136E]" />
+            <span>Pay bKash Fee (Pending)</span>
+          </DropdownMenuItem>
+        )}
+
         {/* Dashboard Link */}
         <DropdownMenuItem
           onClick={() => router.push(dashboardUrl)}
@@ -142,6 +166,29 @@ export function UserMenu({ user }: UserMenuProps) {
           <LayoutDashboard className="size-4 text-muted-foreground" />
           <span>Dashboard</span>
         </DropdownMenuItem>
+
+        {/* My Profile Link (for candidates or any user) */}
+        {user.role === "CANDIDATE" && (
+          <DropdownMenuItem
+            onClick={() => router.push("/candidate/profile")}
+            className="cursor-pointer gap-2 py-2"
+          >
+            <UserIcon className="size-4 text-muted-foreground" />
+            <span>My Profile & Resume</span>
+          </DropdownMenuItem>
+        )}
+
+        {/* Register Company Link (if not already owning a company) */}
+        {!companyRole && (
+          <DropdownMenuItem
+            onClick={() => router.push("/company-registration")}
+            className="cursor-pointer gap-2 py-2 text-emerald-600 dark:text-emerald-400 font-medium"
+          >
+            <Building2 className="size-4" />
+            <span>Register Company</span>
+          </DropdownMenuItem>
+        )}
+
 
         <DropdownMenuSeparator className="my-1.5" />
 

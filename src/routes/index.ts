@@ -61,6 +61,15 @@ export const candidateRoutes: SidebarItems = [
     ],
   },
   {
+    title: "Organization",
+    items: [
+      {
+        title: "Register Company",
+        url: "/company-registration",
+      },
+    ],
+  },
+  {
     title: "Account",
     items: [
       {
