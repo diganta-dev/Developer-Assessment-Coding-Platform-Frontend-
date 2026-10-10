@@ -398,3 +398,29 @@ Priority 6: Admin Management Directory Operations
     - Fixed typo `"useclient";` to `"use client";` in [FinalizeSubmitAttemptDialog](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/assessments-components/finalize-submit-attempt-dialog.tsx).
   - **Verification:** Verified in headless Chrome via CDP: the candidate assessment workspace at `/candidate/assessments?assessmentId=cmuwbqtcx00009i2tpx1klh1t&attemptId=cmuznom8l0005y62tkdtbi6tt` now loads in milliseconds, displaying the live assessment problem statement, test cases, and code editor with 0% CPU consumption. Production export verified (`npm run build`: 38/38 pages generated, 0 TypeScript errors).
 
+- **[2026-10-09] Feature 13: Dedicated Fullscreen Examination Experience & Layout Isolation (Status: COMPLETE):**
+  - **Root Cause Analysis:** The assessment examination at `/candidate/assessments` was nested under `src/app/(dashboard)/candidate/layout.tsx`, which unconditionally wrapped all candidate routes in `<DashboardShell role={UserRole.CANDIDATE}>`, causing the examination workspace to inherit the dashboard sidebar, navbar, header, and container padding.
+  - **Architecture & Layout Separation:**
+    - Refactored `src/app/(dashboard)/candidate`:
+      - Moved candidate dashboard views (`/candidate`, `/candidate/invitations`, `/candidate/profile`, `/candidate/results`, `/candidate/submissions`) into a Next.js Route Group: `src/app/(dashboard)/candidate/(candidate-dashboard)`.
+      - Moved `DashboardShell` into `(candidate-dashboard)/layout.tsx`, ensuring dashboard chrome is only rendered for standard candidate dashboard pages.
+      - Streamlined `src/app/(dashboard)/candidate/layout.tsx` to provide only `<RoleGuard roles={[UserRole.CANDIDATE]}>`, protecting all candidate routes while leaving layout styling unconstrained.
+      - Created dedicated examination layout [AssessmentExaminationLayout](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/app/(dashboard)/candidate/assessments/layout.tsx) (`fixed inset-0 h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col z-50`) providing a 100% distraction-free, full-window canvas.
+  - **Dedicated Examination Workspace UI:**
+    - Built [CandidateExaminationArena](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-examination-arena.tsx):
+      - **Top Bar:** Assessment title, attempt number badge, authoritative countdown timer, live proctor guard telemetry badge, autosave indicator, fullscreen toggle, and Finalize & Submit CTA button.
+      - **Question Navigator:** Horizontal strip of question chips with status badges (answered green check, flagged amber flag, active outline), and progress statistics counter.
+      - **Split View Arena:** Left panel for problem description, marks, difficulty, and public test cases; Right panel dynamic solver (accessible MCQ option cards, written response with word counter and limits, coding IDE with language switcher, boilerplate reset, and tab-indentation support).
+      - **Anti-Cheat Telemetry Live Hooks:** Integrated tab switch detection, copy-paste blocking, fullscreen exit tracking, and multi-tab session prevention.
+      - **Fullscreen Behavior:** Pre-flight modal, exit warning modal with re-entry CTA, and throttled proctor telemetry reporting.
+      - **Authoritative Server Countdown Timer:** Synchronized with server `attempt.expiresAt`, visual color-coding (normal, warning <= 10m, critical <= 3m), and auto-submission on expiry.
+      - **Final Submission Modal:** Progress statistics breakdown (answered, unanswered with zero-mark warnings, flagged), submission loading state, error preservation, and redirect to `/candidate/results` upon confirmation.
+      - **State & Error Recovery:** Dedicated screens for missing parameters (`MissingAttemptSessionView`), already-submitted attempts (`AttemptCompletedView`), expired sessions (`AttemptExpiredView`), and network errors.
+  - **Route & Navigation Alignment:**
+    - Updated candidate sidebar routes in `src/routes/index.ts` to point "My Tests & Invitations" directly to `/candidate/invitations`.
+    - Aligned CTA links in [CandidateOverview](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-overview.tsx), [CandidateMyResults](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-my-results.tsx), and [CandidateProfileView](file:///home/diganta/Programming/B7A7/developer-assessment-coding-platform-frontend/src/components/dashboard/candidate-dashboard/candidate-profile-view.tsx).
+  - **Verification:**
+    - Next.js static site export (`npm run build`): 38/38 static pages generated cleanly with 0 errors.
+    - Biome linting: 0 errors, 0 warnings across all examination layouts and components.
+    - All candidate route HTTP endpoints (`/candidate`, `/candidate/invitations`, `/candidate/profile`, `/candidate/results`, `/candidate/submissions`, `/candidate/assessments`) verified returning HTTP 200.
+

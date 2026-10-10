@@ -320,6 +320,7 @@ export function AddProblemInAssessment({
       {
         onSuccess: () => {
           // Query invalidation in component (senior rule)
+          queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
           queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
           queryClient.invalidateQueries({ queryKey: ["assessments"] });
           queryClient.invalidateQueries({ queryKey: ["company-questions"] });

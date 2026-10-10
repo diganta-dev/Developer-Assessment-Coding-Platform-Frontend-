@@ -174,7 +174,7 @@ export function CandidateProfileView() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href="/candidate/assessments"
+              href="/candidate/invitations"
               className={buttonVariants({
                 size: "sm",
                 className: "gap-1.5 shadow-xs",

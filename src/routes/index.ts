@@ -47,12 +47,8 @@ export const candidateRoutes: SidebarItems = [
     title: "Assessments",
     items: [
       {
-        title: "Invitations",
+        title: "My Tests & Invitations",
         url: "/candidate/invitations",
-      },
-      {
-        title: "Assessments",
-        url: "/candidate/assessments",
       },
       {
         title: "Results",

@@ -84,7 +84,9 @@ export function AssessmentManagement() {
           }
         />
       )}
-      {activeTab === "CREATE" && <CreateAssessmentForm />}
+      {activeTab === "CREATE" && (
+        <CreateAssessmentForm onSuccess={() => setActiveTab("ALL")} />
+      )}
       {activeTab === "ADD_PROBLEMS" && (
         <AddProblemInAssessment
           assessmentId={selectedAssessmentForProblems?.id}

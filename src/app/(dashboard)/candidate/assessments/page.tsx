@@ -1,29 +1,28 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CandidateAssessmentWorkspace } from "@/components/dashboard/candidate-dashboard/candidate-assessment-workspace";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CandidateExaminationArena } from "@/components/dashboard/candidate-dashboard/candidate-examination-arena";
 
 export const metadata: Metadata = {
-  title: "Assessment Workspace | Candidate Portal",
+  title: "Examination Arena | Candidate Portal",
   description:
-    "Solve coding challenges, multiple-choice questions, and submit your technical assessment solutions.",
+    "Official proctored examination environment for candidate assessment attempts.",
 };
 
 export default function CandidateAssessmentsPage() {
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
+    <main className="h-full w-full flex flex-col overflow-hidden bg-background">
       <Suspense
         fallback={
-          <Card className="p-8 space-y-4">
-            <Skeleton className="h-6 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </Card>
+          <div className="h-screen w-screen flex flex-col items-center justify-center bg-background gap-4">
+            <div className="size-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-xs font-medium text-muted-foreground">
+              Initializing examination environment...
+            </p>
+          </div>
         }
       >
-        <CandidateAssessmentWorkspace />
+        <CandidateExaminationArena />
       </Suspense>
-    </div>
+    </main>
   );
 }

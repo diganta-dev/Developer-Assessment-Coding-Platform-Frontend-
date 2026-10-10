@@ -228,7 +228,7 @@ export function CandidateMyResults() {
           </p>
           <div className="pt-2">
             <Link
-              href="/candidate/assessments"
+              href="/candidate/invitations"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Code2 className="size-3.5" />

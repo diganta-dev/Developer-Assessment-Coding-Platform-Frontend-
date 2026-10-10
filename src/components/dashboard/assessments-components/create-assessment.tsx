@@ -49,7 +49,13 @@ interface FormErrors {
   maxTabSwitches?: string;
 }
 
-export default function CreateAssessmentForm() {
+interface CreateAssessmentFormProps {
+  onSuccess?: () => void;
+}
+
+export default function CreateAssessmentForm({
+  onSuccess,
+}: CreateAssessmentFormProps = {}) {
   const queryClient = useQueryClient();
   const { mutate: createAssessment, isPending } = useCreateAssessment();
 
@@ -225,9 +231,10 @@ export default function CreateAssessmentForm() {
 
     createAssessment(payload, {
       onSuccess: () => {
-        // Query invalidation in form component as instructed
-        queryClient.invalidateQueries({ queryKey: ["assessments"] });
+        // Query invalidation in form component as instructed (refreshes all assessment lists without page reload)
+        queryClient.invalidateQueries({ queryKey: ["my-assessments"] });
         queryClient.invalidateQueries({ queryKey: ["company-assessments"] });
+        queryClient.invalidateQueries({ queryKey: ["assessments"] });
 
         toast.add({
           title: "Assessment Created Successfully",
@@ -236,6 +243,7 @@ export default function CreateAssessmentForm() {
         });
 
         handleReset();
+        onSuccess?.();
       },
       onError: (error: unknown) => {
         const apiErr = error as {

@@ -156,7 +156,7 @@ export function CandidateOverview() {
             Scorecards
           </Link>
           <Link
-            href="/candidate/assessments"
+            href="/candidate/invitations"
             className={buttonVariants({ variant: "default", size: "sm" })}
           >
             <Play className="mr-1.5 size-3.5" />
@@ -353,7 +353,7 @@ export function CandidateOverview() {
                 live progress will appear here.
               </p>
               <Link
-                href="/candidate/assessments"
+                href="/candidate/invitations"
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
                 Browse Assessments
@@ -473,7 +473,7 @@ export function CandidateOverview() {
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link
-            href="/candidate/assessments"
+            href="/candidate/invitations"
             className="group flex flex-col gap-1.5 rounded-lg border border-border/60 p-4 hover:border-primary/50 hover:bg-muted/30 transition-all"
           >
             <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
